@@ -56,7 +56,7 @@ export const formatPrice = (amount) => {
   }).format(amount || 0);
 };
 
-// Constructor compacto de productos
+// Helper constructor compacto de productos
 const p = (id, name, category, price, description, imageUrl, features, requiresNotice, sizes) => ({
   id,
   name,
@@ -899,8 +899,8 @@ export default function App() {
                             <div className="flex flex-wrap gap-1 pt-1">
                               {product.features.map((feat) => (
                                 <span
-                                   key={feat}
-                                   className="text-[10px] px-2 py-0.5 rounded-md bg-[#FAF7F2] text-stone-600 border border-[#EAE2D8] font-medium"
+                                  key={feat}
+                                  className="text-[10px] px-2 py-0.5 rounded-md bg-[#FAF7F2] text-stone-600 border border-[#EAE2D8] font-medium"
                                 >
                                   {feat}
                                 </span>
