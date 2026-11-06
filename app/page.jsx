@@ -89,14 +89,14 @@ const p = (id, name, category, price, description, imageUrl, features, requiresN
 // 2. CATÁLOGO COMPLETO INICIAL (initialProducts)
 // ==========================================
 export const initialProducts = [
-  // --- TORTAS SALUDABLES (21 TORTAS) ---
+  // --- TORTAS SALUDABLES ---
   p('ts-1-moka', 'Torta Moka', 'Tortas Saludables', 84000, 'Esponjoso bizcocho con café orgánico santandereano, cacao puro al 70% y suave crema chantilly sin azúcar.', '/torta-moka.png', ['Sin Azúcar', 'Sin Gluten', 'Keto', 'Con Anticipación'], 1, [['5 porc', 84000], ['8 porc', 123000], ['12 porc', 155000], ['18 porc', 217000]]),
   p('ts-2-arequipe', 'Torta de Arequipe', 'Tortas Saludables', 63000, 'Bizcocho ultra suave sin azúcar refinada cubierto con arequipe artesanal saludable y toques de frutos secos tostados.', '/torta-de-arequipe.png', ['Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['5 porc', 63000], ['8 porc', 87000], ['12 porc', 111000], ['18 porc', 156000], ['25 porc', 197000]]),
   p('ts-3-choco-arequipe', 'Torta Choco-Arequipe', 'Tortas Saludables', 60000, 'Combinación perfecta de bizcocho húmedo de chocolate oscuro y relleno abundante de arequipe artesanal sin azúcar.', '/torta-chocoarequipe.png', ['Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['3 porc', 60000], ['5 porc', 84000], ['8 porc', 123000], ['12 porc', 155000]]),
   p('ts-4-pistacho', 'Torta Pistacho', 'Tortas Saludables', 94000, 'Bizcocho húmedo de harina de almendras y pasta 100% pura de pistachos tostados con frosting fit de queso ligero.', '/torta-pistacho.png', ['Keto', 'Sin Gluten', 'Sin Azúcar', 'Con Anticipación'], 1, [['5 porc', 94000], ['8 porc', 141000], ['12 porc', 197000], ['18 porc', 274000], ['25 porc', 353000]]),
   p('ts-5-vasca-pistacho', 'Torta Vasca Pistacho', 'Tortas Saludables', 62000, 'Cheesecake quemado vasco con pasta pura de pistachos tostados importados y textura aterciopelada inolvidable.', '/tortas-vasca-pistacho.png', ['Keto', 'Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['3 porc', 62000], ['6 porc', 104000], ['8 porc', 139000]]),
   p('ts-6-primavera', 'Torta Primavera', 'Tortas Saludables', 85000, 'Fresca y ligera, elaborada con compota de fresas y arándanos frescos, crema ligera de limón y flores comestibles.', '/torta-primavera.jpeg', ['Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['5 porc', 85000], ['8 porc', 124000], ['12 porc', 156000], ['18 porc', 218000], ['25 porc', 271000]]),
-  p('ts-7-vasca-frutos', 'Torta Vasca Frutos Rojos/Amarillos', 'Tortas Saludables', 58000, 'Cheesecake estilo vasco horneado a alta temperatura, interior cremoso con coulis natural de frutos rojos o frutos amarillos.', '/torta-vasca-frutos-rojos-o-amarillos.jpeg', ['Keto', 'Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['3 porc', 58000], ['6 porc', 101000], ['8 porc', 133000]]),
+  p('ts-7-vasca-frutos', 'Torta Vasca Frutos Rojos o Amarillos', 'Tortas Saludables', 73000, 'Cheesecake estilo vasco horneado a alta temperatura, interior cremoso con coulis natural de frutos rojos o frutos amarillos.', '/torta-vasca-frutos-rojos-o-amarillos.jpeg', ['Keto', 'Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['5 porc', 73000], ['8 porc', 100000], ['12 porc', 120000]]),
   p('ts-8-vino', 'Torta de Vino', 'Tortas Saludables', 68000, 'Maceración tradicional artesanal con frutos secos, especias aromáticas y vino sin alcohol añadido sin azúcar.', '/torta-de-vino.jpeg', ['Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['5 porc', 68000], ['8 porc', 95000], ['12 porc', 128000]]),
   p('ts-9-yogurt', 'Torta de Yogurt', 'Tortas Saludables', 84000, 'Textura esponjosa enriquecida con yogurt griego artesanal probiótico y un sutil toque cítrico natural.', '/torta-de-yogurt.png', ['Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['5 porc', 84000], ['8 porc', 123000], ['12 porc', 155000], ['18 porc', 217000], ['25 porc', 270000]]),
   p('ts-10-versalles', 'Torta Versalles', 'Tortas Saludables', 88000, 'Elegante preparación gourmet con crema diplomática ligera sin azúcar y crujientes láminas de frutos secos.', '/torta-versalles.png', ['Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['5 porc', 88000], ['8 porc', 128000], ['12 porc', 162000], ['18 porc', 225000]]),
@@ -111,8 +111,10 @@ export const initialProducts = [
   p('ts-19-quebec', 'Quebec', 'Tortas Saludables', 88000, 'Torta inspirada en sabores canadienses con toque de nuez pecana tostada, canela y glaseado fit.', '/quebec.png', ['Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['5 porc', 88000], ['8 porc', 125000], ['12 porc', 160000]]),
   p('ts-20-sin-lacteos', 'Sin Lácteos', 'Tortas Saludables', 86000, 'Formulación 100% libre de caseína y lactosa, elaborada con leche de coco y almendras, suave y esponjosa.', '/sin-lacteos.png', ['Sin Lácteos', 'Sin Gluten', 'Sin Azúcar', 'Con Anticipación'], 1, [['5 porc', 86000], ['8 porc', 119000], ['12 porc', 135000], ['18 porc', 193000]]),
   p('ts-21-red-velvet', 'Capas Red Velvet', 'Tortas Saludables', 85000, 'Inconfundible bizcocho aterciopelado color carmesí con cacao y capas de frosting suave de queso crema sin azúcar.', '/capas-red-velvet.png', ['Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['5 porc', 85000], ['8 porc', 124000], ['12 porc', 156000], ['18 porc', 218000]]),
+  p('ts-22-mousse-cake', 'Mousse Cake', 'Tortas Saludables', 73000, 'Suave y aireada textura mousse con cobertura sedosa de chocolate puro sin azúcar refinada ni gluten.', '/mousse-cake.png', ['Sin Azúcar', 'Sin Gluten', 'Keto', 'Con Anticipación'], 1, [['5 porc', 73000], ['8 porc', 100000], ['12 porc', 120000]]),
+  p('ts-23-marquesa-brownie', 'Marquesa de Brownie', 'Tortas Saludables', 75000, 'Capas generosas de brownie melcochudo artesanal intercaladas con crema pastelera fit y ganache de cacao.', '/marquesa-de-brownie.png', ['Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['5 porc', 75000], ['8 porc', 115000], ['12 porc', 146000]]),
 
-  // --- CATALOGO DETALLES (14 DETALLES) ---
+  // --- CATALOGO DETALLES ---
   p('det-1-box-duo', 'Box Dúo', 'Catalogo Detalles', 20000, 'Cajita de regalo con 2 postres individuales a elección para sorprender en cualquier momento.', '/box-duo.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
   p('det-2-guacal-amor', 'Guacal Amor', 'Catalogo Detalles', 88000, 'Arreglo especial en madera rústica con postres saludables, brownie melcochudo y alfajor.', '/guacal-amor.jpeg', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
   p('det-3-guacal-coquette', 'Guacal Coquette', 'Catalogo Detalles', 65000, 'Presentación con detalles en cinta pastel, mini cake decorado y alfajores fit.', '/guacal-coquette.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
@@ -127,8 +129,10 @@ export const initialProducts = [
   p('det-12-mini-blondies', 'Mini Blondies', 'Catalogo Detalles', 23000, 'Suaves cuadritos de vainilla natural con chispas de chocolate blanco sin azúcar.', '/mini-blondies.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, [['Caja x4', 23000], ['Caja x8', 44000]]),
   p('det-13-mini-cookies', 'Mini Cookies', 'Catalogo Detalles', 7000, 'Deliciosas y diminutas galletitas de vainilla ideales para café o lonchera.', '/mini-cookies.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
   p('det-14-mugcake', 'Mugcake', 'Catalogo Detalles', 15000, 'Bizcochito fit individual en taza listo para disfrutar. Delicioso, ligero y sin remordimientos.', '/mugcake.png', ['Keto', 'Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, [['Naranja & Amapola', 15000], ['Red Velvet', 15000], ['Yogurt Griego', 15000], ['Chocolate 70%', 15000]]),
+  p('det-15-mini-cake-personal', 'Mini Cake Personal', 'Catalogo Detalles', 28000, 'Mini torta personal perfecta para regalar o consentirse en cualquier momento, 100% saludable.', '/mini-cake-personal.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, [['Tamaño personal', 28000]]),
+  p('det-16-brownies-x2', 'Brownies x2', 'Catalogo Detalles', 20000, 'Dúo de brownies melcochudos de puro cacao con nueces crujientes empacados para obsequio.', '/brownies-x2.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
 
-  // --- POSTRES SALUDABLES (21 POSTRES) ---
+  // --- POSTRES SALUDABLES ---
   p('pos-1-tres-leches-mermelada', '3 Leches con Mermelada', 'Postres Saludables', 17000, 'Tres leches refrescante coronado con mermelada artesanal de frutos del bosque sin azúcar.', '/3-leches-con-mermelada.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, [['Frutos Rojos', 17000], ['Frutos Amarillos', 17000]]),
   p('pos-2-tres-leches-arequipe', '3 Leches de Arequipe', 'Postres Saludables', 17000, 'Vaso individual de bizcocho esponjoso bañado en tres leches deslactosadas y arequipe fit.', '/3-leches-de-arequipe.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
   p('pos-3-tres-leches-chocolate', '3 Leches Chocolate', 'Postres Saludables', 18000, 'Versión chocolatosa de tres leches saludables con cacao puro, ultra húmeda con virutas de chocolate oscuro.', '/3-leches-chocolate.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, [['Vaso Personal', 18000], ['Familiar 5 porc', 84000]]),
@@ -139,7 +143,7 @@ export const initialProducts = [
   p('pos-8-alfajores-chocolate', 'Alfajores con Chocolate', 'Postres Saludables', 23000, 'Masa quebradiza de maicena rellena con arequipe saludable y cobertura de cacao.', '/alfajores-con-chocolate.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, [['Caja x3', 23000], ['Caja x6', 41000]]),
   p('pos-9-brownies', 'Brownies', 'Postres Saludables', 19000, 'Brownies densos y húmedos con nueces de nogal y chocolate oscuro al 70%.', '/brownies.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, [['Caja x2', 19000], ['Caja x4', 36000]]),
   p('pos-10-brownie-helado', 'Brownie con Helado', 'Postres Saludables', 22000, 'Brownie tibio melcochudo de cacao puro acompañado de bola de helado artesanal sin azúcar.', '/brownie-con-helado.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
-  p('pos-11-postre-brownie-helado', 'Postre Brownie con Helado', 'Postres Saludables', 24000, 'Presentación en copa con capas de brownie crocante, helado cremoso y sirope de chocolate fit.', '/postre-brownie-con-helado.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
+  p('pos-11-postre-con-helado', 'Postre con Helado', 'Postres Saludables', 17000, 'Presentación en copa con capas de brownie crocante, helado cremoso artesanal y sirope de chocolate fit.', '/postre-brownie-con-helado.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
   p('pos-12-sandwich-helado', 'Sandwich de Helado', 'Postres Saludables', 16000, 'Dos galletas crocantes de harina de almendras rellenas de helado artesanal cremoso sin azúcar.', '/sandwich-de-helado.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
   p('pos-13-helados-130g', 'Helados 130g', 'Postres Saludables', 14000, 'Pote individual de helado artesanal cremoso sin azúcar refinada elaborado con fruta pura.', '/helados-130g.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, [['Vainilla Almendras', 14000], ['Chocolate 70%', 14000], ['Frutos del Bosque', 14000]]),
   p('pos-14-galletas-chocolate', 'Galletas con Chocolate', 'Postres Saludables', 7500, 'Galletas clásicas con trozos crujientes de chocolate amargo puro.', '/galletas-con-chocolate.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, [['Paquete x3', 7500], ['Paquete x10', 19000]]),
@@ -148,8 +152,9 @@ export const initialProducts = [
   p('pos-17-waffle-yuca', 'Waffle de Pan de Yuca', 'Postres Saludables', 18000, 'Waffle recién tostado a base de queso y masa de yuca libre de gluten, doradito y suave.', '/waffle-de-pan-de-yuca.png', ['Sin Gluten', 'Sin Azúcar', 'Entrega Hoy'], 0, 0),
   p('pos-18-repollas-fit', 'Repollas Sin Azúcar y Sin Gluten', 'Postres Saludables', 17000, 'Masa choux ligera rellena de arequipe artesanal y espolvoreadas con endulzante natural.', '/repollas-sin-azucar-y-sin-gluten.png', ['Sin Gluten', 'Sin Azúcar', 'Entrega Hoy'], 0, [['Caja x2', 17000], ['Caja x4', 32000]]),
   p('pos-19-copa-saludable', 'Copa Saludable', 'Postres Saludables', 55000, 'Copa de vidrio con capas de torta, chantilly sin azúcar, fresas frescas y lazo decorativo.', '/copa-saludable.jpeg', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
-  p('pos-20-mini-marquesa', 'Mini Marquesa', 'Postres Saludables', 35000, 'Delicioso postre frío en caja de acetato con capas cremosas y virutas de chocolate.', '/mini-marquesa.jpeg', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
+  p('pos-20-mini-marquesa-brownie', 'Mini Marquesa de Brownie', 'Postres Saludables', 35000, 'Deliciosa marquesa individual con capas de brownie melcochudo, crema sedosa y virutas de chocolate sin azúcar.', '/mini-marquesa-de-brownie.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, [['Tamaño personal', 35000]]),
   p('pos-21-postre-ilusion', 'Postre Ilusión', 'Postres Saludables', 19000, 'Vaso postre individual con capas de galleta, crema chantilly fit y compota de frutos rojos.', '/postre-ilusion.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
+  p('pos-22-blondie', 'Blondie', 'Postres Saludables', 19000, 'Suaves cuadritos de vainilla natural con chispas de chocolate blanco sin azúcar y textura melcochuda.', '/mini-blondies.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, [['Caja x2 Unidades', 19000], ['Caja x4 Unidades', 36000]]),
 
   // --- PAN SALUDABLE (14 PANES) ---
   p('pan-1-baguette', 'Baguette', 'Pan Saludable', 15000, 'Baguette artesanal con costra crocante y miga aireada sin trigo ni gluten, perfecta para bruschettas.', '/baguette.jpeg', ['Sin Gluten', 'Sin Azúcar', 'Con Anticipación'], 1, 0),
@@ -167,7 +172,7 @@ export const initialProducts = [
   p('pan-13-bocadillo-parmesano', 'Bocadillo y Queso Parmesano', 'Pan Saludable', 13000, 'Cuatro pancitos con relleno de bocadillo sin azúcar añadida y toque saladito de parmesano madurado.', '/pan-bocadillo-y-queso-parmesano.jpg', ['Sin Gluten', 'Sin Azúcar', 'Con Anticipación'], 1, 0),
   p('pan-14-ajo-hierbas', 'Ajo y Finas Hierbas 250g', 'Pan Saludable', 16000, 'Pan artesanal horneado con ajo rostizado, orégano y romero. Masa libre de gluten suave y aromática.', '/pan-ajo-y-finas-hierbas-250g-(Salado).png', ['Sin Gluten', 'Sin Azúcar', 'Con Anticipación'], 1, 0),
 
-  // --- MERCADITO (SOLO 3 PRODUCTOS) ---
+  // --- MERCADITO (ÚNICAMENTE 3 PRODUCTOS) ---
   p('merc-1-arequipe', 'Arequipe', 'Mercadito', 16000, 'Arequipe 100% sin azúcar cocinado lentamente con leche deslactosada y fruto del monje.', '/arequipe.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, [['Frasco 150g', 16000], ['Frasco 280g', 25000], ['Frasco 500g', 38000]]),
   p('merc-2-mermeladas', 'Mermeladas Naturales', 'Mercadito', 16000, 'Pura fruta seleccionada sin azúcar refinada ni conservantes (Frutos Rojos / Frutos Amarillos).', '/mermeladas-naturales.jpg', ['Sin Azúcar', 'Sin Gluten', 'Sin Lácteos', 'Entrega Hoy'], 0, [['Frutos Rojos', 16000], ['Frutos Amarillos', 16000]]),
   p('merc-3-arepas', 'Arepas Libres de Gluten', 'Mercadito', 14000, 'Arepas artesanales de maíz peto no transgénico en paquete de 5 unidades.', '/arepas-libres-de-gluten.jpeg', ['Sin Gluten', 'Sin Lácteos', 'Entrega Hoy'], 0, [['Semillas de chía y ajonjolí', 14000], ['Plátano maduro', 14000]]),
@@ -204,7 +209,8 @@ export default function App() {
 
   const [authRole, setAuthRole] = useState(() => {
     if (typeof window !== 'undefined') {
-      return sessionStorage.getItem('ts_auth_role') || null;
+      const saved = sessionStorage.getItem('ts_auth_role');
+      if (saved === 'admin' || saved === 'panadero') return saved;
     }
     return null;
   });
@@ -235,7 +241,7 @@ export default function App() {
   const [products, setProducts] = useState(() => {
     if (typeof window !== 'undefined') {
       try {
-        const saved = localStorage.getItem('ts_products_catalog_v2');
+        const saved = localStorage.getItem('ts_products_catalog_v3');
         if (saved) {
           const parsed = JSON.parse(saved);
           if (Array.isArray(parsed) && parsed.length > 0) {
@@ -276,6 +282,7 @@ export default function App() {
   const [formAvailable, setFormAvailable] = useState(true);
   const [formFeatures, setFormFeatures] = useState(['Sin Azúcar', 'Sin Gluten']);
   const [formRequiresNotice, setFormRequiresNotice] = useState(true);
+  const [formSizes, setFormSizes] = useState([]);
 
   useEffect(() => {
     const handleLocationSync = () => {
@@ -296,7 +303,7 @@ export default function App() {
 
   useEffect(() => {
     try {
-      localStorage.setItem('ts_products_catalog_v2', JSON.stringify(products));
+      localStorage.setItem('ts_products_catalog_v3', JSON.stringify(products));
     } catch (err) {
       console.warn('Error guardando en localStorage:', err);
     }
@@ -431,6 +438,20 @@ export default function App() {
     );
   };
 
+  const handleAddSizeRow = () => {
+    setFormSizes((prev) => [...prev, { portions: '', price: formPrice || 50000 }]);
+  };
+
+  const handleUpdateSizeRow = (index, field, value) => {
+    setFormSizes((prev) =>
+      prev.map((item, idx) => (idx === index ? { ...item, [field]: value } : item))
+    );
+  };
+
+  const handleRemoveSizeRow = (index) => {
+    setFormSizes((prev) => prev.filter((_, idx) => idx !== index));
+  };
+
   const handleOpenEditModal = (product) => {
     setEditingProduct(product);
     setFormName(product.name);
@@ -441,6 +462,11 @@ export default function App() {
     setFormAvailable(product.available);
     setFormFeatures(product.features || ['Sin Azúcar', 'Sin Gluten']);
     setFormRequiresNotice(product.requiresNotice ?? (product.category === 'Tortas Saludables' || product.category === 'Pan Saludable'));
+    if (product.sizes && product.sizes.length > 0) {
+      setFormSizes(product.sizes.map((s) => ({ portions: s.portions, price: s.price })));
+    } else {
+      setFormSizes([]);
+    }
     setIsModalOpen(true);
   };
 
@@ -454,6 +480,7 @@ export default function App() {
     setFormAvailable(true);
     setFormFeatures(['Sin Azúcar', 'Sin Gluten']);
     setFormRequiresNotice(true);
+    setFormSizes([]);
     setIsModalOpen(true);
   };
 
@@ -466,6 +493,19 @@ export default function App() {
 
     const cleanImageUrl = ensureSlash(formImageUrl);
 
+    const cleanedSizes = formSizes
+      .filter((s) => s.portions.trim().length > 0 && Number(s.price) > 0)
+      .map((s) => ({
+        portions: s.portions.trim(),
+        price: Number(s.price),
+        label: `${s.portions.trim()} (${formatPrice(Number(s.price))})`,
+      }));
+
+    const finalBasePrice =
+      cleanedSizes.length > 0
+        ? Number(formPrice) || cleanedSizes[0].price
+        : Number(formPrice) || 0;
+
     if (editingProduct) {
       setProducts((prev) =>
         prev.map((item) =>
@@ -475,11 +515,12 @@ export default function App() {
                 name: formName.trim(),
                 category: formCategory,
                 description: formDescription.trim(),
-                price: Number(formPrice) || 0,
+                price: finalBasePrice,
                 imageUrl: cleanImageUrl,
                 available: formAvailable,
                 features: formFeatures,
                 requiresNotice: formRequiresNotice,
+                sizes: cleanedSizes.length > 0 ? cleanedSizes : undefined,
               }
             : item
         )
@@ -491,11 +532,12 @@ export default function App() {
         name: formName.trim(),
         category: formCategory,
         description: formDescription.trim(),
-        price: Number(formPrice) || 0,
+        price: finalBasePrice,
         imageUrl: cleanImageUrl,
         available: formAvailable,
         features: formFeatures,
         requiresNotice: formRequiresNotice,
+        sizes: cleanedSizes.length > 0 ? cleanedSizes : undefined,
       };
       setProducts((prev) => [newProd, ...prev]);
       showToast(`✓ Producto "${formName.trim()}" agregado al catálogo`);
@@ -549,10 +591,9 @@ export default function App() {
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
         const matchesName = item.name.toLowerCase().includes(query);
-        const matchesDesc = item.description.toLowerCase().includes(query);
+        const matchesDesc = item.description?.toLowerCase().includes(query);
         const matchesCat = item.category.toLowerCase().includes(query);
-        const matchesFeat = item.features?.some((f) => f.toLowerCase().includes(query));
-        if (!matchesName && !matchesDesc && !matchesCat && !matchesFeat) return false;
+        return matchesName || matchesDesc || matchesCat;
       }
 
       return true;
@@ -609,151 +650,152 @@ export default function App() {
             </span>
           </div>
           <div className="flex items-center gap-4 text-[11px] text-emerald-100 font-medium">
-            <span className="flex items-center gap-1">
-              <Clock size={12} />
-              <span>Tortas por encargo (1 día)</span>
-            </span>
-            <span className="flex items-center gap-1">
-              <MapPin size={12} />
-              <span>Despachos a toda el área metropolitana</span>
-            </span>
+            <span>Domicilios en toda el Área Metropolitana</span>
+            <span className="hidden md:inline">•</span>
+            <span className="hidden md:inline">Sin Azúcar & Libres de Gluten</span>
           </div>
         </div>
       </aside>
 
-      {/* Header de Navegación */}
-      <header className="sticky top-0 z-40 bg-[#FAF7F2]/95 backdrop-blur-md border-b border-[#EAE2D8]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between gap-4">
-          <button
-            onClick={() => navigateTo('public')}
-            className="flex items-center gap-3 text-left group cursor-pointer focus:outline-none"
-          >
-            <div className="w-10 h-10 rounded-2xl bg-[#2D5A27] text-white flex items-center justify-center font-serif text-xl font-black shadow-md group-hover:scale-105 transition-transform">
-              TS
-            </div>
-            <div>
-              <span className="font-serif text-lg sm:text-xl font-bold tracking-tight text-[#241E19] block group-hover:text-[#2D5A27] transition">
-                Territorio Saludable
-              </span>
-              <span className="text-[10px] uppercase tracking-widest text-[#8C533C] font-semibold block">
-                100% Sin Azúcar & Sin Gluten • Bucaramanga
-              </span>
-            </div>
-          </button>
-
-          {/* Navegación y Accesos Protegidos */}
-          <nav className="flex items-center gap-1.5 sm:gap-2">
+      {/* Encabezado Principal */}
+      <header className="sticky top-0 z-40 bg-[#FAF7F2]/95 backdrop-blur-md border-b border-[#EAE2D8] transition-all">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
             <button
               onClick={() => navigateTo('public')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
-                currentView === 'public'
-                  ? 'bg-[#2D5A27] text-white shadow-xs'
-                  : 'bg-white border border-[#D8CFC4] text-stone-700 hover:bg-stone-50'
-              }`}
+              className="text-left group cursor-pointer flex items-center gap-2.5"
             >
-              Catálogo
+              <div className="w-10 h-10 rounded-2xl bg-[#2D5A27] text-white flex items-center justify-center font-serif text-xl font-bold shadow-md shadow-[#2D5A27]/20 group-hover:scale-105 transition">
+                TS
+              </div>
+              <div>
+                <h1 className="font-serif text-xl sm:text-2xl font-bold text-[#241E19] leading-tight group-hover:text-[#2D5A27] transition">
+                  Territorio Saludable
+                </h1>
+                <p className="text-[10px] text-stone-500 uppercase tracking-widest font-semibold">
+                  Bucaramanga • Repostería Funcional
+                </p>
+              </div>
             </button>
+          </div>
 
-            <button
-              onClick={() => navigateTo('panadero')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
-                currentView === 'panadero'
-                  ? 'bg-amber-700 text-white shadow-xs'
-                  : 'bg-amber-50 text-amber-900 border border-amber-200 hover:bg-amber-100'
-              }`}
-              title="Panel simplificado para panaderos y cocina"
-            >
-              <ChefHat size={14} />
-              <span className="hidden sm:inline">Panel Panadero</span>
-              <span className="sm:hidden">Cocina</span>
-            </button>
+          {/* Botones de Navegación y Vistas */}
+          <div className="flex items-center gap-2">
+            {currentView === 'public' ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => navigateTo('panadero')}
+                  className="px-3 sm:px-4 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-900 text-xs font-bold flex items-center gap-1.5 transition cursor-pointer shadow-2xs"
+                  title="Panel Rápido de Panadero"
+                >
+                  <ChefHat size={15} className="text-amber-800" />
+                  <span className="hidden sm:inline">Panel Panadero</span>
+                </button>
 
-            <button
-              onClick={() => navigateTo('admin')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
-                currentView === 'admin'
-                  ? 'bg-stone-900 text-white shadow-xs'
-                  : 'bg-white border border-[#D8CFC4] text-stone-700 hover:bg-stone-50'
-              }`}
-              title="Panel completo de administración y precios"
-            >
-              <ShieldCheck size={14} />
-              <span className="hidden sm:inline">Panel Admin</span>
-              <span className="sm:hidden">Admin</span>
-            </button>
-
-            {authRole && (
+                <button
+                  type="button"
+                  onClick={() => navigateTo('admin')}
+                  className="px-3 sm:px-4 py-2 rounded-xl bg-white hover:bg-stone-50 border border-stone-300 text-stone-700 text-xs font-bold flex items-center gap-1.5 transition cursor-pointer shadow-2xs"
+                  title="Panel de Administración Completo"
+                >
+                  <ShieldCheck size={15} className="text-[#2D5A27]" />
+                  <span className="hidden sm:inline">Panel Admin</span>
+                </button>
+              </>
+            ) : (
               <button
-                onClick={handleLogout}
-                className="p-1.5 rounded-xl text-stone-500 hover:text-red-600 hover:bg-red-50 transition cursor-pointer"
-                title="Cerrar sesión protegida"
+                type="button"
+                onClick={() => navigateTo('public')}
+                className="px-3 sm:px-4 py-2 rounded-xl bg-[#2D5A27] hover:bg-[#23481E] text-white text-xs font-bold flex items-center gap-1.5 transition cursor-pointer shadow-sm"
               >
-                <LogOut size={16} />
+                <ArrowLeft size={14} />
+                <span>Ver Catálogo Público</span>
               </button>
             )}
-          </nav>
+          </div>
         </div>
       </header>
 
       {/* ============================================================== */}
-      {/* VISTA 1: CATÁLOGO PÚBLICO (CLIENTES)                            */}
+      {/* VISTA 1: CATÁLOGO PÚBLICO                                      */}
       {/* ============================================================== */}
       {currentView === 'public' && (
-        <div className="flex-1 flex flex-col">
+        <main className="flex-1 max-w-7xl mx-auto w-full p-4 sm:p-6 lg:p-8 space-y-8">
           {/* Banner Hero */}
-          <section className="bg-gradient-to-b from-[#FAF0E6]/80 to-transparent pt-8 pb-6 px-4 border-b border-[#EAE2D8]">
-            <div className="max-w-4xl mx-auto text-center space-y-3">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EBF3EA] text-[#2D5A27] text-xs font-bold border border-[#C5DEC3]">
-                🌱 Pastelería Artesanal Consciente
+          <section className="relative overflow-hidden rounded-3xl bg-linear-to-r from-[#2D5A27] to-[#3E7B35] text-white p-6 sm:p-10 shadow-lg">
+            <div className="relative z-10 max-w-2xl space-y-3">
+              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[11px] font-bold uppercase tracking-wider text-amber-200">
+                <Sparkles size={13} />
+                Catálogo Oficial Bucaramanga
               </span>
-              <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-black text-[#241E19] leading-tight">
-                Disfruta lo dulce, cuida tu bienestar
+              <h2 className="font-serif text-3xl sm:text-5xl font-black leading-tight drop-shadow-xs">
+                Disfruta sin culpa, cuida tu salud.
               </h2>
-              <p className="text-stone-600 text-xs sm:text-sm max-w-2xl mx-auto leading-relaxed">
-                Tortas artesanales, panes libres de gluten y postres gourmet horneados en Bucaramanga.
-                Endulzados naturalmente con fruta pura y fruto del monje, sin azúcar refinada.
+              <p className="text-xs sm:text-sm text-emerald-50 max-w-xl leading-relaxed">
+                Tortas artesanales, panes funcionales y postres libres de gluten y sin azúcar refinada.
+                Haz tu pedido con entrega programada o para hoy en Bucaramanga y Floridablanca.
               </p>
-
-              {/* Buscador de Productos */}
-              <div className="pt-2 max-w-md mx-auto">
-                <div className="relative">
-                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400" size={17} />
-                  <input
-                    type="text"
-                    placeholder="Buscar por torta, pan, ingrediente o etiqueta..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white border border-[#D8CFC4] shadow-xs text-xs sm:text-sm font-medium focus:outline-none focus:border-[#2D5A27] focus:ring-1 focus:ring-[#2D5A27]"
-                  />
-                  {searchQuery && (
-                    <button
-                      onClick={() => setSearchQuery('')}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 cursor-pointer"
-                    >
-                      <X size={15} />
-                    </button>
-                  )}
-                </div>
-              </div>
             </div>
+            <div className="absolute right-0 bottom-0 translate-x-10 translate-y-10 w-72 h-72 rounded-full bg-white/5 pointer-events-none" />
           </section>
 
-          {/* Pestañas de Categorías y Filtros Dietarios */}
-          <section className="sticky top-[61px] z-30 bg-[#FAF7F2]/95 backdrop-blur-md border-b border-[#EAE2D8] py-3 px-4 shadow-xs">
-            <div className="max-w-7xl mx-auto flex items-center justify-start sm:justify-center gap-2 overflow-x-auto no-scrollbar pb-1">
+          {/* Barra de Filtros y Búsqueda */}
+          <section className="space-y-4">
+            <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
+              {/* Buscador */}
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400" size={17} />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Buscar por nombre (ej. Moka, Arequipe, Baguette)..."
+                  className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white border border-[#EAE2D8] focus:outline-none focus:border-[#2D5A27] text-xs sm:text-sm shadow-2xs font-medium placeholder:text-stone-400"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 p-1"
+                  >
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+
+              {/* Filtros Dietarios / Etiquetas */}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+                {DIETARY_TAGS.map((tag) => (
+                  <button
+                    key={tag}
+                    onClick={() => setActiveDietaryTag(tag)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
+                      activeDietaryTag === tag
+                        ? 'bg-[#2D5A27] text-white shadow-xs'
+                        : 'bg-white text-stone-600 hover:bg-[#F2ECE4] border border-[#EAE2D8]'
+                    }`}
+                  >
+                    {tag}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Pestañas de Categorías Principales */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none border-b border-[#EAE2D8]">
               <button
                 onClick={() => setActiveCategory('Todas')}
-                className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition cursor-pointer flex items-center gap-1.5 ${
+                className={`px-4 py-2.5 rounded-2xl font-serif text-xs sm:text-sm font-bold whitespace-nowrap transition cursor-pointer flex items-center gap-2 ${
                   activeCategory === 'Todas'
-                    ? 'bg-[#2D5A27] text-white shadow-sm'
-                    : 'bg-white border border-[#EAE2D8] text-stone-600 hover:border-[#2D5A27] hover:text-[#2D5A27]'
+                    ? 'bg-[#2D5A27] text-white shadow-md shadow-[#2D5A27]/20'
+                    : 'bg-white hover:bg-stone-50 text-stone-700 border border-[#EAE2D8]'
                 }`}
               >
                 <span>Todas</span>
                 <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${
-                  activeCategory === 'Todas' ? 'bg-white/20 text-white' : 'bg-stone-100 text-stone-500'
+                  activeCategory === 'Todas' ? 'bg-white/25 text-white' : 'bg-stone-100 text-stone-600'
                 }`}>
-                  {categoryCounts['Todas'] || 0}
+                  {categoryCounts['Todas']}
                 </span>
               </button>
 
@@ -761,389 +803,385 @@ export default function App() {
                 <button
                   key={cat}
                   onClick={() => setActiveCategory(cat)}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition cursor-pointer flex items-center gap-1.5 ${
+                  className={`px-4 py-2.5 rounded-2xl font-serif text-xs sm:text-sm font-bold whitespace-nowrap transition cursor-pointer flex items-center gap-2 ${
                     activeCategory === cat
-                      ? 'bg-[#2D5A27] text-white shadow-sm'
-                      : 'bg-white border border-[#EAE2D8] text-stone-600 hover:border-[#2D5A27] hover:text-[#2D5A27]'
+                      ? 'bg-[#2D5A27] text-white shadow-md shadow-[#2D5A27]/20'
+                      : 'bg-white hover:bg-stone-50 text-stone-700 border border-[#EAE2D8]'
                   }`}
                 >
                   <span>{cat}</span>
                   <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${
-                    activeCategory === cat ? 'bg-white/20 text-white' : 'bg-stone-100 text-stone-500'
+                    activeCategory === cat ? 'bg-white/25 text-white' : 'bg-stone-100 text-stone-600'
                   }`}>
                     {categoryCounts[cat] || 0}
                   </span>
                 </button>
               ))}
             </div>
-
-            <div className="max-w-7xl mx-auto mt-2.5 pt-2 border-t border-[#EAE2D8]/70 flex items-center justify-start sm:justify-center gap-1.5 overflow-x-auto no-scrollbar">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mr-1 shrink-0">
-                Filtros:
-              </span>
-              {DIETARY_TAGS.map((tag) => (
-                <button
-                  key={tag}
-                  onClick={() => setActiveDietaryTag(tag)}
-                  className={`text-[11px] px-3 py-1 rounded-full whitespace-nowrap transition cursor-pointer font-semibold ${
-                    activeDietaryTag === tag
-                      ? 'bg-[#241E19] text-white shadow-xs'
-                      : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
-                  }`}
-                >
-                  {tag}
-                </button>
-              ))}
-            </div>
           </section>
 
-          {/* Tarjetas de Productos (Diseño Visual Estilo AI Studio) */}
-          <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 py-8 flex-1">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#241E19]">
-                  {activeCategory === 'Todas' ? 'Menú Completo de Territorio Saludable' : `Categoría: ${activeCategory}`}
-                </h3>
-                <p className="text-xs text-stone-500 mt-0.5">
-                  Mostrando {filteredProducts.length} delicia{filteredProducts.length !== 1 ? 's' : ''} saludable{filteredProducts.length !== 1 ? 's' : ''}
-                </p>
+          {/* Grilla de Productos */}
+          {filteredProducts.length === 0 ? (
+            <div className="text-center py-16 bg-white rounded-3xl border border-[#EAE2D8] p-8 space-y-3">
+              <div className="w-14 h-14 rounded-2xl bg-amber-50 text-amber-700 flex items-center justify-center mx-auto">
+                <Search size={24} />
               </div>
+              <h3 className="font-serif text-xl font-bold text-[#241E19]">
+                No encontramos productos con esos filtros
+              </h3>
+              <p className="text-xs text-stone-500 max-w-sm mx-auto">
+                Prueba cambiando la etiqueta dietaria, la categoría o el término de búsqueda.
+              </p>
+              <button
+                onClick={() => {
+                  setActiveCategory('Todas');
+                  setActiveDietaryTag('Todas');
+                  setSearchQuery('');
+                }}
+                className="mt-2 px-4 py-2 rounded-xl bg-[#2D5A27] text-white text-xs font-bold hover:bg-[#23481E] transition cursor-pointer"
+              >
+                Limpiar Filtros
+              </button>
             </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filteredProducts.map((product) => {
+                const hasSizes = product.sizes && product.sizes.length > 0;
+                const currentSelectedPortion =
+                  selectedPortions[product.id] || (hasSizes ? product.sizes[0].portions : undefined);
 
-            {filteredProducts.length === 0 ? (
-              <div className="py-20 text-center space-y-4 bg-white rounded-3xl border border-[#EAE2D8] p-8 max-w-lg mx-auto">
-                <div className="w-16 h-16 rounded-2xl bg-[#FAF0E6] text-[#8C533C] flex items-center justify-center text-3xl mx-auto">
-                  🧁
-                </div>
-                <h4 className="font-serif text-xl font-bold text-[#241E19]">No se encontraron delicias</h4>
-                <p className="text-xs text-stone-500">
-                  Prueba cambiando los filtros de etiquetas o el término de búsqueda.
-                </p>
-                <button
-                  onClick={() => {
-                    setActiveCategory('Todas');
-                    setActiveDietaryTag('Todas');
-                    setSearchQuery('');
-                  }}
-                  className="px-4 py-2 rounded-xl bg-[#2D5A27] text-white text-xs font-bold hover:bg-[#23481E] transition cursor-pointer"
-                >
-                  Ver Todo el Catálogo
-                </button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {filteredProducts.map((product) => {
-                  const hasSizes = Array.isArray(product.sizes) && product.sizes.length > 0;
-                  const currentSelectedPortion = selectedPortions[product.id] || (hasSizes && product.sizes ? product.sizes[0].portions : '');
-                  const selectedSizeObj = hasSizes && product.sizes
-                    ? product.sizes.find((s) => s.portions === currentSelectedPortion) || product.sizes[0]
-                    : null;
-                  const displayPrice = selectedSizeObj ? selectedSizeObj.price : product.price;
+                const currentPortionObj = hasSizes
+                  ? product.sizes.find((s) => s.portions === currentSelectedPortion) || product.sizes[0]
+                  : null;
 
-                  return (
-                    <div
-                      key={product.id}
-                      className="bg-white rounded-3xl border border-[#EAE2D8] overflow-hidden flex flex-col shadow-xs hover:shadow-xl hover:border-[#2D5A27]/40 transition-all duration-300 group"
-                    >
-                      {/* Imagen con degradado inferior, precio grande y badges */}
-                      <div className="relative aspect-4/3 w-full bg-[#FAF0E6] overflow-hidden">
-                        <img
-                          src={product.imageUrl || FALLBACK_IMAGE_URL}
-                          alt={product.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                          onError={(e) => {
-                            e.currentTarget.onerror = null;
-                            e.currentTarget.src = FALLBACK_IMAGE_URL;
-                          }}
-                          loading="lazy"
-                        />
+                const displayPrice = currentPortionObj ? currentPortionObj.price : product.price;
 
-                        {/* Degradado oscuro inferior estilo AI Studio */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent pointer-events-none" />
+                return (
+                  <div
+                    key={product.id}
+                    className={`group bg-white rounded-3xl border border-[#EAE2D8] overflow-hidden flex flex-col transition duration-300 hover:shadow-xl hover:border-[#2D5A27]/40 ${
+                      !product.available ? 'opacity-75' : ''
+                    }`}
+                  >
+                    {/* Contenedor de la Imagen con Degradado Oscuro Inferior y Badges */}
+                    <div className="relative aspect-square w-full bg-[#FAF0E6] overflow-hidden">
+                      <img
+                        src={product.imageUrl || FALLBACK_IMAGE_URL}
+                        alt={product.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = FALLBACK_IMAGE_URL;
+                        }}
+                      />
 
-                        {/* Badge superior izquierdo con ícono de reloj */}
-                        <div className="absolute top-3 left-3 px-2.5 py-1 rounded-xl bg-white/95 backdrop-blur-md text-[#2D5A27] text-[11px] font-bold shadow-xs flex items-center gap-1.5">
-                          <Clock size={12} className="text-[#2D5A27]" />
-                          <span>{product.requiresNotice ? 'Anticipación: 1 día' : 'Entrega Inmediata'}</span>
-                        </div>
+                      {/* Degradado oscuro inferior */}
+                      <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
 
-                        {/* Botón superior derecho de información (i) */}
-                        <button
-                          type="button"
-                          onClick={() => setInfoModalProduct(product)}
-                          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 hover:bg-white text-stone-700 hover:text-[#2D5A27] flex items-center justify-center shadow-xs transition cursor-pointer backdrop-blur-xs"
-                          title="Ver ingredientes y detalles del producto"
-                        >
-                          <Info size={16} />
-                        </button>
-
-                        {/* Categoría a la izquierda y Precio Grande a la derecha */}
-                        <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between gap-2 pointer-events-none">
-                          <span className="px-2.5 py-0.5 rounded-lg bg-white/20 backdrop-blur-md text-white text-[11px] font-bold border border-white/20">
-                            {product.category}
+                      {/* Badge Superior Izquierdo: Anticipación / Entrega Inmediata */}
+                      <div className="absolute top-3 left-3 flex flex-col gap-1 items-start">
+                        {product.requiresNotice ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-[#241E19]/90 backdrop-blur-md text-amber-200 text-[10px] font-bold shadow-xs">
+                            <Clock size={11} />
+                            Anticipación: 1 día
                           </span>
-                          <span className="font-serif text-2xl font-black text-white drop-shadow-md tracking-tight">
-                            {formatPrice(displayPrice)}
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-emerald-700/90 backdrop-blur-md text-emerald-100 text-[10px] font-bold shadow-xs">
+                            <Sparkles size={11} />
+                            Entrega Inmediata
                           </span>
-                        </div>
+                        )}
+
+                        {!product.available && (
+                          <span className="px-2.5 py-0.5 rounded-lg bg-red-600 text-white text-[10px] font-extrabold uppercase tracking-wider shadow-sm">
+                            Agotado
+                          </span>
+                        )}
                       </div>
 
-                      <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
-                        <div className="space-y-2">
-                          <h4 className="font-serif text-lg font-bold text-[#241E19] group-hover:text-[#2D5A27] transition">
-                            {product.name}
-                          </h4>
+                      {/* Botón Superior Derecho: Información (i) */}
+                      <button
+                        type="button"
+                        onClick={() => setInfoModalProduct(product)}
+                        className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 hover:bg-white text-stone-700 hover:text-[#2D5A27] flex items-center justify-center shadow-xs transition cursor-pointer backdrop-blur-xs"
+                        title="Ver ingredientes y detalles del producto"
+                      >
+                        <Info size={16} />
+                      </button>
 
-                          <p className="text-xs text-stone-600 leading-relaxed line-clamp-2">
-                            {product.description}
-                          </p>
+                      {/* Categoría a la izquierda y Precio Grande a la derecha */}
+                      <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between gap-2 pointer-events-none">
+                        <span className="px-2.5 py-0.5 rounded-lg bg-white/20 backdrop-blur-md text-white text-[11px] font-bold border border-white/20">
+                          {product.category}
+                        </span>
+                        <span className="font-serif text-2xl font-black text-white drop-shadow-md tracking-tight">
+                          {formatPrice(displayPrice)}
+                        </span>
+                      </div>
+                    </div>
 
-                          {product.features && product.features.length > 0 && (
-                            <div className="flex flex-wrap gap-1 pt-1">
-                              {product.features.map((feat) => (
-                                <span
-                                  key={feat}
-                                  className="text-[10px] px-2 py-0.5 rounded-md bg-[#FAF7F2] text-stone-600 border border-[#EAE2D8] font-medium"
-                                >
-                                  {feat}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                        </div>
+                    <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                      <div className="space-y-2">
+                        <h4 className="font-serif text-lg font-bold text-[#241E19] group-hover:text-[#2D5A27] transition">
+                          {product.name}
+                        </h4>
 
-                        <div className="pt-2 border-t border-[#F2ECE4] space-y-3">
-                          {/* Botones de selección de porciones en pills horizontales */}
-                          {hasSizes && product.sizes && (
-                            <div className="space-y-1.5">
-                              <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 block">
-                                Tamaño / Porción:
+                        <p className="text-xs text-stone-600 leading-relaxed line-clamp-2">
+                          {product.description}
+                        </p>
+
+                        {product.features && product.features.length > 0 && (
+                          <div className="flex flex-wrap gap-1 pt-1">
+                            {product.features.map((feat) => (
+                              <span
+                                key={feat}
+                                className="text-[10px] px-2 py-0.5 rounded-md bg-[#FAF7F2] text-stone-600 border border-[#EAE2D8] font-medium"
+                              >
+                                {feat}
                               </span>
-                              <div className="flex flex-wrap gap-1.5">
-                                {product.sizes.map((size) => {
-                                  const isSelected = size.portions === currentSelectedPortion;
-                                  return (
-                                    <button
-                                      key={size.portions}
-                                      type="button"
-                                      onClick={() =>
-                                        setSelectedPortions({
-                                          ...selectedPortions,
-                                          [product.id]: size.portions,
-                                        })
-                                      }
-                                      className={`text-[11px] px-2.5 py-1 rounded-xl font-bold transition cursor-pointer border ${
-                                        isSelected
-                                          ? 'bg-[#2D5A27] text-white border-[#2D5A27] shadow-xs'
-                                          : 'bg-stone-50 hover:bg-stone-100 text-stone-700 border-stone-200'
-                                      }`}
-                                    >
-                                      {size.portions}
-                                    </button>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          )}
+                            ))}
+                          </div>
+                        )}
+                      </div>
 
-                          {/* Botón Verde Destacado WhatsApp */}
-                          {product.available ? (
+                      <div className="pt-2 border-t border-[#F2ECE4] space-y-3">
+                        {/* Botones de selección de porciones en pills horizontales */}
+                        {hasSizes && product.sizes && (
+                          <div className="space-y-1.5">
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 block">
+                              Tamaño / Porción:
+                            </span>
+                            <div className="flex flex-wrap gap-1.5">
+                              {product.sizes.map((size) => {
+                                const isSelected = size.portions === currentSelectedPortion;
+                                return (
+                                  <button
+                                    key={size.portions}
+                                    type="button"
+                                    onClick={() =>
+                                      setSelectedPortions({
+                                        ...selectedPortions,
+                                        [product.id]: size.portions,
+                                      })
+                                    }
+                                    className={`text-[11px] px-2.5 py-1 rounded-xl font-bold transition cursor-pointer border ${
+                                      isSelected
+                                        ? 'bg-[#2D5A27] text-white border-[#2D5A27] shadow-xs'
+                                        : 'bg-stone-50 hover:bg-stone-100 text-stone-700 border-stone-200'
+                                    }`}
+                                  >
+                                    {size.portions}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Botón Verde Destacado WhatsApp */}
+                        {product.available ? (
+                          <a
+                            href={buildWhatsAppUrl(product, currentSelectedPortion, displayPrice)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-full py-3 px-4 rounded-2xl bg-[#25D366] hover:bg-[#20ba5a] text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md shadow-[#25D366]/20 transition cursor-pointer active:scale-98"
+                          >
+                            <Phone size={16} className="fill-white" />
+                            <span>Pedir por WhatsApp</span>
+                          </a>
+                        ) : (
+                          <div className="space-y-1.5">
+                            <button
+                              disabled
+                              className="w-full py-2.5 px-4 rounded-2xl bg-stone-100 text-stone-400 font-bold text-xs flex items-center justify-center gap-2 cursor-not-allowed border border-stone-200"
+                            >
+                              <XCircle size={15} />
+                              <span>Agotado Temporalmente</span>
+                            </button>
                             <a
-                              href={buildWhatsAppUrl(product, currentSelectedPortion, displayPrice)}
+                              href={`https://wa.me/${WHATSAPP_PHONE_NUMBER}?text=${encodeURIComponent(`¡Hola! Vi en el catálogo que *${product.name}* está agotado. ¿Cuándo tendrán nueva disponibilidad horneada?`)}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="w-full py-3 px-4 rounded-2xl bg-[#25D366] hover:bg-[#20ba5a] text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md shadow-[#25D366]/20 transition cursor-pointer active:scale-98"
+                              className="block text-center text-[11px] text-[#2D5A27] hover:underline font-semibold"
                             >
-                              <Phone size={16} className="fill-white" />
-                              <span>Pedir por WhatsApp</span>
+                              Consultar próxima horneada por WhatsApp →
                             </a>
-                          ) : (
-                            <div className="space-y-1.5">
-                              <button
-                                disabled
-                                className="w-full py-2.5 px-4 rounded-2xl bg-stone-100 text-stone-400 font-bold text-xs flex items-center justify-center gap-2 cursor-not-allowed border border-stone-200"
-                              >
-                                <XCircle size={15} />
-                                <span>Agotado Temporalmente</span>
-                              </button>
-                              <a
-                                href={`https://wa.me/${WHATSAPP_PHONE_NUMBER}?text=${encodeURIComponent(`¡Hola! Vi en el catálogo que *${product.name}* está agotado. ¿Cuándo tendrán nueva disponibilidad horneada?`)}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="block text-center text-[11px] text-[#2D5A27] hover:underline font-semibold"
-                              >
-                                Consultar próxima horneada por WhatsApp →
-                              </a>
-                            </div>
-                          )}
-                        </div>
+                          </div>
+                        )}
                       </div>
                     </div>
-                  );
-                })}
-              </div>
-            )}
-          </main>
-
-          {/* ============================================================== */}
-          {/* PIE DE PÁGINA (FOOTER OSCURO COMPLETO)                         */}
-          {/* ============================================================== */}
-          <footer className="bg-[#1C1815] text-[#F3EFEA] pt-12 pb-8 border-t border-stone-800">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 pb-10 border-b border-stone-800">
-                {/* Columna 1: Marca y Horarios */}
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-xl bg-[#2D5A27] text-white flex items-center justify-center font-serif text-lg font-bold">
-                      TS
-                    </div>
-                    <div>
-                      <h4 className="font-serif text-lg font-bold text-white">
-                        Territorio Saludable
-                      </h4>
-                      <p className="text-[10px] text-amber-200/80 uppercase tracking-widest font-semibold">
-                        Pastelería Consciente
-                      </p>
-                    </div>
                   </div>
-                  <p className="text-xs text-stone-400 leading-relaxed">
-                    100% libre de gluten, sin azúcar refinada y horneado artesanalmente en Bucaramanga para cuidar de ti y tu familia.
-                  </p>
-                  <div className="pt-2 space-y-1">
-                    <span className="text-[11px] font-bold text-white uppercase tracking-wider block">
-                      Horarios de Atención:
-                    </span>
-                    <ul className="text-xs text-stone-300 space-y-0.5">
-                      <li>• Lunes a Viernes: <b>8:00 AM – 6:00 PM</b></li>
-                      <li>• Sábados: <b>8:00 AM – 5:00 PM</b></li>
-                      <li>• Domingos y Festivos: <b>9:00 AM – 2:00 PM</b></li>
-                    </ul>
-                  </div>
-                </div>
-
-                {/* Columna 2: Zonas de Entrega */}
-                <div className="space-y-3">
-                  <h4 className="font-serif text-base font-bold text-white flex items-center gap-1.5">
-                    <MapPin size={16} className="text-emerald-400" />
-                    <span>Zonas de Entrega</span>
-                  </h4>
-                  <p className="text-xs text-stone-400">
-                    Despachos en toda el área metropolitana de Bucaramanga:
-                  </p>
-                  <ul className="text-xs text-stone-300 space-y-1.5 divide-y divide-stone-800/60">
-                    <li className="pt-1 flex items-center justify-between">
-                      <span>Cabecera / Sotomayor / Prado</span>
-                      <span className="font-bold text-emerald-400">$5.000</span>
-                    </li>
-                    <li className="pt-1 flex items-center justify-between">
-                      <span>Centro / San Francisco</span>
-                      <span className="font-bold text-emerald-400">$7.000</span>
-                    </li>
-                    <li className="pt-1 flex items-center justify-between">
-                      <span>Floridablanca / Cañaveral</span>
-                      <span className="font-bold text-emerald-400">$10.000</span>
-                    </li>
-                    <li className="pt-1 flex items-center justify-between">
-                      <span>Girón / Piedecuesta</span>
-                      <span className="font-bold text-emerald-400">$15.000</span>
-                    </li>
-                  </ul>
-                </div>
-
-                {/* Columna 3: Medios de Pago */}
-                <div className="space-y-3">
-                  <h4 className="font-serif text-base font-bold text-white flex items-center gap-1.5">
-                    <CreditCard size={16} className="text-emerald-400" />
-                    <span>Medios de Pago</span>
-                  </h4>
-                  <p className="text-xs text-stone-400">
-                    Transferencias inmediatas y pagos en efectivo:
-                  </p>
-                  <div className="flex flex-wrap gap-2 pt-1">
-                    <span className="px-3 py-1 rounded-xl bg-[#360036] text-purple-200 border border-purple-500/30 text-xs font-bold">
-                      Nequi
-                    </span>
-                    <span className="px-3 py-1 rounded-xl bg-[#B81414] text-red-100 border border-red-500/30 text-xs font-bold">
-                      Daviplata
-                    </span>
-                    <span className="px-3 py-1 rounded-xl bg-[#FDDA24] text-stone-900 font-extrabold text-xs">
-                      Bancolombia
-                    </span>
-                    <span className="px-3 py-1 rounded-xl bg-[#2D5A27] text-white text-xs font-bold">
-                      Efectivo
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-stone-400 pt-1">
-                    Verificamos tu pago directamente por WhatsApp para agendar tu entrega.
-                  </p>
-                </div>
-
-                {/* Columna 4: Enlaces Administrativos y Seguridad */}
-                <div className="space-y-3">
-                  <h4 className="font-serif text-base font-bold text-white flex items-center gap-1.5">
-                    <ShieldCheck size={16} className="text-emerald-400" />
-                    <span>Acceso de Personal</span>
-                  </h4>
-                  <p className="text-xs text-stone-400">
-                    Accesos protegidos para la administración y cocina del taller:
-                  </p>
-                  <div className="flex flex-col gap-2 pt-1">
-                    <button
-                      type="button"
-                      onClick={() => handleRequestProtectedAccess('admin')}
-                      className="w-full py-2 px-3 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 hover:text-white text-xs font-bold transition flex items-center justify-center gap-2 border border-stone-700 cursor-pointer"
-                    >
-                      <Lock size={13} className="text-amber-400" />
-                      <span>Acceso Administrativo</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleRequestProtectedAccess('panadero')}
-                      className="w-full py-2 px-3 rounded-xl bg-stone-850 hover:bg-stone-800 text-stone-300 hover:text-amber-300 text-xs font-bold transition flex items-center justify-center gap-2 border border-stone-800 cursor-pointer"
-                    >
-                      <ChefHat size={14} className="text-amber-400" />
-                      <span>Panel de Cocina / Panadería</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Derechos de Autor */}
-              <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-stone-400">
-                <p>© 2026 Territorio Saludable S.A.S. • Bucaramanga, Colombia.</p>
-                <div className="flex items-center gap-4 text-stone-400 text-[11px]">
-                  <span>Pastelería 100% Saludable</span>
-                  <span>•</span>
-                  <span>Sin Gluten & Sin Azúcar</span>
-                </div>
-              </div>
+                );
+              })}
             </div>
-          </footer>
-        </div>
+          )}
+        </main>
       )}
 
       {/* ============================================================== */}
-      {/* VISTA 2: PANEL PANADERO (COCINA / CHECKLIST)                   */}
+      {/* PIE DE PÁGINA (FOOTER OSCURO COMPLETO)                         */}
+      {/* ============================================================== */}
+      <footer className="bg-[#1C1815] text-[#F3EFEA] pt-12 pb-8 border-t border-stone-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 pb-10 border-b border-stone-800">
+            {/* Columna 1: Marca y Horarios */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-[#2D5A27] text-white flex items-center justify-center font-serif text-lg font-bold">
+                  TS
+                </div>
+                <div>
+                  <h4 className="font-serif text-lg font-bold text-white">
+                    Territorio Saludable
+                  </h4>
+                  <p className="text-[10px] text-amber-200/80 uppercase tracking-widest font-semibold">
+                    Pastelería Consciente
+                  </p>
+                </div>
+              </div>
+              <p className="text-xs text-stone-400 leading-relaxed">
+                100% libre de gluten, sin azúcar refinada y horneado artesanalmente en Bucaramanga para cuidar de ti y tu familia.
+              </p>
+              <div className="pt-2 space-y-1">
+                <span className="text-[11px] font-bold text-white uppercase tracking-wider block">
+                  Horarios de Atención:
+                </span>
+                <ul className="text-xs text-stone-300 space-y-0.5">
+                  <li>• Lunes a Viernes: <b>8:00 AM – 6:00 PM</b></li>
+                  <li>• Sábados: <b>8:00 AM – 5:00 PM</b></li>
+                  <li>• Domingos y Festivos: <b>9:00 AM – 2:00 PM</b></li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Columna 2: Zonas de Entrega */}
+            <div className="space-y-3">
+              <span className="text-xs font-bold text-amber-200 uppercase tracking-wider block flex items-center gap-1.5">
+                <MapPin size={14} />
+                Zonas de Entrega
+              </span>
+              <p className="text-xs text-stone-400">
+                Cobertura con domicilios seguros en Bucaramanga y municipios vecinos:
+              </p>
+              <div className="space-y-2 text-xs">
+                <div className="flex justify-between items-center bg-stone-900/60 p-2 rounded-xl border border-stone-800">
+                  <span className="text-stone-300">Cabecera / Sotomayor</span>
+                  <span className="font-bold text-emerald-400">$5.000</span>
+                </div>
+                <div className="flex justify-between items-center bg-stone-900/60 p-2 rounded-xl border border-stone-800">
+                  <span className="text-stone-300">Centro / San Francisco</span>
+                  <span className="font-bold text-emerald-400">$7.000</span>
+                </div>
+                <div className="flex justify-between items-center bg-stone-900/60 p-2 rounded-xl border border-stone-800">
+                  <span className="text-stone-300">Floridablanca / Cañaveral</span>
+                  <span className="font-bold text-emerald-400">$10.000</span>
+                </div>
+                <div className="flex justify-between items-center bg-stone-900/60 p-2 rounded-xl border border-stone-800">
+                  <span className="text-stone-300">Girón / Piedecuesta</span>
+                  <span className="font-bold text-emerald-400">$15.000</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Columna 3: Medios de Pago */}
+            <div className="space-y-3">
+              <span className="text-xs font-bold text-amber-200 uppercase tracking-wider block flex items-center gap-1.5">
+                <CreditCard size={14} />
+                Medios de Pago
+              </span>
+              <p className="text-xs text-stone-400">
+                Recibimos pagos inmediatos y transferencias seguras:
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <span className="px-3 py-1.5 rounded-xl bg-purple-900/40 border border-purple-700/50 text-purple-200 text-xs font-bold">
+                  Nequi
+                </span>
+                <span className="px-3 py-1.5 rounded-xl bg-red-900/40 border border-red-700/50 text-red-200 text-xs font-bold">
+                  Daviplata
+                </span>
+                <span className="px-3 py-1.5 rounded-xl bg-yellow-900/40 border border-yellow-700/50 text-yellow-200 text-xs font-bold">
+                  Bancolombia
+                </span>
+                <span className="px-3 py-1.5 rounded-xl bg-emerald-900/40 border border-emerald-700/50 text-emerald-200 text-xs font-bold">
+                  Efectivo
+                </span>
+              </div>
+              <div className="pt-3">
+                <a
+                  href={`https://wa.me/${WHATSAPP_PHONE_NUMBER}?text=${encodeURIComponent('¡Hola Territorio Saludable! Quisiera solicitar datos de pago para mi pedido.')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-xs text-emerald-400 hover:text-emerald-300 font-bold"
+                >
+                  <Phone size={13} />
+                  <span>Consultar cuentas por WhatsApp →</span>
+                </a>
+              </div>
+            </div>
+
+            {/* Columna 4: Accesos Rápidos & Privados */}
+            <div className="space-y-3">
+              <span className="text-xs font-bold text-stone-300 uppercase tracking-wider block">
+                Acceso del Equipo
+              </span>
+              <p className="text-xs text-stone-400">
+                Herramientas protegidas para panaderos, pasteleros y administradores:
+              </p>
+              <div className="space-y-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => navigateTo('panadero')}
+                  className="w-full text-left px-3 py-2 rounded-xl bg-stone-900/80 hover:bg-stone-800 border border-stone-800 text-xs text-amber-200 hover:text-white transition flex items-center justify-between cursor-pointer"
+                >
+                  <span className="flex items-center gap-2">
+                    <ChefHat size={14} />
+                    <span>Panel Panadero (Disponibilidad)</span>
+                  </span>
+                  <span>→</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigateTo('admin')}
+                  className="w-full text-left px-3 py-2 rounded-xl bg-stone-900/80 hover:bg-stone-800 border border-stone-800 text-xs text-stone-300 hover:text-white transition flex items-center justify-between cursor-pointer"
+                >
+                  <span className="flex items-center gap-2">
+                    <ShieldCheck size={14} />
+                    <span>Panel Admin (Precios, Fotos y Orden)</span>
+                  </span>
+                  <span>→</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left text-xs text-stone-500">
+            <p>© 2026 Territorio Saludable S.A.S. • Bucaramanga, Colombia.</p>
+            <p>Todos los derechos reservados. Repostería funcional y consciente.</p>
+          </div>
+        </div>
+      </footer>
+
+      {/* ============================================================== */}
+      {/* VISTA 2: PANEL PANADERO (LISTA RÁPIDA DE DISPONIBILIDAD)       */}
       {/* ============================================================== */}
       {currentView === 'panadero' && (
         <div className="flex-1 max-w-5xl mx-auto w-full p-4 sm:p-6 lg:p-8 space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#EAE2D8]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#EAE2D8]">
             <div className="flex items-center gap-3">
               <button
-                type="button"
                 onClick={() => navigateTo('public')}
                 className="p-2 rounded-xl bg-white border border-[#D8CFC4] hover:bg-stone-50 text-stone-600 transition cursor-pointer"
-                title="Volver al catálogo"
+                title="Volver al catálogo público"
               >
                 <ArrowLeft size={16} />
               </button>
               <div>
                 <h2 className="font-serif text-2xl sm:text-3xl font-extrabold text-[#241E19] flex items-center gap-2">
-                  <ChefHat className="text-amber-700" size={26} />
-                  <span>Panel de Panadería y Cocina</span>
+                  <ChefHat className="text-amber-800" size={26} />
+                  <span>Panel Panadero y Cocina</span>
                 </h2>
                 <p className="text-xs sm:text-sm text-stone-500 mt-0.5">
-                  Cambio rápido de estado: <b>Disponible</b> o <b>Agotado</b> con un solo toque.
+                  Toca el botón para alternar el estado entre <b>Disponible</b> y <b>Agotado</b> en tiempo real.
                 </p>
               </div>
             </div>
@@ -1151,60 +1189,36 @@ export default function App() {
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={() => navigateTo('public')}
-                className="px-3.5 py-1.5 rounded-xl bg-white border border-stone-300 hover:bg-stone-50 text-stone-700 text-xs font-bold transition cursor-pointer"
-              >
-                Ver Tienda
-              </button>
-              <button
-                type="button"
                 onClick={handleLogout}
-                className="px-3 py-1.5 rounded-xl bg-red-100 text-red-700 hover:bg-red-200 text-xs font-bold transition cursor-pointer flex items-center gap-1"
-                title="Cerrar sesión de panadero"
+                className="px-3.5 py-2 rounded-xl bg-stone-100 hover:bg-red-50 text-stone-600 hover:text-red-700 text-xs font-bold flex items-center gap-1.5 transition cursor-pointer"
               >
-                <LogOut size={13} />
-                <span>Salir</span>
+                <LogOut size={14} />
+                <span>Cerrar Sesión</span>
               </button>
             </div>
           </div>
 
-          {/* Métricas Cocina */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
-            <div className="bg-white p-4 rounded-2xl border border-[#EAE2D8] shadow-xs">
-              <span className="text-[11px] font-bold text-stone-400 uppercase tracking-wider">Total en Catálogo</span>
-              <p className="font-serif text-2xl font-black text-[#241E19]">{stats.total}</p>
-            </div>
-            <div className="bg-white p-4 rounded-2xl border border-emerald-100 shadow-xs">
-              <span className="text-[11px] font-bold text-emerald-600 uppercase tracking-wider">Disponibles para Venta</span>
-              <p className="font-serif text-2xl font-black text-[#2D5A27]">{stats.available}</p>
-            </div>
-            <div className="bg-white p-4 rounded-2xl border border-red-100 shadow-xs col-span-2 sm:col-span-1">
-              <span className="text-[11px] font-bold text-red-500 uppercase tracking-wider">Agotados Actualmente</span>
-              <p className="font-serif text-2xl font-black text-red-600">{stats.soldOut}</p>
-            </div>
-          </div>
-
-          {/* Filtros Cocina */}
-          <div className="bg-white rounded-3xl border border-[#EAE2D8] p-4 shadow-xs space-y-3">
+          {/* Filtros rápidos para el panadero */}
+          <div className="bg-white p-4 rounded-3xl border border-[#EAE2D8] space-y-3 shadow-xs">
             <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" size={16} />
+              <div className="relative flex-1 max-w-sm">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400" size={15} />
                 <input
                   type="text"
-                  placeholder="Buscar producto por nombre para cambiar estado..."
                   value={panaderoSearch}
                   onChange={(e) => setPanaderoSearch(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 rounded-xl bg-stone-50 border border-stone-200 text-xs font-medium focus:outline-none focus:border-[#2D5A27]"
+                  placeholder="Filtrar por nombre..."
+                  className="w-full pl-9 pr-3 py-2 rounded-xl bg-stone-50 border border-stone-200 text-xs focus:bg-white focus:outline-none focus:border-[#2D5A27]"
                 />
               </div>
 
-              <div className="flex items-center gap-1.5 shrink-0">
+              <div className="flex items-center gap-1.5 flex-wrap">
                 <button
                   type="button"
                   onClick={() => setPanaderoStatusFilter('all')}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+                  className={`text-xs px-3 py-1.5 rounded-xl font-bold transition cursor-pointer ${
                     panaderoStatusFilter === 'all'
-                      ? 'bg-stone-900 text-white'
+                      ? 'bg-[#2D5A27] text-white'
                       : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
                   }`}
                 >
@@ -1213,10 +1227,10 @@ export default function App() {
                 <button
                   type="button"
                   onClick={() => setPanaderoStatusFilter('available')}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+                  className={`text-xs px-3 py-1.5 rounded-xl font-bold transition cursor-pointer ${
                     panaderoStatusFilter === 'available'
-                      ? 'bg-[#2D5A27] text-white'
-                      : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                      ? 'bg-emerald-700 text-white'
+                      : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100'
                   }`}
                 >
                   Disponibles ({stats.available})
@@ -1224,10 +1238,10 @@ export default function App() {
                 <button
                   type="button"
                   onClick={() => setPanaderoStatusFilter('soldout')}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+                  className={`text-xs px-3 py-1.5 rounded-xl font-bold transition cursor-pointer ${
                     panaderoStatusFilter === 'soldout'
-                      ? 'bg-red-600 text-white'
-                      : 'bg-red-50 text-red-700 hover:bg-red-100'
+                      ? 'bg-red-700 text-white'
+                      : 'bg-red-50 text-red-800 hover:bg-red-100'
                   }`}
                 >
                   Agotados ({stats.soldOut})
@@ -1235,14 +1249,15 @@ export default function App() {
               </div>
             </div>
 
-            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-1 border-t border-stone-100">
+            {/* Categorías del Panadero */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pt-2 border-t border-stone-100 scrollbar-none">
               <button
                 type="button"
                 onClick={() => setPanaderoCategoryFilter('Todas')}
-                className={`text-xs px-3 py-1 rounded-xl font-bold whitespace-nowrap transition cursor-pointer ${
+                className={`text-xs px-3 py-1 rounded-xl font-semibold whitespace-nowrap transition cursor-pointer ${
                   panaderoCategoryFilter === 'Todas'
-                    ? 'bg-[#2D5A27] text-white'
-                    : 'bg-stone-50 text-stone-600 hover:bg-stone-100 border border-stone-200'
+                    ? 'bg-[#241E19] text-white'
+                    : 'bg-stone-50 text-stone-600 hover:bg-stone-100'
                 }`}
               >
                 Todas las Categorías
@@ -1252,10 +1267,10 @@ export default function App() {
                   key={cat}
                   type="button"
                   onClick={() => setPanaderoCategoryFilter(cat)}
-                  className={`text-xs px-3 py-1 rounded-xl font-bold whitespace-nowrap transition cursor-pointer ${
+                  className={`text-xs px-3 py-1 rounded-xl font-semibold whitespace-nowrap transition cursor-pointer ${
                     panaderoCategoryFilter === cat
-                      ? 'bg-[#2D5A27] text-white'
-                      : 'bg-stone-50 text-stone-600 hover:bg-stone-100 border border-stone-200'
+                      ? 'bg-[#241E19] text-white'
+                      : 'bg-stone-50 text-stone-600 hover:bg-stone-100'
                   }`}
                 >
                   {cat}
@@ -1264,27 +1279,18 @@ export default function App() {
             </div>
           </div>
 
-          {/* Checklist */}
-          <div className="bg-white rounded-3xl border border-[#EAE2D8] shadow-xs overflow-hidden">
-            <div className="p-4 bg-[#FAF7F2] border-b border-[#EAE2D8] flex items-center justify-between">
-              <span className="text-xs font-bold text-stone-700">
-                Mostrando {panaderoFilteredProducts.length} productos
-              </span>
-              <span className="text-[11px] text-stone-500">
-                Toque el botón grande para cambiar estado al instante
-              </span>
-            </div>
-
-            <div className="divide-y divide-stone-100">
+          {/* Lista tipo Checklist de 1 Toque */}
+          <div className="bg-white rounded-3xl border border-[#EAE2D8] overflow-hidden shadow-xs">
+            <div className="divide-y divide-[#F2ECE4]">
               {panaderoFilteredProducts.map((product) => (
                 <div
                   key={product.id}
                   className={`p-4 sm:p-5 flex items-center justify-between gap-4 transition ${
-                    product.available ? 'hover:bg-emerald-50/30' : 'bg-red-50/20 hover:bg-red-50/40'
+                    product.available ? 'hover:bg-emerald-50/30' : 'bg-red-50/20'
                   }`}
                 >
-                  <div className="flex items-center gap-3.5 min-w-0 flex-1">
-                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-stone-100 overflow-hidden border border-stone-200 shrink-0 relative">
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <div className="w-12 h-12 rounded-2xl bg-[#FAF0E6] overflow-hidden shrink-0 border border-stone-200">
                       <img
                         src={product.imageUrl || FALLBACK_IMAGE_URL}
                         alt={product.name}
@@ -1295,19 +1301,13 @@ export default function App() {
                         }}
                       />
                     </div>
-
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <h4 className="font-serif font-bold text-base text-[#241E19]">
-                          {product.name}
-                        </h4>
-                        <span className="px-2 py-0.5 rounded-md bg-stone-100 text-stone-600 text-[10px] font-bold">
-                          {product.category}
-                        </span>
-                      </div>
-                      <p className="text-xs text-stone-500 truncate mt-0.5">
-                        {product.description}
-                      </p>
+                    <div className="min-w-0">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 block">
+                        {product.category}
+                      </span>
+                      <h4 className="font-serif text-base font-bold text-[#241E19] truncate">
+                        {product.name}
+                      </h4>
                       <div className="mt-1 flex items-center gap-2">
                         <span
                           className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold ${
@@ -1424,7 +1424,7 @@ export default function App() {
             </div>
             <div className="bg-white p-4 rounded-2xl border border-amber-100 shadow-xs">
               <span className="text-[11px] font-bold text-amber-700 uppercase tracking-wider">Tortas Saludables</span>
-              <p className="font-serif text-2xl font-black text-amber-800">{stats.cakes} de 21</p>
+              <p className="font-serif text-2xl font-black text-amber-800">{stats.cakes} variedades</p>
             </div>
           </div>
 
@@ -1444,58 +1444,59 @@ export default function App() {
               </div>
             </div>
 
-            <form onSubmit={handleSavePasswords} className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+            <form onSubmit={handleSavePasswords} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
               <div>
                 <label className="block text-xs font-bold text-stone-700 mb-1">
-                  Nueva Contraseña de Administrador
+                  Nueva Clave Admin
                 </label>
-                <input
-                  type="password"
-                  value={newAdminPwd}
-                  onChange={(e) => setNewAdminPwd(e.target.value)}
-                  placeholder="Escribe la nueva contraseña de Admin..."
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-stone-50 border border-stone-300 focus:bg-white focus:outline-none focus:border-[#2D5A27] text-xs font-mono"
-                />
+                <div className="relative">
+                  <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" size={15} />
+                  <input
+                    type="password"
+                    value={newAdminPwd}
+                    onChange={(e) => setNewAdminPwd(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full pl-9 pr-3 py-2 rounded-xl bg-stone-50 border border-stone-200 text-xs font-mono focus:bg-white focus:outline-none focus:border-[#2D5A27]"
+                  />
+                </div>
               </div>
 
               <div>
                 <label className="block text-xs font-bold text-stone-700 mb-1">
-                  Nueva Contraseña Panel Panadero (Cocina)
+                  Nueva Clave Panadero
                 </label>
-                <input
-                  type="password"
-                  value={newPanaderoPwd}
-                  onChange={(e) => setNewPanaderoPwd(e.target.value)}
-                  placeholder="Escribe la nueva contraseña de Cocina..."
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-stone-50 border border-stone-300 focus:bg-white focus:outline-none focus:border-[#2D5A27] text-xs font-mono"
-                />
+                <div className="relative">
+                  <ChefHat className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" size={15} />
+                  <input
+                    type="password"
+                    value={newPanaderoPwd}
+                    onChange={(e) => setNewPanaderoPwd(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full pl-9 pr-3 py-2 rounded-xl bg-stone-50 border border-stone-200 text-xs font-mono focus:bg-white focus:outline-none focus:border-[#2D5A27]"
+                  />
+                </div>
               </div>
 
-              <div className="sm:col-span-2 flex justify-end pt-1">
+              <div>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-xl bg-[#2D5A27] hover:bg-[#23481E] text-white text-xs font-bold transition shadow-sm cursor-pointer flex items-center gap-1.5"
+                  className="w-full py-2.5 px-4 rounded-xl bg-[#241E19] hover:bg-black text-white text-xs font-bold transition shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
                 >
                   <Lock size={14} />
-                  <span>Guardar Nuevas Contraseñas</span>
+                  <span>Guardar Contraseñas</span>
                 </button>
               </div>
             </form>
           </div>
 
-          {/* Tabla de Productos con Controles de Reordenamiento */}
-          <div className="bg-white rounded-3xl border border-[#EAE2D8] shadow-xs overflow-hidden">
-            <div className="p-4 sm:p-5 border-b border-[#EAE2D8] bg-[#FAF7F2] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div>
-                <h3 className="font-serif text-lg font-bold text-[#241E19]">
-                  Control de Orden y Edición del Catálogo
-                </h3>
-                <p className="text-xs text-stone-500">
-                  Usa los botones <b>⬆️ Subir</b> o <b>⬇️ Bajar</b> para cambiar de puesto un producto en el catálogo.
-                </p>
-              </div>
-              <span className="text-xs bg-[#EAE2D8] px-3 py-1 rounded-full text-stone-700 font-semibold self-start sm:self-auto">
-                {products.length} productos ordenados
+          {/* Tabla de Productos con Botones de Reordenar ⬆️ ⬇️ */}
+          <div className="bg-white rounded-3xl border border-[#EAE2D8] overflow-hidden shadow-xs">
+            <div className="p-4 bg-[#FAF7F2] border-b border-[#EAE2D8] flex items-center justify-between">
+              <span className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                Catálogo Actual ({products.length} productos)
+              </span>
+              <span className="text-[11px] text-stone-500">
+                Usa las flechas para cambiar la posición que verá el cliente
               </span>
             </div>
 
@@ -1507,44 +1508,40 @@ export default function App() {
                 return (
                   <div
                     key={product.id}
-                    className="p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-[#FAF7F2]/50 transition"
+                    className="p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-stone-50/60 transition"
                   >
-                    {/* Botones de Reordenar (Subir / Bajar) */}
-                    <div className="flex items-center gap-3 shrink-0">
-                      <div className="flex flex-col items-center gap-1">
+                    <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                      {/* Botones de Reordenamiento */}
+                      <div className="flex flex-col gap-1 shrink-0">
                         <button
                           type="button"
                           disabled={isFirst}
                           onClick={() => handleMoveProduct(product.id, 'up')}
-                          className={`p-1.5 rounded-lg border transition ${
+                          className={`w-7 h-7 rounded-lg flex items-center justify-center transition border ${
                             isFirst
                               ? 'bg-stone-100 text-stone-300 border-stone-200 cursor-not-allowed'
-                              : 'bg-white text-stone-700 border-stone-300 hover:bg-[#2D5A27] hover:text-white hover:border-[#2D5A27] cursor-pointer shadow-2xs'
+                              : 'bg-white hover:bg-[#2D5A27] hover:text-white text-stone-700 border-stone-300 shadow-2xs cursor-pointer'
                           }`}
-                          title={isFirst ? 'Ya está en la primera posición' : 'Subir producto de posición ⬆️'}
+                          title={isFirst ? 'Primer producto' : 'Mover hacia arriba'}
                         >
                           <ArrowUp size={14} />
                         </button>
-                        <span className="text-[11px] font-mono font-bold text-stone-500">
-                          #{index + 1}
-                        </span>
                         <button
                           type="button"
                           disabled={isLast}
                           onClick={() => handleMoveProduct(product.id, 'down')}
-                          className={`p-1.5 rounded-lg border transition ${
+                          className={`w-7 h-7 rounded-lg flex items-center justify-center transition border ${
                             isLast
                               ? 'bg-stone-100 text-stone-300 border-stone-200 cursor-not-allowed'
-                              : 'bg-white text-stone-700 border-stone-300 hover:bg-[#2D5A27] hover:text-white hover:border-[#2D5A27] cursor-pointer shadow-2xs'
+                              : 'bg-white hover:bg-[#2D5A27] hover:text-white text-stone-700 border-stone-300 shadow-2xs cursor-pointer'
                           }`}
-                          title={isLast ? 'Ya está en la última posición' : 'Bajar producto de posición ⬇️'}
+                          title={isLast ? 'Último producto' : 'Mover hacia abajo'}
                         >
                           <ArrowDown size={14} />
                         </button>
                       </div>
 
-                      {/* Miniatura */}
-                      <div className="w-16 h-16 rounded-2xl bg-[#FAF0E6] overflow-hidden border border-[#EAE2D8] shrink-0 relative">
+                      <div className="w-14 h-14 rounded-2xl bg-[#FAF0E6] overflow-hidden shrink-0 border border-stone-200">
                         <img
                           src={product.imageUrl || FALLBACK_IMAGE_URL}
                           alt={product.name}
@@ -1556,18 +1553,17 @@ export default function App() {
                         />
                       </div>
 
-                      {/* Información */}
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <h4 className="font-serif font-bold text-base text-[#241E19] truncate">
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-stone-100 text-stone-600">
+                            #{index + 1} • {product.category}
+                          </span>
+                          <h4 className="font-serif text-base font-bold text-[#241E19]">
                             {product.name}
                           </h4>
-                          <span className="px-2 py-0.5 rounded-md bg-stone-100 text-stone-600 text-[10px] font-bold">
-                            {product.category}
-                          </span>
-                          {product.sizes && product.sizes.length > 0 && (
-                            <span className="px-2 py-0.5 rounded-md bg-emerald-50 text-[#2D5A27] text-[10px] font-semibold border border-emerald-200">
-                              {product.sizes.length} porciones
+                          {product.requiresNotice && (
+                            <span className="text-[10px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                              Anticipación 1 día
                             </span>
                           )}
                         </div>
@@ -1881,6 +1877,129 @@ export default function App() {
                     className="w-full pl-8 pr-4 py-2.5 rounded-xl bg-stone-50 border border-stone-300 focus:bg-white focus:outline-none focus:border-[#2D5A27] text-xs sm:text-sm font-bold text-[#2D5A27]"
                   />
                 </div>
+              </div>
+
+              {/* GESTOR DE PORCIONES / TAMAÑOS */}
+              <div className="p-4 bg-stone-50 rounded-2xl border border-stone-200 space-y-3">
+                <div className="flex items-center justify-between gap-2">
+                  <div>
+                    <label className="block text-xs font-bold text-stone-800">
+                      Gestor de Porciones / Tamaños (Opcional)
+                    </label>
+                    <p className="text-[11px] text-stone-500">
+                      Configura variantes con sus respectivos precios para que el cliente pueda elegirlas.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleAddSizeRow}
+                    className="px-3 py-1.5 rounded-xl bg-[#2D5A27] hover:bg-[#23481E] text-white text-xs font-bold flex items-center gap-1 transition cursor-pointer shadow-xs shrink-0"
+                  >
+                    <Plus size={13} />
+                    <span>Agregar Porción</span>
+                  </button>
+                </div>
+
+                {formSizes.length === 0 ? (
+                  <div className="p-3 rounded-xl bg-white border border-dashed border-stone-300 text-center space-y-1.5">
+                    <p className="text-xs text-stone-500">
+                      Sin variantes. Se venderá únicamente con el <b>Precio Base</b> ({formatPrice(formPrice || 0)}).
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const base = formPrice || 73000;
+                        setFormSizes([
+                          { portions: '5 porc', price: base },
+                          { portions: '8 porc', price: Math.round((base * 1.37) / 1000) * 1000 },
+                          { portions: '12 porc', price: Math.round((base * 1.64) / 1000) * 1000 },
+                        ]);
+                      }}
+                      className="text-xs font-bold text-[#2D5A27] hover:underline cursor-pointer"
+                    >
+                      + Cargar plantilla rápida de torta (5, 8 y 12 porc)
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {formSizes.map((sz, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-center gap-2 bg-white p-2.5 rounded-xl border border-stone-200 shadow-xs"
+                      >
+                        <div className="flex-1">
+                          <span className="text-[10px] font-bold text-stone-500 block mb-0.5">
+                            Nombre de porción / tamaño
+                          </span>
+                          <input
+                            type="text"
+                            placeholder="Ej: 5 porc, Tamaño personal..."
+                            value={sz.portions}
+                            onChange={(e) => handleUpdateSizeRow(idx, 'portions', e.target.value)}
+                            className="w-full px-2.5 py-1.5 rounded-lg bg-stone-50 border border-stone-300 text-xs font-semibold focus:bg-white focus:outline-none focus:border-[#2D5A27]"
+                          />
+                        </div>
+
+                        <div className="w-28 sm:w-36">
+                          <span className="text-[10px] font-bold text-stone-500 block mb-0.5">
+                            Precio (COP)
+                          </span>
+                          <div className="relative">
+                            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-stone-400 text-xs font-bold">
+                              $
+                            </span>
+                            <input
+                              type="number"
+                              min={0}
+                              step={1000}
+                              placeholder="73000"
+                              value={sz.price}
+                              onChange={(e) => handleUpdateSizeRow(idx, 'price', Number(e.target.value))}
+                              className="w-full pl-6 pr-2 py-1.5 rounded-lg bg-stone-50 border border-stone-300 text-xs font-bold text-[#2D5A27] focus:bg-white focus:outline-none focus:border-[#2D5A27]"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="pt-3.5 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveSizeRow(idx)}
+                            className="p-1.5 rounded-lg text-stone-400 hover:text-red-600 hover:bg-red-50 transition cursor-pointer"
+                            title="Eliminar porción"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+
+                    <div className="flex items-center gap-1.5 pt-1 flex-wrap">
+                      <span className="text-[10px] text-stone-400 font-semibold">Atajos:</span>
+                      {[
+                        '3 porc',
+                        '5 porc',
+                        '8 porc',
+                        '12 porc',
+                        '18 porc',
+                        '25 porc',
+                        'Tamaño personal',
+                        'Caja x2 Unidades',
+                        'Caja x4 Unidades',
+                      ].map((quick) => (
+                        <button
+                          key={quick}
+                          type="button"
+                          onClick={() => {
+                            setFormSizes((prev) => [...prev, { portions: quick, price: formPrice || 50000 }]);
+                          }}
+                          className="text-[10px] px-2 py-0.5 rounded-md bg-stone-200/70 hover:bg-emerald-100 hover:text-[#2D5A27] text-stone-700 transition cursor-pointer font-medium"
+                        >
+                          + {quick}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div>
