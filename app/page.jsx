@@ -33,16 +33,23 @@ import {
 // ==========================================
 const WHATSAPP_PHONE_NUMBER = '573174246835';
 const FALLBACK_IMAGE_URL = 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=500&auto=format&fit=crop&q=60';
-const DEFAULT_IMAGE_FALLBACK = '/torta-moka.jpg';
+const DEFAULT_IMAGE_FALLBACK = '/torta-moka.png';
 
 const ADMIN_PASSWORD_DEFAULT = '1234';
 const PANADERO_PASSWORD_DEFAULT = '5678';
 
-export const CATEGORIES = ['Tortas', 'Detalles', 'Pan', 'Postres', 'Mercadito'];
+export const CATEGORIES = [
+  'Tortas Saludables',
+  'Catalogo Detalles',
+  'Pan Saludable',
+  'Postres Saludables',
+  'Mercadito'
+];
+
 export const DIETARY_TAGS = ['Todas', 'Keto', 'Sin Gluten', 'Sin Azúcar', 'Sin Lácteos', 'Entrega Hoy', 'Con Anticipación'];
 
 export const ensureSlash = (url) => {
-  if (!url) return '/torta-moka.jpg';
+  if (!url) return '/torta-moka.png';
   const trimmed = url.trim();
   if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed;
   return trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
@@ -56,7 +63,7 @@ export const formatPrice = (amount) => {
   }).format(amount || 0);
 };
 
-// Helper constructor compacto de productos
+// Constructor compacto de productos
 const p = (id, name, category, price, description, imageUrl, features, requiresNotice, sizes) => ({
   id,
   name,
@@ -82,91 +89,88 @@ const p = (id, name, category, price, description, imageUrl, features, requiresN
 // 2. CATÁLOGO COMPLETO INICIAL (initialProducts)
 // ==========================================
 export const initialProducts = [
-  // --- LAS 29 TORTAS SALUDABLES ---
-  p('torta-1-arequipe', 'Torta de Arequipe', 'Tortas', 63000, 'Bizcocho ultra suave sin azúcar refinada cubierto con arequipe artesanal saludable y toques de frutos secos tostados.', '/torta-arequipe.png', ['Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['5 porc', 63000], ['8 porc', 87000], ['12 porc', 111000], ['18 porc', 156000], ['25 porc', 197000]]),
-  p('torta-2-moka', 'Torta Moka', 'Tortas', 84000, 'Esponjoso bizcocho con café orgánico santandereano, cacao puro al 70% y suave crema chantilly sin azúcar.', '/torta-moka.jpg', ['Sin Azúcar', 'Sin Gluten', 'Keto', 'Con Anticipación'], 1, [['5 porc', 84000], ['8 porc', 123000], ['12 porc', 155000], ['18 porc', 217000]]),
-  p('torta-3-pistacho', 'Torta Pistacho', 'Tortas', 94000, 'Bizcocho húmedo de harina de almendras y pasta 100% pura de pistachos tostados con frosting fit de queso ligero.', '/torta-pistacho.jpg', ['Keto', 'Sin Gluten', 'Sin Azúcar', 'Con Anticipación'], 1, [['5 porc', 94000], ['8 porc', 141000], ['12 porc', 197000], ['18 porc', 274000], ['25 porc', 353000]]),
-  p('torta-4-choco-arequipe', 'Torta Choco-arequipe', 'Tortas', 60000, 'Combinación perfecta de bizcocho húmedo de chocolate oscuro y relleno abundante de arequipe artesanal sin azúcar.', '/choco-arequipe.jpg', ['Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['3 porc', 60000], ['5 porc', 84000], ['8 porc', 123000], ['12 porc', 155000]]),
-  p('torta-5-luna-almendras', 'Luna de Almendras', 'Tortas', 73000, 'Torta suave a base de harina de almendras seleccionadas, aromatizada con vainilla natural y almendras laminadas crujientes.', '/luna-almendras.jpg', ['Keto', 'Sin Gluten', 'Sin Azúcar', 'Con Anticipación'], 1, [['5 porc', 73000], ['8 porc', 108000], ['12 porc', 142000], ['18 porc', 189000], ['25 porc', 250000]]),
-  p('torta-6-victoria', 'Torta Victoria', 'Tortas', 84000, 'Clásica torta estilo británico esponjosa con mermelada casera de fresas frescas sin azúcar y crema chantilly fit.', '/torta-victoria.png', ['Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['5 porc', 84000], ['8 porc', 110000], ['12 porc', 141000], ['18 porc', 192000], ['25 porc', 248000]]),
-  p('torta-7-mousse-cake', 'Mousse Cake', 'Tortas', 73000, 'Capas sedosas de mousse de chocolate amargo al 70% sobre una base crocante de frutos secos y cacao puro.', '/mousse-cake.png', ['Keto', 'Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['5 porc', 73000], ['8 porc', 100000], ['12 porc', 120000]]),
-  p('torta-8-yogurt', 'Torta de Yogurt', 'Tortas', 84000, 'Textura esponjosa enriquecida con yogurt griego artesanal probiótico y un sutil toque cítrico natural.', '/torta-yogurt.png', ['Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['5 porc', 84000], ['8 porc', 123000], ['12 porc', 155000], ['18 porc', 217000], ['25 porc', 270000]]),
-  p('torta-9-red-velvet', 'Capas Red Velvet', 'Tortas', 85000, 'Inconfundible bizcocho aterciopelado color carmesí con cacao y capas de frosting suave de queso crema sin azúcar.', '/capas-red-velvet.png', ['Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['5 porc', 85000], ['8 porc', 124000], ['12 porc', 156000], ['18 porc', 218000]]),
-  p('torta-10-tres-leches-vainilla', '3 Leches Vainilla', 'Tortas', 84000, 'Bizcocho súper húmedo bañado en nuestra exclusiva infusión de tres leches deslactosadas sin azúcar con merengue dorado.', '/tres-leches-vainilla.png', ['Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['5 porc', 84000], ['8 porc', 123000], ['12 porc', 155000], ['18 porc', 217000]]),
-  p('torta-11-tres-leches-chocolate', '3 Leches Chocolate', 'Tortas', 84000, 'Versión chocolatosa de tres leches saludables con cacao puro, ultra húmeda, decorada con virutas de chocolate oscuro.', '/tres-leches-chocolate.png', ['Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['5 porc', 84000], ['8 porc', 123000], ['12 porc', 155000], ['18 porc', 217000]]),
-  p('torta-12-marquesa-brownie', 'Marquesa de Brownie', 'Tortas', 75000, 'Postre frío por capas alternadas de brownie melcochudo de chocolate y crema chantilly ligera sin azúcar refinada.', '/marquesa-brownie.png', ['Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['5 porc', 75000], ['8 porc', 115000], ['12 porc', 146000], ['18 porc', 205000], ['24 porc', 270000]]),
-  p('torta-13-zanahoria', 'Torta Zanahoria', 'Tortas', 75000, 'Deliciosa torta húmeda con zanahoria fresca rallada, nueces de nogal crocantes, canela aromática y frosting de queso suave.', '/torta-zanahoria.png', ['Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['5 porc', 75000], ['8 porc', 108000], ['12 porc', 141000], ['18 porc', 188000], ['25 porc', 249000]]),
-  p('torta-14-sin-lacteos', 'Sin Lácteos', 'Tortas', 86000, 'Formulación 100% libre de caseína y lactosa, elaborada con leche de coco y almendras, suave y esponjosa.', '/torta-sin-lacteos.png', ['Sin Lácteos', 'Sin Gluten', 'Sin Azúcar', 'Con Anticipación'], 1, [['5 porc', 86000], ['8 porc', 119000], ['12 porc', 135000], ['18 porc', 193000]]),
-  p('torta-15-volcan', 'Torta Volcán', 'Tortas', 56000, 'Espectacular centro fluido de chocolate tibio que fluye al cortar. Perfecta para amantes del chocolate intenso.', '/torta-volcan.png', ['Keto', 'Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['2-3 porc', 56000], ['5 porc', 74000], ['8 porc', 110000], ['12 porc', 130000], ['18 porc', 189000]]),
-  p('torta-16-tres-sabores', '3 Sabores', 'Tortas', 134000, 'Trilogía especial que combina bizcocho de chocolate, vainilla y frutos rojos en una sola presentación gourmet.', '/torta-tres-sabores.png', ['Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['8 porc', 134000], ['12 porc', 169000], ['18 porc', 223000], ['25 porc', 283000]]),
-  p('torta-17-chocoluxe', 'Torta Chocoluxe', 'Tortas', 94000, 'Nuestra creación más indulgente con tres texturas de chocolate belga sin azúcar, trufas fit y ganache brillante.', '/torta-chocoluxe.png', ['Keto', 'Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['5 porc', 94000], ['8 porc', 141000], ['12 porc', 197000], ['18 porc', 274000], ['25 porc', 353000]]),
-  p('torta-18-maria-luisa', 'María Luisa', 'Tortas', 84000, 'Tradicional torta rellena de abundante arequipe artesanal y dulce de mora casero sin azúcar refinada.', '/torta-maria-luisa.png', ['Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['5 porc', 84000], ['8 porc', 123000], ['12 porc', 155000], ['18 porc', 217000], ['25 porc', 270000]]),
-  p('torta-19-matilda', 'Matilda', 'Tortas', 134000, 'Inspirada en el clásico cinéfilo: capas densas y ultra húmedas de puro fudge de chocolate oscuro sin remordimientos.', '/torta-matilda.png', ['Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['8 porc', 134000], ['12 porc', 169000], ['18 porc', 223000], ['25 porc', 283000]]),
-  p('torta-20-vasca-frutos-rojos', 'Torta Vasca Frutos Rojos', 'Tortas', 58000, 'Cheesecake estilo vasco horneado a alta temperatura, interior cremoso y compota de frutos rojos de la casa.', '/torta-vasca-frutos-rojos.png', ['Keto', 'Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['3 porc', 58000], ['6 porc', 101000], ['8 porc', 133000]]),
-  p('torta-21-vasca-frutos-amarillos', 'Torta Vasca Frutos Amarillos', 'Tortas', 58000, 'Cremosa tarta vasca de queso con coulis tropical de maracuyá, mango y uchuvas 100% natural sin azúcar.', '/torta-vasca-frutos-amarillos.png', ['Keto', 'Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['3 porc', 58000], ['6 porc', 101000], ['8 porc', 133000]]),
-  p('torta-22-vasca-pistacho', 'Tortas Vasca Pistacho', 'Tortas', 62000, 'Cheesecake quemado vasco con pasta pura de pistachos tostados importados y textura aterciopelada inolvidable.', '/torta-vasca-pistacho.png', ['Keto', 'Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['3 porc', 62000], ['6 porc', 104000], ['8 porc', 139000]]),
-  p('torta-23-primavera', 'Torta Primavera', 'Tortas', 85000, 'Fresca y ligera, elaborada con compota de fresas y arándanos frescos, crema ligera de limón y flores comestibles.', '/torta-primavera.png', ['Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['5 porc', 85000], ['8 porc', 124000], ['12 porc', 156000], ['18 porc', 218000], ['25 porc', 271000]]),
-  p('torta-24-guanabana-yogurt', 'Torta de Guanábana y Yogurt Griego', 'Tortas', 55000, 'Pulpa natural de guanábana seleccionada combinada con la suavidad del yogurt griego deslactosado y bizcocho ligero.', '/torta-guanabana-yogurt.png', ['Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['8 porc', 55000]]),
-  p('torta-25-chocolate-amargo', 'Torta de Chocolate Amargo 70%', 'Tortas', 52000, 'Bizcocho intenso para paladares refinados, elaborado con cacao puro al 70%, sin azúcar ni harinas refinadas.', '/torta-chocolate-amargo.png', ['Keto', 'Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['8 porc', 52000]]),
-  p('torta-26-selva-negra', 'Torta Selva Negra Fit', 'Tortas', 84000, 'Capas de bizcocho esponjoso de cacao, cerezas maceradas sin azúcar y suave crema chantilly de almendras.', '/torta-selva-negra.png', ['Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['5 porc', 84000], ['8 porc', 123000], ['12 porc', 155000], ['18 porc', 217000]]),
-  p('torta-27-limon-almendras', 'Torta Keto de Limón & Almendras', 'Tortas', 78000, 'Sabor cítrico vibrante de limones naturales con base de almendras y cobertura de glaseado keto sin calorías.', '/torta-limon-almendras.png', ['Keto', 'Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['5 porc', 78000], ['8 porc', 112000], ['12 porc', 145000]]),
-  p('torta-28-naranja-amapola', 'Torta Naranja & Semillas de Amapola', 'Tortas', 72000, 'Aroma cítrico de naranjas valencianas recién exprimidas con textura crujiente de semillas de amapola seleccionadas.', '/torta-naranja-amapola.png', ['Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['5 porc', 72000], ['8 porc', 105000], ['12 porc', 138000]]),
-  p('torta-29-tres-leches-arequipe', 'Torta Tres Leches Arequipe', 'Tortas', 86000, 'La combinación soñada: tres leches ultra jugosa empapada con arequipe artesanal saludable y canela.', '/torta-tres-leches-arequipe.png', ['Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['5 porc', 86000], ['8 porc', 126000], ['12 porc', 158000], ['18 porc', 220000]]),
+  // --- TORTAS SALUDABLES (21 TORTAS) ---
+  p('ts-1-moka', 'Torta Moka', 'Tortas Saludables', 84000, 'Esponjoso bizcocho con café orgánico santandereano, cacao puro al 70% y suave crema chantilly sin azúcar.', '/torta-moka.png', ['Sin Azúcar', 'Sin Gluten', 'Keto', 'Con Anticipación'], 1, [['5 porc', 84000], ['8 porc', 123000], ['12 porc', 155000], ['18 porc', 217000]]),
+  p('ts-2-arequipe', 'Torta de Arequipe', 'Tortas Saludables', 63000, 'Bizcocho ultra suave sin azúcar refinada cubierto con arequipe artesanal saludable y toques de frutos secos tostados.', '/torta-de-arequipe.png', ['Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['5 porc', 63000], ['8 porc', 87000], ['12 porc', 111000], ['18 porc', 156000], ['25 porc', 197000]]),
+  p('ts-3-choco-arequipe', 'Torta Choco-Arequipe', 'Tortas Saludables', 60000, 'Combinación perfecta de bizcocho húmedo de chocolate oscuro y relleno abundante de arequipe artesanal sin azúcar.', '/torta-chocoarequipe.png', ['Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['3 porc', 60000], ['5 porc', 84000], ['8 porc', 123000], ['12 porc', 155000]]),
+  p('ts-4-pistacho', 'Torta Pistacho', 'Tortas Saludables', 94000, 'Bizcocho húmedo de harina de almendras y pasta 100% pura de pistachos tostados con frosting fit de queso ligero.', '/torta-pistacho.png', ['Keto', 'Sin Gluten', 'Sin Azúcar', 'Con Anticipación'], 1, [['5 porc', 94000], ['8 porc', 141000], ['12 porc', 197000], ['18 porc', 274000], ['25 porc', 353000]]),
+  p('ts-5-vasca-pistacho', 'Torta Vasca Pistacho', 'Tortas Saludables', 62000, 'Cheesecake quemado vasco con pasta pura de pistachos tostados importados y textura aterciopelada inolvidable.', '/tortas-vasca-pistacho.png', ['Keto', 'Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['3 porc', 62000], ['6 porc', 104000], ['8 porc', 139000]]),
+  p('ts-6-primavera', 'Torta Primavera', 'Tortas Saludables', 85000, 'Fresca y ligera, elaborada con compota de fresas y arándanos frescos, crema ligera de limón y flores comestibles.', '/torta-primavera.jpeg', ['Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['5 porc', 85000], ['8 porc', 124000], ['12 porc', 156000], ['18 porc', 218000], ['25 porc', 271000]]),
+  p('ts-7-vasca-frutos', 'Torta Vasca Frutos Rojos/Amarillos', 'Tortas Saludables', 58000, 'Cheesecake estilo vasco horneado a alta temperatura, interior cremoso con coulis natural de frutos rojos o frutos amarillos.', '/torta-vasca-frutos-rojos-o-amarillos.jpeg', ['Keto', 'Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['3 porc', 58000], ['6 porc', 101000], ['8 porc', 133000]]),
+  p('ts-8-vino', 'Torta de Vino', 'Tortas Saludables', 68000, 'Maceración tradicional artesanal con frutos secos, especias aromáticas y vino sin alcohol añadido sin azúcar.', '/torta-de-vino.jpeg', ['Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['5 porc', 68000], ['8 porc', 95000], ['12 porc', 128000]]),
+  p('ts-9-yogurt', 'Torta de Yogurt', 'Tortas Saludables', 84000, 'Textura esponjosa enriquecida con yogurt griego artesanal probiótico y un sutil toque cítrico natural.', '/torta-de-yogurt.png', ['Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['5 porc', 84000], ['8 porc', 123000], ['12 porc', 155000], ['18 porc', 217000], ['25 porc', 270000]]),
+  p('ts-10-versalles', 'Torta Versalles', 'Tortas Saludables', 88000, 'Elegante preparación gourmet con crema diplomática ligera sin azúcar y crujientes láminas de frutos secos.', '/torta-versalles.png', ['Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['5 porc', 88000], ['8 porc', 128000], ['12 porc', 162000], ['18 porc', 225000]]),
+  p('ts-11-victoria', 'Torta Victoria', 'Tortas Saludables', 84000, 'Clásica torta estilo británico esponjosa con mermelada casera de fresas frescas sin azúcar y crema chantilly fit.', '/torta-victoria.png', ['Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['5 porc', 84000], ['8 porc', 110000], ['12 porc', 141000], ['18 porc', 192000], ['25 porc', 248000]]),
+  p('ts-12-volcan', 'Torta Volcán', 'Tortas Saludables', 56000, 'Espectacular centro fluido de chocolate tibio que fluye al cortar. Perfecta para amantes del chocolate intenso.', '/torta-volcan.png', ['Keto', 'Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['2-3 porc', 56000], ['5 porc', 74000], ['8 porc', 110000], ['12 porc', 130000], ['18 porc', 189000]]),
+  p('ts-13-zanahoria', 'Torta Zanahoria', 'Tortas Saludables', 75000, 'Deliciosa torta húmeda con zanahoria fresca rallada, nueces de nogal crocantes, canela aromática y frosting de queso suave.', '/torta-zanahoria.png', ['Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['5 porc', 75000], ['8 porc', 108000], ['12 porc', 141000], ['18 porc', 188000], ['25 porc', 249000]]),
+  p('ts-14-chocoluxe', 'Torta Chocoluxe', 'Tortas Saludables', 94000, 'Nuestra creación más indulgente con tres texturas de chocolate belga sin azúcar, trufas fit y ganache brillante.', '/torta-chocoluxe.png', ['Keto', 'Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['5 porc', 94000], ['8 porc', 141000], ['12 porc', 197000], ['18 porc', 274000], ['25 porc', 353000]]),
+  p('ts-15-matilda', 'Torta Matilda', 'Tortas Saludables', 134000, 'Inspirada en el clásico cinéfilo: capas densas y ultra húmedas de puro fudge de chocolate oscuro sin remordimientos.', '/matilda.jpeg', ['Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['8 porc', 134000], ['12 porc', 169000], ['18 porc', 223000], ['25 porc', 283000]]),
+  p('ts-16-luna-almendras', 'Luna de Almendras', 'Tortas Saludables', 73000, 'Torta suave a base de harina de almendras seleccionadas, aromatizada con vainilla natural y almendras laminadas crujientes.', '/luna-de-almendras.png', ['Keto', 'Sin Gluten', 'Sin Azúcar', 'Con Anticipación'], 1, [['5 porc', 73000], ['8 porc', 108000], ['12 porc', 142000], ['18 porc', 189000], ['25 porc', 250000]]),
+  p('ts-17-maria-luisa', 'María Luisa', 'Tortas Saludables', 84000, 'Tradicional torta rellena de abundante arequipe artesanal y dulce de mora casero sin azúcar refinada.', '/maria-luisa.png', ['Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['5 porc', 84000], ['8 porc', 123000], ['12 porc', 155000], ['18 porc', 217000], ['25 porc', 270000]]),
+  p('ts-18-guanabana', 'Guanábana', 'Tortas Saludables', 55000, 'Pulpa natural de guanábana seleccionada combinada con la suavidad del yogurt griego deslactosado y bizcocho ligero.', '/guanabana.png', ['Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['8 porc', 55000], ['12 porc', 85000]]),
+  p('ts-19-quebec', 'Quebec', 'Tortas Saludables', 88000, 'Torta inspirada en sabores canadienses con toque de nuez pecana tostada, canela y glaseado fit.', '/quebec.png', ['Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['5 porc', 88000], ['8 porc', 125000], ['12 porc', 160000]]),
+  p('ts-20-sin-lacteos', 'Sin Lácteos', 'Tortas Saludables', 86000, 'Formulación 100% libre de caseína y lactosa, elaborada con leche de coco y almendras, suave y esponjosa.', '/sin-lacteos.png', ['Sin Lácteos', 'Sin Gluten', 'Sin Azúcar', 'Con Anticipación'], 1, [['5 porc', 86000], ['8 porc', 119000], ['12 porc', 135000], ['18 porc', 193000]]),
+  p('ts-21-red-velvet', 'Capas Red Velvet', 'Tortas Saludables', 85000, 'Inconfundible bizcocho aterciopelado color carmesí con cacao y capas de frosting suave de queso crema sin azúcar.', '/capas-red-velvet.png', ['Sin Azúcar', 'Sin Gluten', 'Con Anticipación'], 1, [['5 porc', 85000], ['8 porc', 124000], ['12 porc', 156000], ['18 porc', 218000]]),
 
-  // --- CATÁLOGO DE DETALLES ---
-  p('det-1-mini-torta-corazon', 'Mini Torta Corazón', 'Detalles', 39000, 'Hermosa mini torta personal con mensaje personalizado en forma de corazón y flores naturales.', '/mini-torta-corazon.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
-  p('det-2-mini-box', 'Mini Box', 'Detalles', 30000, 'Caja de regalo sorpresa con delicias individuales saludables de nuestra pastelería.', '/mini-box.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
-  p('det-3-guacal-premium', 'Guacal Premium', 'Detalles', 98000, 'Guacal de madera artesanal con surtido completo de postres fit, mini torta y bouquet floral.', '/guacal-premium.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
-  p('det-4-guacal-amor', 'Guacal Amor', 'Detalles', 88000, 'Arreglo especial en madera rústica con postres saludables, brownie melcochudo y alfajor.', '/guacal-amor.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
-  p('det-5-brownies-x2', 'Brownies x2', 'Detalles', 20000, 'Dúo de brownies saludables con nueces crocantes y chocolate al 70%, empacados para regalo.', '/brownies-x2.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
-  p('det-6-copa-saludable', 'Copa Saludable', 'Detalles', 55000, 'Copa de vidrio con capas de torta, chantilly sin azúcar, fresas frescas y lazo decorativo.', '/copa-saludable.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
-  p('det-7-guacal-te-cuido', 'Guacal te cuido', 'Detalles', 52000, 'Regalo especial pensado en el bienestar con mugcake esponjoso, mermelada y galletas.', '/guacal-te-cuido.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
-  p('det-8-guacal-coquette', 'Guacal Coquette', 'Detalles', 65000, 'Presentación con detalles en cinta pastel, mini cake decorado y alfajores fit.', '/guacal-coquette.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
-  p('det-9-box-duo', 'Box Duo', 'Detalles', 20000, 'Cajita de regalo con 2 postres individuales a elección para sorprender en cualquier momento.', '/box-duo.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
-  p('det-10-mini-brownies-x4', 'Mini brownies x4', 'Detalles', 24000, 'Cuatro bocaditos densos de chocolate con nueces tostadas en caja de presentación especial.', '/mini-brownies-x4.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
-  p('det-11-postre-ilusion', 'Postre Ilusión', 'Detalles', 19000, 'Vaso postre individual con capas de galleta, crema chantilly fit y compota de frutos rojos.', '/postre-ilusion.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
-  p('det-12-mini-cake-naranja', 'Mini cake Naranja', 'Detalles', 28000, 'Mini torta personal de naranja natural empacada para regalo con tarjeta y lazo.', '/mini-cake-naranja.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
-  p('det-13-mini-cake-love', 'Mini cake Love', 'Detalles', 28000, 'Torta individual de chocolate con cubierta de arequipe saludable y diseño festivo.', '/mini-cake-love.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
-  p('det-14-mini-marquesa-brownie', 'Mini Marquesa de Brownie', 'Detalles', 35000, 'Delicioso postre frío en caja de acetato con capas cremosas y virutas de chocolate.', '/mini-marquesa-brownie.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
+  // --- CATALOGO DETALLES (14 DETALLES) ---
+  p('det-1-box-duo', 'Box Dúo', 'Catalogo Detalles', 20000, 'Cajita de regalo con 2 postres individuales a elección para sorprender en cualquier momento.', '/box-duo.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
+  p('det-2-guacal-amor', 'Guacal Amor', 'Catalogo Detalles', 88000, 'Arreglo especial en madera rústica con postres saludables, brownie melcochudo y alfajor.', '/guacal-amor.jpeg', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
+  p('det-3-guacal-coquette', 'Guacal Coquette', 'Catalogo Detalles', 65000, 'Presentación con detalles en cinta pastel, mini cake decorado y alfajores fit.', '/guacal-coquette.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
+  p('det-4-guacal-premium', 'Guacal Premium', 'Catalogo Detalles', 98000, 'Guacal de madera artesanal con surtido completo de postres fit, mini torta y bouquet floral.', '/guacal-premium.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
+  p('det-5-guacal-te-cuido', 'Guacal Te Cuido', 'Catalogo Detalles', 52000, 'Regalo especial pensado en el bienestar con mugcake esponjoso, mermelada y galletas.', '/guacal-te-cuido.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
+  p('det-6-mini-box', 'Mini Box', 'Catalogo Detalles', 30000, 'Caja de regalo sorpresa con delicias individuales saludables de nuestra pastelería.', '/mini-box.jpeg', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
+  p('det-7-mini-brownies-x4', 'Mini Brownies x4', 'Catalogo Detalles', 24000, 'Cuatro bocaditos densos de chocolate con nueces tostadas en caja de presentación especial.', '/mini-brownies-x4.jpeg', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
+  p('det-8-mini-cake-love', 'Mini Cake Love', 'Catalogo Detalles', 28000, 'Torta individual de chocolate con cubierta de arequipe saludable y diseño festivo.', '/mini-cake-love.jpeg', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
+  p('det-9-mini-cake-naranja', 'Mini Cake Naranja', 'Catalogo Detalles', 28000, 'Mini torta personal de naranja natural empacada para regalo con tarjeta y lazo.', '/mini-cake-naranja.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
+  p('det-10-mini-torta-corazon', 'Mini Torta Corazón', 'Catalogo Detalles', 39000, 'Hermosa mini torta personal con mensaje personalizado en forma de corazón y flores naturales.', '/mini-torta-corazon.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
+  p('det-11-caja-compartir', 'Caja Compartir', 'Catalogo Detalles', 50000, 'Super caja de degustación con canastillas de yuca, mini blondies, fresas y repollas rellenas.', '/caja-compartir.png', ['Sin Gluten', 'Sin Azúcar', 'Entrega Hoy'], 0, 0),
+  p('det-12-mini-blondies', 'Mini Blondies', 'Catalogo Detalles', 23000, 'Suaves cuadritos de vainilla natural con chispas de chocolate blanco sin azúcar.', '/mini-blondies.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, [['Caja x4', 23000], ['Caja x8', 44000]]),
+  p('det-13-mini-cookies', 'Mini Cookies', 'Catalogo Detalles', 7000, 'Deliciosas y diminutas galletitas de vainilla ideales para café o lonchera.', '/mini-cookies.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
+  p('det-14-mugcake', 'Mugcake', 'Catalogo Detalles', 15000, 'Bizcochito fit individual en taza listo para disfrutar. Delicioso, ligero y sin remordimientos.', '/mugcake.png', ['Keto', 'Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, [['Naranja & Amapola', 15000], ['Red Velvet', 15000], ['Yogurt Griego', 15000], ['Chocolate 70%', 15000]]),
 
-  // --- PAN SALUDABLE (100% LIBRE DE GLUTEN) ---
-  p('pan-1-ajo-hierbas', 'Pan Ajo y finas hierbas (Salado, 250g)', 'Pan', 16000, 'Pan artesanal horneado con ajo rostizado, orégano y romero. Masa libre de gluten suave y aromática.', '/pan-ajo-hierbas.png', ['Sin Gluten', 'Sin Azúcar', 'Con Anticipación'], 1, 0),
-  p('pan-2-bocadillo-parmesano', 'Pan Bocadillo y Queso Parmesano (Dulce, 4 und)', 'Pan', 13000, 'Cuatro pancitos con relleno de bocadillo sin azúcar añadida y toque saladito de parmesano madurado.', '/pan-bocadillo-parmesano.png', ['Sin Gluten', 'Sin Azúcar', 'Con Anticipación'], 1, 0),
-  p('pan-3-semillas-chia', 'Pan Semillas de chía y ajonjolí (Dulce, 4 und)', 'Pan', 11000, 'Pancitos suaves ricos en fibra natural y omega-3 vegetal, endulzados naturalmente.', '/pan-semillas-chia.png', ['Sin Gluten', 'Sin Azúcar', 'Keto', 'Con Anticipación'], 1, 0),
-  p('pan-4-rollitos-cuajada', 'Pan Rollitos de Cuajada y Nuez (Dulce, 4 und)', 'Pan', 14000, 'Rollitos tiernos con cuajada fresca campesina de la región y nueces picadas crujientes.', '/pan-rollitos-cuajada.png', ['Sin Gluten', 'Sin Azúcar', 'Con Anticipación'], 1, 0),
-  p('pan-5-oregano', 'Pan de Orégano (Salado, 4 und)', 'Pan', 11000, 'Panecillos salados ideales para acompañar comidas, tostadas o sándwiches ligeros.', '/pan-oregano.png', ['Sin Gluten', 'Sin Azúcar', 'Con Anticipación'], 1, 0),
-  p('pan-6-queso-parmesano', 'Pan de Queso Parmesano (Salado, 4 und)', 'Pan', 14000, 'Corteza dorada con queso parmesano gratinado e interior esponjoso libre de harinas refinadas.', '/pan-queso-parmesano.png', ['Sin Gluten', 'Sin Azúcar', 'Con Anticipación'], 1, 0),
-  p('pan-7-ajonjoli', 'Pan con Ajonjolí (Dulce, 4 und)', 'Pan', 15000, 'Miga suave con semillas de ajonjolí tostadas que aportan un sabor a nuez característico.', '/pan-ajonjoli.png', ['Sin Gluten', 'Sin Azúcar', 'Con Anticipación'], 1, 0),
-  p('pan-8-rollitos-chitaga', 'Pan Rollitos de Queso Chitagá (Dulce, 4 und)', 'Pan', 14000, 'Receta tradicional santandereana adaptada 100% saludable con queso típico de Chitagá.', '/pan-rollitos-chitaga.png', ['Sin Gluten', 'Sin Azúcar', 'Con Anticipación'], 1, 0),
-  p('pan-9-queso-chitaga-300g', 'Pan con Queso Chitagá (Dulce, 300g)', 'Pan', 18000, 'Hogaza familiar rellena con generosas capas de queso Chitagá suave y dulcecito.', '/pan-queso-chitaga.png', ['Sin Gluten', 'Sin Azúcar', 'Con Anticipación'], 1, 0),
-  p('pan-10-baguette', 'Pan Baguette (Salado, 250g)', 'Pan', 15000, 'Baguette artesanal con costra crocante y miga aireada sin trigo ni gluten, perfecta para bruschettas.', '/pan-baguette.png', ['Sin Gluten', 'Sin Azúcar', 'Con Anticipación'], 1, 0),
-  p('pan-11-queso-campesino', 'Pan con Queso Campesino (Dulce, 350g)', 'Pan', 19000, 'Pan grande para compartir en familia con queso campesino fresco bajo en grasa.', '/pan-queso-campesino.png', ['Sin Gluten', 'Sin Azúcar', 'Con Anticipación'], 1, 0),
-  p('pan-12-rustico', 'Pan Rústico (Salado, 300g)', 'Pan', 17000, 'Hogaza campestre horneada a la piedra con harinas integrales de semillas y quinoa.', '/pan-rustico.png', ['Sin Gluten', 'Sin Azúcar', 'Con Anticipación'], 1, 0),
-  p('pan-13-roscon-relleno', 'Roscón Relleno (Dulce, arequipe, rinde 4 porc)', 'Pan', 30000, 'Roscón tradicional relleno de abundante arequipe sin azúcar y azúcar glass fit por encima.', '/roscon-relleno.png', ['Sin Gluten', 'Sin Azúcar', 'Con Anticipación'], 1, 0),
-  p('pan-14-focaccia', 'Focaccia (Salado, 300g, rinde 5-6 porc)', 'Pan', 36000, 'Focaccia italiana con aceite de oliva virgen extra, tomates cherry confitados y romero fresco.', '/focaccia.png', ['Sin Gluten', 'Sin Azúcar', 'Con Anticipación'], 1, 0),
+  // --- POSTRES SALUDABLES (21 POSTRES) ---
+  p('pos-1-tres-leches-mermelada', '3 Leches con Mermelada', 'Postres Saludables', 17000, 'Tres leches refrescante coronado con mermelada artesanal de frutos del bosque sin azúcar.', '/3-leches-con-mermelada.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, [['Frutos Rojos', 17000], ['Frutos Amarillos', 17000]]),
+  p('pos-2-tres-leches-arequipe', '3 Leches de Arequipe', 'Postres Saludables', 17000, 'Vaso individual de bizcocho esponjoso bañado en tres leches deslactosadas y arequipe fit.', '/3-leches-de-arequipe.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
+  p('pos-3-tres-leches-chocolate', '3 Leches Chocolate', 'Postres Saludables', 18000, 'Versión chocolatosa de tres leches saludables con cacao puro, ultra húmeda con virutas de chocolate oscuro.', '/3-leches-chocolate.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, [['Vaso Personal', 18000], ['Familiar 5 porc', 84000]]),
+  p('pos-4-tres-leches-vainilla', '3 Leches Vainilla', 'Postres Saludables', 18000, 'Bizcocho súper húmedo bañado en nuestra exclusiva infusión de tres leches deslactosadas sin azúcar con merengue dorado.', '/3-leches-vainilla.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, [['Vaso Personal', 18000], ['Familiar 5 porc', 84000]]),
+  p('pos-5-tres-sabores', '3 Sabores', 'Postres Saludables', 19000, 'Trilogía especial que combina bizcocho de chocolate, vainilla y frutos rojos en una sola presentación gourmet.', '/3-sabores.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, [['Vaso Trilogía', 19000], ['Familiar 8 porc', 134000]]),
+  p('pos-6-red-velvet-3-leches', 'Red Velvet 3 Leches', 'Postres Saludables', 18000, 'La combinación perfecta entre la humedad de las tres leches y el sabor aterciopelado del red velvet.', '/red-velvet-3-leches.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
+  p('pos-7-alfajores-arequipe', 'Alfajores con Arequipe', 'Postres Saludables', 21000, 'Clásicos alfajores argentinos fit con abundante arequipe artesanal y coco rallado.', '/alfajores-con-arequipe.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, [['Caja x3', 21000], ['Caja x6', 39000]]),
+  p('pos-8-alfajores-chocolate', 'Alfajores con Chocolate', 'Postres Saludables', 23000, 'Masa quebradiza de maicena rellena con arequipe saludable y cobertura de cacao.', '/alfajores-con-chocolate.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, [['Caja x3', 23000], ['Caja x6', 41000]]),
+  p('pos-9-brownies', 'Brownies', 'Postres Saludables', 19000, 'Brownies densos y húmedos con nueces de nogal y chocolate oscuro al 70%.', '/brownies.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, [['Caja x2', 19000], ['Caja x4', 36000]]),
+  p('pos-10-brownie-helado', 'Brownie con Helado', 'Postres Saludables', 22000, 'Brownie tibio melcochudo de cacao puro acompañado de bola de helado artesanal sin azúcar.', '/brownie-con-helado.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
+  p('pos-11-postre-brownie-helado', 'Postre Brownie con Helado', 'Postres Saludables', 24000, 'Presentación en copa con capas de brownie crocante, helado cremoso y sirope de chocolate fit.', '/postre-brownie-con-helado.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
+  p('pos-12-sandwich-helado', 'Sandwich de Helado', 'Postres Saludables', 16000, 'Dos galletas crocantes de harina de almendras rellenas de helado artesanal cremoso sin azúcar.', '/sandwich-de-helado.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
+  p('pos-13-helados-130g', 'Helados 130g', 'Postres Saludables', 14000, 'Pote individual de helado artesanal cremoso sin azúcar refinada elaborado con fruta pura.', '/helados-130g.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, [['Vainilla Almendras', 14000], ['Chocolate 70%', 14000], ['Frutos del Bosque', 14000]]),
+  p('pos-14-galletas-chocolate', 'Galletas con Chocolate', 'Postres Saludables', 7500, 'Galletas clásicas con trozos crujientes de chocolate amargo puro.', '/galletas-con-chocolate.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, [['Paquete x3', 7500], ['Paquete x10', 19000]]),
+  p('pos-15-galletas-semillas', 'Galletas Semillas', 'Postres Saludables', 12300, 'Paquete de galletas artesanales con chía, girasol, ajonjolí y linaza dorada.', '/galletas-semillas.png', ['Keto', 'Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, [['Paquete x10', 12300], ['Paquete x15', 18200]]),
+  p('pos-16-canastilla-yuca', 'Canastilla de Pan de Yuca', 'Postres Saludables', 24000, 'Crocantes canastillas de almidón agrio de yuca y queso cuajada fresca.', '/canastilla-de-pan-de-yuca.png', ['Sin Gluten', 'Sin Azúcar', 'Entrega Hoy'], 0, [['Empaque x2', 24000], ['Empaque x4', 41000]]),
+  p('pos-17-waffle-yuca', 'Waffle de Pan de Yuca', 'Postres Saludables', 18000, 'Waffle recién tostado a base de queso y masa de yuca libre de gluten, doradito y suave.', '/waffle-de-pan-de-yuca.png', ['Sin Gluten', 'Sin Azúcar', 'Entrega Hoy'], 0, 0),
+  p('pos-18-repollas-fit', 'Repollas Sin Azúcar y Sin Gluten', 'Postres Saludables', 17000, 'Masa choux ligera rellena de arequipe artesanal y espolvoreadas con endulzante natural.', '/repollas-sin-azucar-y-sin-gluten.png', ['Sin Gluten', 'Sin Azúcar', 'Entrega Hoy'], 0, [['Caja x2', 17000], ['Caja x4', 32000]]),
+  p('pos-19-copa-saludable', 'Copa Saludable', 'Postres Saludables', 55000, 'Copa de vidrio con capas de torta, chantilly sin azúcar, fresas frescas y lazo decorativo.', '/copa-saludable.jpeg', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
+  p('pos-20-mini-marquesa', 'Mini Marquesa', 'Postres Saludables', 35000, 'Delicioso postre frío en caja de acetato con capas cremosas y virutas de chocolate.', '/mini-marquesa.jpeg', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
+  p('pos-21-postre-ilusion', 'Postre Ilusión', 'Postres Saludables', 19000, 'Vaso postre individual con capas de galleta, crema chantilly fit y compota de frutos rojos.', '/postre-ilusion.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
 
-  // --- POSTRES SALUDABLES ---
-  p('pos-1-tres-leches-arequipe-vaso', '3 Leches de Arequipe (9 oz)', 'Postres', 17000, 'Vaso individual de bizcocho esponjoso bañado en tres leches deslactosadas y arequipe fit.', '/tres-leches-arequipe-vaso.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
-  p('pos-2-tres-leches-mermelada', '3 Leches con Mermelada Frutos Rojos / Amarillos', 'Postres', 17000, 'Tres leches refrescante coronado con mermelada artesanal de frutos del bosque sin azúcar.', '/tres-leches-mermelada.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, [['Frutos Rojos', 17000], ['Frutos Amarillos', 17000]]),
-  p('pos-3-mugcake-surtido', 'Mugcake Esponjoso (Varios Sabores)', 'Postres', 15000, 'Bizcochito fit individual en taza listo para disfrutar. Delicioso, ligero y sin remordimientos.', '/mugcake-surtido.png', ['Keto', 'Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, [['Naranja & Amapola', 15000], ['Red Velvet', 15000], ['Yogurt Griego', 15000], ['Chocolate 70%', 15000]]),
-  p('pos-4-red-velvet-3-leches', 'Red Velvet 3 Leches', 'Postres', 18000, 'La combinación perfecta entre la humedad de las tres leches y el sabor aterciopelado del red velvet.', '/red-velvet-tres-leches.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
-  p('pos-5-brownies-caja', 'Caja de Brownies Melcochudos', 'Postres', 19000, 'Brownies densos y húmedos con nueces de nogal y chocolate oscuro al 70%.', '/caja-brownies.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, [['Caja x2', 19000], ['Caja x4', 36000]]),
-  p('pos-6-mini-brownies-caja', 'Mini Brownies Bocaditos', 'Postres', 23000, 'Caja de mini brownies individuales ideales para snacks de la tarde o compartir.', '/mini-brownies-caja.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, [['Caja x4', 23000], ['Caja x8', 44000]]),
-  p('pos-7-mini-blondies-caja', 'Mini Blondies de Chocolate Blanco', 'Postres', 23000, 'Suaves cuadritos de vainilla natural con chispas de chocolate blanco sin azúcar.', '/mini-blondies-caja.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, [['Caja x4', 23000], ['Caja x8', 44000]]),
-  p('pos-8-blondie-caja', 'Blondie Tradicional', 'Postres', 19000, 'Versión rubia del brownie elaborada con harina de almendras y toque acaramelado natural.', '/blondie-caja.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, [['Caja x2', 19000], ['Caja x4', 36000]]),
-  p('pos-9-galletas-semillas', 'Galletas Crocantes de Semillas', 'Postres', 12300, 'Paquete de galletas artesanales con chía, girasol, ajonjolí y linaza dorada.', '/galletas-semillas.png', ['Keto', 'Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, [['Paquete x10', 12300], ['Paquete x15', 18200]]),
-  p('pos-10-galletas-chocolate', 'Galletas con Chips de Chocolate', 'Postres', 7500, 'Galletas clásicas con trozos crujientes de chocolate amargo puro.', '/galletas-chocolate.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, [['Paquete x3', 7500], ['Paquete x10', 19000]]),
-  p('pos-11-alfajores-chocolate', 'Alfajores Bañados en Chocolate', 'Postres', 23000, 'Masa quebradiza de maicena rellena con arequipe saludable y cobertura de cacao.', '/alfajores-chocolate.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, [['Caja x3', 23000], ['Caja x6', 41000]]),
-  p('pos-12-alfajores-arequipe', 'Alfajores Tradicionales con Arequipe', 'Postres', 21000, 'Clásicos alfajores argentinos fit con abundante arequipe artesanal y coco rallado.', '/alfajores-arequipe.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, [['Caja x3', 21000], ['Caja x6', 39000]]),
-  p('pos-13-mini-cookies', 'Mini Cookies (Empaque x12)', 'Postres', 7000, 'Deliciosas y diminutas galletitas de vainilla ideales para café o lonchera.', '/mini-cookies.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, 0),
-  p('pos-14-canastilla-yuca', 'Canastilla de Pan de Yuca', 'Postres', 24000, 'Crocantes canastillas de almidón agrio de yuca y queso cuajada fresca.', '/canastilla-yuca.png', ['Sin Gluten', 'Sin Azúcar', 'Entrega Hoy'], 0, [['Empaque x2', 24000], ['Empaque x4', 41000]]),
-  p('pos-15-repollas-fit', 'Repollas Sin Azúcar y Sin Gluten', 'Postres', 17000, 'Masa choux ligera rellena de arequipe artesanal y espolvoreadas con endulzante natural.', '/repollas-fit.png', ['Sin Gluten', 'Sin Azúcar', 'Entrega Hoy'], 0, [['Caja x2', 17000], ['Caja x4', 32000]]),
-  p('pos-16-caja-compartir', 'Caja Compartir Especial', 'Postres', 50000, 'Super caja de degustación con canastillas de yuca, mini blondies, fresas y repollas rellenas.', '/caja-compartir.png', ['Sin Gluten', 'Sin Azúcar', 'Entrega Hoy'], 0, 0),
+  // --- PAN SALUDABLE (14 PANES) ---
+  p('pan-1-baguette', 'Baguette', 'Pan Saludable', 15000, 'Baguette artesanal con costra crocante y miga aireada sin trigo ni gluten, perfecta para bruschettas.', '/baguette.jpeg', ['Sin Gluten', 'Sin Azúcar', 'Con Anticipación'], 1, 0),
+  p('pan-2-focaccia-300g', 'Focaccia 300g', 'Pan Saludable', 36000, 'Focaccia italiana con aceite de oliva virgen extra, tomates cherry confitados y romero fresco.', '/focaccia-300g.jpeg', ['Sin Gluten', 'Sin Azúcar', 'Con Anticipación'], 1, 0),
+  p('pan-3-roscon-relleno', 'Roscón Relleno', 'Pan Saludable', 30000, 'Roscón tradicional relleno de abundante arequipe sin azúcar y azúcar glass fit por encima.', '/roscon-relleno.jpeg', ['Sin Gluten', 'Sin Azúcar', 'Con Anticipación'], 1, 0),
+  p('pan-4-rustico', 'Rústico', 'Pan Saludable', 17000, 'Hogaza campestre horneada a la piedra con harinas integrales de semillas y quinoa.', '/rustico.jpeg', ['Sin Gluten', 'Sin Azúcar', 'Con Anticipación'], 1, 0),
+  p('pan-5-queso-campesino', 'Con Queso Campesino', 'Pan Saludable', 19000, 'Pan grande para compartir en familia con queso campesino fresco bajo en grasa.', '/con-queso-ampesino.jpeg', ['Sin Gluten', 'Sin Azúcar', 'Con Anticipación'], 1, 0),
+  p('pan-6-queso-chitaga', 'Con Queso Chítaga', 'Pan Saludable', 18000, 'Hogaza familiar rellena con generosas capas de queso Chitagá suave y dulcecito.', '/con-queso-chitaga.jpeg', ['Sin Gluten', 'Sin Azúcar', 'Con Anticipación'], 1, 0),
+  p('pan-7-rollitos-chitaga', 'Rollitos de Queso Chítaga', 'Pan Saludable', 14000, 'Receta tradicional santandereana adaptada 100% saludable con queso típico de Chitagá.', '/rollitos-de-queso-chitaga.jpeg', ['Sin Gluten', 'Sin Azúcar', 'Con Anticipación'], 1, 0),
+  p('pan-8-ajonjoli', 'Con Ajonjolí', 'Pan Saludable', 15000, 'Miga suave con semillas de ajonjolí tostadas que aportan un sabor a nuez característico.', '/con-ajonjoli.jpeg', ['Sin Gluten', 'Sin Azúcar', 'Con Anticipación'], 1, 0),
+  p('pan-9-queso-parmesano', 'Pan de Queso Parmesano', 'Pan Saludable', 14000, 'Corteza dorada con queso parmesano gratinado e interior esponjoso libre de harinas refinadas.', '/pan-de-queso-parmesano.jpeg', ['Sin Gluten', 'Sin Azúcar', 'Con Anticipación'], 1, 0),
+  p('pan-10-oregano', 'Pan de Orégano', 'Pan Saludable', 11000, 'Panecillos salados ideales para acompañar comidas, tostadas o sándwiches ligeros.', '/pan-de-oregano.jpeg', ['Sin Gluten', 'Sin Azúcar', 'Con Anticipación'], 1, 0),
+  p('pan-11-rollitos-cuajada', 'Rollitos de Cuajada y Nuez', 'Pan Saludable', 14000, 'Rollitos tiernos con cuajada fresca campesina de la región y nueces picadas crujientes.', '/pan-rollitos-de-cuajada-y-nuece.png', ['Sin Gluten', 'Sin Azúcar', 'Con Anticipación'], 1, 0),
+  p('pan-12-semillas-chia', 'Semillas de Chía y Ajonjolí', 'Pan Saludable', 11000, 'Pancitos suaves ricos en fibra natural y omega-3 vegetal, endulzados naturalmente.', '/pan-semillas-de-chia-y-ajonjoli.jpeg', ['Sin Gluten', 'Sin Azúcar', 'Keto', 'Con Anticipación'], 1, 0),
+  p('pan-13-bocadillo-parmesano', 'Bocadillo y Queso Parmesano', 'Pan Saludable', 13000, 'Cuatro pancitos con relleno de bocadillo sin azúcar añadida y toque saladito de parmesano madurado.', '/pan-bocadillo-y-queso-parmesano.jpg', ['Sin Gluten', 'Sin Azúcar', 'Con Anticipación'], 1, 0),
+  p('pan-14-ajo-hierbas', 'Ajo y Finas Hierbas 250g', 'Pan Saludable', 16000, 'Pan artesanal horneado con ajo rostizado, orégano y romero. Masa libre de gluten suave y aromática.', '/pan-ajo-y-finas-hierbas-250g-(Salado).png', ['Sin Gluten', 'Sin Azúcar', 'Con Anticipación'], 1, 0),
 
-  // --- MERCADITO (EXACTAMENTE 3 PRODUCTOS REQUERIDOS) ---
-  p('merc-1-arequipe', 'Arequipe Artesanal', 'Mercadito', 16000, 'Arequipe 100% sin azúcar cocinado lentamente con leche deslactosada y fruto del monje.', '/arequipe-artesanal.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, [['Frasco 150g', 16000], ['Frasco 280g', 25000], ['Frasco 500g', 38000]]),
-  p('merc-2-mermeladas', 'Mermeladas Naturales', 'Mercadito', 16000, 'Pura fruta seleccionada sin azúcar refinada ni conservantes (Frutos Rojos / Frutos Amarillos).', '/mermeladas-naturales.png', ['Sin Azúcar', 'Sin Gluten', 'Sin Lácteos', 'Entrega Hoy'], 0, [['Frutos Rojos', 16000], ['Frutos Amarillos', 16000]]),
-  p('merc-3-arepas', 'Arepas Libres de Gluten (Paquete x5)', 'Mercadito', 14000, 'Arepas artesanales de maíz peto no transgénico en paquete de 5 unidades.', '/arepas-libres-gluten.png', ['Sin Gluten', 'Sin Lácteos', 'Entrega Hoy'], 0, [['Semillas de chía y ajonjolí', 14000], ['Plátano maduro', 14000]]),
+  // --- MERCADITO (SOLO 3 PRODUCTOS) ---
+  p('merc-1-arequipe', 'Arequipe', 'Mercadito', 16000, 'Arequipe 100% sin azúcar cocinado lentamente con leche deslactosada y fruto del monje.', '/arequipe.png', ['Sin Azúcar', 'Sin Gluten', 'Entrega Hoy'], 0, [['Frasco 150g', 16000], ['Frasco 280g', 25000], ['Frasco 500g', 38000]]),
+  p('merc-2-mermeladas', 'Mermeladas Naturales', 'Mercadito', 16000, 'Pura fruta seleccionada sin azúcar refinada ni conservantes (Frutos Rojos / Frutos Amarillos).', '/mermeladas-naturales.jpg', ['Sin Azúcar', 'Sin Gluten', 'Sin Lácteos', 'Entrega Hoy'], 0, [['Frutos Rojos', 16000], ['Frutos Amarillos', 16000]]),
+  p('merc-3-arepas', 'Arepas Libres de Gluten', 'Mercadito', 14000, 'Arepas artesanales de maíz peto no transgénico en paquete de 5 unidades.', '/arepas-libres-de-gluten.jpeg', ['Sin Gluten', 'Sin Lácteos', 'Entrega Hoy'], 0, [['Semillas de chía y ajonjolí', 14000], ['Plátano maduro', 14000]]),
 ];
 
 const buildWhatsAppUrl = (product, selectedPortion, currentPrice) => {
@@ -231,7 +235,7 @@ export default function App() {
   const [products, setProducts] = useState(() => {
     if (typeof window !== 'undefined') {
       try {
-        const saved = localStorage.getItem('ts_products_catalog');
+        const saved = localStorage.getItem('ts_products_catalog_v2');
         if (saved) {
           const parsed = JSON.parse(saved);
           if (Array.isArray(parsed) && parsed.length > 0) {
@@ -265,10 +269,10 @@ export default function App() {
   const [editingProduct, setEditingProduct] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formName, setFormName] = useState('');
-  const [formCategory, setFormCategory] = useState('Tortas');
+  const [formCategory, setFormCategory] = useState('Tortas Saludables');
   const [formDescription, setFormDescription] = useState('');
   const [formPrice, setFormPrice] = useState(0);
-  const [formImageUrl, setFormImageUrl] = useState('/torta-moka.jpg');
+  const [formImageUrl, setFormImageUrl] = useState('/torta-moka.png');
   const [formAvailable, setFormAvailable] = useState(true);
   const [formFeatures, setFormFeatures] = useState(['Sin Azúcar', 'Sin Gluten']);
   const [formRequiresNotice, setFormRequiresNotice] = useState(true);
@@ -292,7 +296,7 @@ export default function App() {
 
   useEffect(() => {
     try {
-      localStorage.setItem('ts_products_catalog', JSON.stringify(products));
+      localStorage.setItem('ts_products_catalog_v2', JSON.stringify(products));
     } catch (err) {
       console.warn('Error guardando en localStorage:', err);
     }
@@ -436,17 +440,17 @@ export default function App() {
     setFormImageUrl(product.imageUrl || DEFAULT_IMAGE_FALLBACK);
     setFormAvailable(product.available);
     setFormFeatures(product.features || ['Sin Azúcar', 'Sin Gluten']);
-    setFormRequiresNotice(product.requiresNotice ?? (product.category === 'Tortas' || product.category === 'Pan'));
+    setFormRequiresNotice(product.requiresNotice ?? (product.category === 'Tortas Saludables' || product.category === 'Pan Saludable'));
     setIsModalOpen(true);
   };
 
   const handleOpenNewModal = () => {
     setEditingProduct(null);
     setFormName('');
-    setFormCategory('Tortas');
+    setFormCategory('Tortas Saludables');
     setFormDescription('');
     setFormPrice(45000);
-    setFormImageUrl('/torta-moka.jpg');
+    setFormImageUrl('/torta-moka.png');
     setFormAvailable(true);
     setFormFeatures(['Sin Azúcar', 'Sin Gluten']);
     setFormRequiresNotice(true);
@@ -509,7 +513,7 @@ export default function App() {
   };
 
   const handleResetCatalog = () => {
-    if (confirm('¿Restablecer el catálogo con las 29 tortas y categorías originales asociadas a /public?')) {
+    if (confirm('¿Restablecer el catálogo con las categorías y nombres de imagen limpios de GitHub?')) {
       setProducts(initialProducts);
       showToast('✓ Catálogo completo restablecido');
     }
@@ -581,7 +585,7 @@ export default function App() {
   const stats = useMemo(() => {
     const total = products.length;
     const available = products.filter((item) => item.available).length;
-    const cakes = products.filter((item) => item.category === 'Tortas').length;
+    const cakes = products.filter((item) => item.category === 'Tortas Saludables').length;
     return { total, available, soldOut: total - available, cakes };
   }, [products]);
 
@@ -799,7 +803,6 @@ export default function App() {
               <div>
                 <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#241E19]">
                   {activeCategory === 'Todas' ? 'Menú Completo de Territorio Saludable' : `Categoría: ${activeCategory}`}
-                  {activeCategory === 'Tortas' && ' (29 Opciones)'}
                 </h3>
                 <p className="text-xs text-stone-500 mt-0.5">
                   Mostrando {filteredProducts.length} delicia{filteredProducts.length !== 1 ? 's' : ''} saludable{filteredProducts.length !== 1 ? 's' : ''}
@@ -1421,7 +1424,7 @@ export default function App() {
             </div>
             <div className="bg-white p-4 rounded-2xl border border-amber-100 shadow-xs">
               <span className="text-[11px] font-bold text-amber-700 uppercase tracking-wider">Tortas Saludables</span>
-              <p className="font-serif text-2xl font-black text-amber-800">{stats.cakes} de 29</p>
+              <p className="font-serif text-2xl font-black text-amber-800">{stats.cakes} de 21</p>
             </div>
           </div>
 
@@ -1895,7 +1898,7 @@ export default function App() {
                     required
                     value={formImageUrl}
                     onChange={(e) => setFormImageUrl(e.target.value)}
-                    placeholder="Ej: /torta-moka.jpg o /nombre-foto.png"
+                    placeholder="Ej: /torta-moka.png o /nombre-foto.png"
                     className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-stone-50 border border-stone-300 focus:bg-white focus:outline-none focus:border-[#2D5A27] font-mono text-xs text-stone-800 font-medium"
                   />
                 </div>
@@ -1904,12 +1907,12 @@ export default function App() {
                   <p className="text-[10px] text-stone-400">Accesos rápidos de fotos comunes:</p>
                   <div className="flex flex-wrap gap-1.5">
                     {[
-                      { label: 'Torta Moka', path: '/torta-moka.jpg' },
-                      { label: 'Torta Pistacho', path: '/torta-pistacho.jpg' },
-                      { label: 'Choco-arequipe', path: '/choco-arequipe.jpg' },
-                      { label: 'Luna Almendras', path: '/luna-almendras.jpg' },
-                      { label: 'Torta Arequipe', path: '/torta-arequipe.png' },
-                      { label: 'Arequipe Artesanal', path: '/arequipe-artesanal.png' },
+                      { label: 'Torta Moka', path: '/torta-moka.png' },
+                      { label: 'Torta Pistacho', path: '/torta-pistacho.png' },
+                      { label: 'Torta Arequipe', path: '/torta-de-arequipe.png' },
+                      { label: 'Choco-Arequipe', path: '/torta-chocoarequipe.png' },
+                      { label: 'Luna Almendras', path: '/luna-de-almendras.png' },
+                      { label: 'Arequipe', path: '/arequipe.png' },
                     ].map((item) => (
                       <button
                         key={item.path}
