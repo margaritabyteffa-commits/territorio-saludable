@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-// 1. VERIFICACIÓN DEL WEBHOOK (GET)
+// 1. VERIFICACIÓN DEL WEBHOOK (Requerido por Meta)
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const mode = searchParams.get('hub.mode');
@@ -16,7 +16,7 @@ export async function GET(request) {
   return new Response('Token de verificación inválido', { status: 403 });
 }
 
-// 2. RECEPCIÓN Y RESPUESTA DE MENSAJES (POST)
+// 2. RECEPCIÓN Y PROCESAMIENTO DE MENSAJES (POST)
 export async function POST(request) {
   try {
     const body = await request.json();
@@ -30,12 +30,13 @@ export async function POST(request) {
       const from = message.from;
       const msgText = message.text.body;
 
-      console.log(`📩 Mensaje de ${from}: ${msgText}`);
+      console.log(`📩 Mensaje recibido de ${from}: ${msgText}`);
 
       // Generar respuesta inteligente con Gemini
       const replyMessage = await generateGeminiResponse(msgText);
+      console.log(`🤖 Respuesta de Gemini generada: ${replyMessage}`);
 
-      // Enviar respuesta a WhatsApp
+      // Enviar respuesta a WhatsApp a través de Meta API
       await sendWhatsAppMessage(from, replyMessage);
     }
 
@@ -50,32 +51,32 @@ export async function POST(request) {
 async function generateGeminiResponse(userQuery) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    console.error('⚠️ Falta GEMINI_API_KEY en Vercel');
+    console.error('⚠️ GEMINI_API_KEY no encontrada en variables de entorno de Vercel');
     return getFallbackResponse(userQuery);
   }
 
   const prompt = `
-Eres el asistente virtual oficial de "Territorio Saludable", una repostería funcional y saludable en Bucaramanga.
+Eres el asistente virtual oficial por WhatsApp de "Territorio Saludable", una repostería funcional y saludable en Bucaramanga.
 
-INFORMACIÓN DEL NEGOCIO Y CATÁLOGO:
-- Todos los productos son 100% SIN azúcar refinada y SIN gluten (ideales para cuidarse, diabéticos o celiacos).
-- PWA Web del catálogo: https://territorio-saludable.vercel.app
-- Categorías:
+INFORMACIÓN COMPLETA DEL NEGOCIO Y CATÁLOGO:
+- Todos nuestros productos son 100% SIN azúcar refinada y SIN gluten (ideales para cuidarse, diabéticos o celiacos).
+- Catálogo web interactivo: https://territorio-saludable.vercel.app
+- Categorías del catálogo (29 productos en total):
   1. *Tortas Saludables* (Moka, Red Velvet, Zanahoria, Chocolate)
   2. *Pan Saludable* (Pan de Yuca, Pan de Queso, Pan de Almidón)
-  3. *Postres Saludables* (Cheesecakes, Mousse, Brownies sin azúcar)
+  3. *Postres Saludables* (Cheesecakes, Mousse, Brownies)
   4. *Catálogo Detalles* (Cajas regalo y tortas personalizadas)
   5. *Mercadito* (Harinas funcionales, endulzantes, snacks)
 
-MÉTODO Y FLUJO DE PAGO:
+MEDIOS Y PROCESO DE PAGO:
 - Medios de pago autorizados: **Nequi** y **Bancolombia**.
-- Indica al cliente que para procesar la orden debe realizar la transferencia y **enviar la captura del comprobante de pago por este chat de WhatsApp**.
-- Aclara que la **Jefe / Administración validará el comprobante manualmente** para ingresar de inmediato el pedido a la cocina.
+- Indica al cliente que cuando realice su transferencia, debe **enviar la captura del comprobante por este mismo chat de WhatsApp**.
+- Explica amablemente que **la administración / jefe valida manualmente cada comprobante** antes de ingresar el pedido a la cocina.
 
-INSTRUCCIONES DE RESPUESTA:
-- Responde al usuario de forma cercana, amable, breve y apetitosa.
-- Usa estilo WhatsApp con *negritas*, viñetas y emojis (🍰, 🌿, 💳, 🛵).
-- Responde exactamente a lo que consulta el usuario.
+INSTRUCCIONES DE FORMATO:
+- Responde de forma cercana, amable, breve y apetitosa.
+- Usa formato estilo WhatsApp con *negritas*, viñetas y emojis (🍰, 🌿, 💳, 🛵).
+- Responde directamente a la consulta del cliente.
 
 Consulta del cliente: "${userQuery}"
 Respuesta:`;
@@ -88,7 +89,7 @@ Respuesta:`;
         contents: [{ parts: [{ text: prompt }] }]
       })
     });
-    
+
     const data = await res.json();
 
     if (data.error) {
@@ -98,12 +99,12 @@ Respuesta:`;
 
     return data.candidates?.[0]?.content?.parts?.[0]?.text || getFallbackResponse(userQuery);
   } catch (err) {
-    console.error('❌ Error al conectar con Gemini:', err);
+    console.error('❌ Error conectando con Gemini:', err);
     return getFallbackResponse(userQuery);
   }
 }
 
-// Respuesta de respaldo estructurada
+// 4. RESPUESTA DE RESPALDO (FALLBACK)
 function getFallbackResponse(query) {
   return `¡Hola! 🌿 Bienvenido a *Territorio Saludable* 🍰
 
@@ -112,21 +113,23 @@ Toda nuestra repostería es **100% sin azúcar refinada y libre de gluten**.
 Puedes explorar nuestro catálogo interactivo con fotos y precios en:
 👉 https://territorio-saludable.vercel.app
 
-💳 *Medios de Pago:* Nequi y Bancolombia. 
-Una vez realices tu transferencia, **envíanos el comprobante por este chat** para que nuestra administración lo valide e ingrese tu pedido a cocina inmediatamente.
+💳 *Medios de Pago:* Nequi y Bancolombia.
+Una vez realices tu transferencia, **envíanos la captura del comprobante por este chat** para que nuestra administración lo valide e ingrese tu pedido a cocina inmediatamente.
 
 ¿Qué producto o torta te gustaría consultar hoy?`;
 }
 
-// 4. ENVÍO A TRAVÉS DE META API
+// 5. ENVÍO DE MENSAJE A TRAVÉS DE META GRAPH API
 async function sendWhatsAppMessage(to, text) {
   const token = process.env.WHATSAPP_TOKEN;
   const phoneId = process.env.WHATSAPP_PHONE_ID;
 
   if (!token || !phoneId) {
-    console.error('❌ Faltan credenciales WHATSAPP_TOKEN o WHATSAPP_PHONE_ID');
+    console.error('❌ Faltan variables WHATSAPP_TOKEN o WHATSAPP_PHONE_ID');
     return;
   }
+
+  console.log(`📤 Enviando mensaje a ${to} mediante Phone ID ${phoneId}...`);
 
   const res = await fetch(`https://graph.facebook.com/v20.0/${phoneId}/messages`, {
     method: 'POST',
@@ -142,10 +145,6 @@ async function sendWhatsAppMessage(to, text) {
     })
   });
 
-  const data = await res.json();
-  if (data.error) {
-    console.error('❌ Error al enviar mensaje vía Meta API:', JSON.stringify(data.error));
-  } else {
-    console.log('✅ Mensaje enviado exitosamente a WhatsApp');
-  }
+  const responseData = await res.json();
+  console.log('📄 Respuesta de Meta Graph API:', JSON.stringify(responseData));
 }
