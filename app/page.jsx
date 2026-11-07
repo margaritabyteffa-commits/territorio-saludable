@@ -307,13 +307,17 @@ export default function App() {
     showToast('✓ Pedido registrado con éxito');
   };
 
-  const handleOrderWhatsApp = (product) => {
-    const selPortion = selectedSizes[product.id];
-    const sizeObj = product.sizes && product.sizes.find(s => s.portions === selPortion);
-    const pr = sizeObj ? sizeObj.price : product.price;
-    const txt = '¡Hola Territorio Saludable! 🍰 Quisiera pedir: *' + product.name + '*' + (sizeObj ? ' (' + sizeObj.portions + ')' : '') + ' por valor de ' + formatCOP(pr) + '. ¿Tienen disponibilidad para Bucaramanga?';
-    window.open('https://wa.me/' + DEFAULT_CONFIG.whatsappPhone + '?text=' + encodeURIComponent(txt), '_blank');
-  };
+ const handleOrderWhatsApp = (product) => {
+  const selPortion = selectedSizes[product.id];
+  const sizeObj = product.sizes && product.sizes.find(s => s.portions === selPortion);
+  const pr = sizeObj ? sizeObj.price : product.price;
+  const txt = '¡Hola Territorio Saludable! 🍰 Quisiera pedir: *' + product.name + '*' + (sizeObj ? ' (' + sizeObj.portions + ')' : '');
+
+  // Número de la SIM provisional de WhatsApp
+  const whatsappPhone = '573000559196';
+
+  window.open('https://wa.me/' + whatsappPhone + '?text=' + encodeURIComponent(txt), '_blank');
+};
 
   const filteredProducts = useMemo(() => {
     return products.filter(p => {
