@@ -4,13 +4,13 @@ import React, { useState, useEffect, useMemo } from 'react';
 import {
   Search, Edit2, Trash2, Plus, ArrowUp, ArrowDown, Sparkles, Phone,
   ShieldCheck, X, Clock, Lock, KeyRound, ChefHat, LogOut, MapPin,
-  Calendar, ShoppingBag, ClipboardList, Eye, Settings, ExternalLink, Check, Copy, MessageCircle
+  Calendar, ShoppingBag, ClipboardList, Eye, Settings, ExternalLink, Check, Copy
 } from 'lucide-react';
 
 const FALLBACK_IMG = 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=500&auto=format&fit=crop&q=60';
 const DEFAULT_CONFIG = {
   businessName: 'Territorio Saludable S.A.S.',
-  whatsappPhone: '573000559196', // SIM Provisional registrada en Meta
+  whatsappPhone: '573000559196', // SIM PROVISIONAL METACLOUD
   instagramUrl: 'https://instagram.com/territoriosaludable',
   facebookUrl: 'https://facebook.com/territoriosaludable',
   calendarEmbedUrl: 'https://calendar.google.com/calendar/embed?src=territoriosaludable%40gmail.com&ctz=America%2FBogota'
@@ -20,28 +20,27 @@ const CATEGORIES = ['Tortas Saludables', 'Catalogo Detalles', 'Pan Saludable', '
 const DIETARY_TAGS = ['Todas', 'Keto', 'Sin Gluten', 'Sin Azúcar', 'Sin Lácteos', 'Entrega Hoy', 'Con Anticipación'];
 
 const INITIAL_ZONES = [
-  { id: 1, name: 'Cabecera / Sotomayor / Prado', price: 5000 },
-  { id: 2, name: 'Centro / San Francisco', price: 7000 },
-  { id: 3, name: 'Floridablanca / Cañaveral', price: 10000 },
-  { id: 4, name: 'Girón / Piedecuesta', price: 15000 }
+  { id: 'z1', name: 'Cabecera / Sotomayor / Prado', price: 5000 },
+  { id: 'z2', name: 'Centro / San Francisco', price: 7000 },
+  { id: 'z3', name: 'Floridablanca / Cañaveral', price: 10000 },
+  { id: 'z4', name: 'Girón / Piedecuesta', price: 15000 }
 ];
 
 export const formatCOP = (n) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(n);
-export const ensureSlash = (u) => !u ? '/logo.png' : (u.startsWith('http') || u.startsWith('/') ? u : '/' + u);
+export const ensureSlash = (u) => !u ? '/torta-moka.png' : (u.startsWith('http') || u.startsWith('/') ? u : '/' + u);
 
 const P = (id, name, catIdx, price, imageUrl, sizes = [], features = ['Sin Azúcar', 'Sin Gluten'], requiresNotice = false, description = '') => ({
-  id, name, category: CATEGORIES[catIdx], price, imageUrl: ensureSlash(imageUrl), available: true, features, requiresNotice,
-  description: description || `${name} artesanal, 100% libre de gluten y elaborado sin azúcar refinada.`,
+  id, name, category: CATEGORIES[catIdx], price, imageUrl: ensureSlash(imageUrl), available: true, features, requiresNotice, description,
   sizes: sizes.map(([p, pr]) => ({ portions: p, price: pr, label: p + ' (' + formatCOP(pr) + ')' }))
 });
 
 export const initialProducts = [
-  P('torta-moka', 'Torta Moka', 0, 84000, '/torta-moka.png', [['5 porc',84000],['8 porc',123000],['12 porc',155000],['18 porc',217000]], ["Sin Azúcar","Sin Gluten","Keto"], true, "Esponjoso bizcocho de cacao y café orgánico, rellenado con crema suave de arequipe sin azúcar y cobertura de ganache artesanal."),
-  P('torta-pistacho', 'Torta Pistacho', 0, 94000, '/torta-pistacho.png', [['5 porc',94000],['8 porc',141000],['12 porc',197000],['18 porc',274000],['25 porc',353000]], ["Sin Azúcar","Sin Gluten","Keto"], true, "Masa fina a base de harina de almendras y pistachos naturales molidos, endulzada con stevia pura."),
-  P('torta-chocoarequipe', 'Torta Choco-Arequipe', 0, 60000, '/torta-chocoarequipe.png', [['3 porc',60000],['5 porc',84000],['8 porc',123000],['12 porc',155000]], ["Sin Azúcar","Sin Gluten"], true, "Bizcocho de chocolate húmedo con capas generosas de arequipe fit libre de culpa."),
-  P('luna-de-almendras', 'Luna de Almendras', 0, 73000, '/luna-de-almendras.png', [['5 porc',73000],['8 porc',108000],['12 porc',142000],['18 porc',189000],['25 porc',250000]], ["Sin Azúcar","Sin Gluten","Keto"], true, "Suave textura con almendras seleccionadas tostadas y crema chantilly sin azúcar."),
-  P('torta-victoria', 'Torta Victoria', 0, 84000, '/torta-victoria.png', [['5 porc',84000],['8 porc',110000],['12 porc',141000],['18 porc',192000],['25 porc',248000]], ["Sin Azúcar","Sin Gluten"], true, "Clásica receta inglesa versionada 100% saludable con frutos rojos frescos."),
-  P('torta-de-vino', 'Torta de Vino', 0, 30000, '/torta-de-vino.jpeg', [['Personal',30000],['3 porc',51000],['5 porc',69000],['8 porc',101000],['12 porc',136000]], ["Sin Azúcar","Sin Gluten"], true, "Tradicional pastel especiado macerado artesanalmente sin azúcares añadidos."),
+  P('torta-moka', 'Torta Moka', 0, 84000, '/torta-moka.png', [['5 porc',84000],['8 porc',123000],['12 porc',155000],['18 porc',217000]], ["Sin Azúcar","Sin Gluten","Keto"], true, "Esponjoso bizcocho de cacao y café orgánico, rellenado con crema suave de arequipe sin azúcar."),
+  P('torta-pistacho', 'Torta Pistacho', 0, 94000, '/torta-pistacho.png', [['5 porc',94000],['8 porc',141000],['12 porc',197000],['18 porc',274000],['25 porc',353000]], ["Sin Azúcar","Sin Gluten","Keto"], true, "Masa fina a base de harina de almendras y pistachos naturales molidos con stevia pura."),
+  P('torta-chocoarequipe', 'Torta Choco-Arequipe', 0, 60000, '/torta-chocoarequipe.png', [['3 porc',60000],['5 porc',84000],['8 porc',123000],['12 porc',155000]], ["Sin Azúcar","Sin Gluten"], true, "Capas suaves de chocolate amargo artesanal con el más cremoso arequipe fit."),
+  P('luna-de-almendras', 'Luna de Almendras', 0, 73000, '/luna-de-almendras.png', [['5 porc',73000],['8 porc',108000],['12 porc',142000],['18 porc',189000],['25 porc',250000]], ["Sin Azúcar","Sin Gluten","Keto"], true, "Bizcocho liviano cubierto de láminas de almendra tostada y toque de vainilla natural."),
+  P('torta-victoria', 'Torta Victoria', 0, 84000, '/torta-victoria.png', [['5 porc',84000],['8 porc',110000],['12 porc',141000],['18 porc',192000],['25 porc',248000]], ["Sin Azúcar","Sin Gluten"], true),
+  P('torta-de-vino', 'Torta de Vino', 0, 30000, '/torta-de-vino.jpeg', [['Personal',30000],['3 porc',51000],['5 porc',69000],['8 porc',101000],['12 porc',136000]], ["Sin Azúcar","Sin Gluten"], true),
   P('torta-versalles', 'Torta Versalles', 0, 73000, '/torta-versalles.png', [['5 porc',73000],['8 porc',108000],['12 porc',145000],['18 porc',189000],['25 porc',249000]], ["Sin Azúcar","Sin Gluten"], true),
   P('frutos-rojos-o-amarillos', 'Frutos Rojos o Amarillos', 0, 73000, '/torta-vasca-frutos-rojos-o-amarillos.jpeg', [['5 porc',73000],['8 porc',108000],['12 porc',145000],['18 porc',189000],['25 porc',249000]], ["Sin Azúcar","Sin Gluten"], true),
   P('quebec', 'Quebec', 0, 73000, '/quebec.png', [['5 porc',73000],['8 porc',108000],['12 porc',145000],['18 porc',189000],['25 porc',249000]], ["Sin Azúcar","Sin Gluten"], true),
@@ -63,10 +62,10 @@ export const initialProducts = [
   P('maria-luisa', 'María Luisa', 0, 73000, '/maria-luisa.png', [['5 porc',73000],['8 porc',108000],['12 porc',145000],['18 porc',189000],['25 porc',249000]], ["Sin Azúcar","Sin Gluten"], true),
   P('matilda', 'Matilda', 0, 85000, '/matilda.jpeg', [['5 porc',85000],['8 porc',125000],['12 porc',158000],['18 porc',218000]], ["Sin Azúcar","Sin Gluten","Keto"], true),
   P('torta-vasca-frutos-rojos-o-amarillos', 'Torta Vasca Frutos Rojos o Amarillos', 0, 73000, '/torta-vasca-frutos-rojos-o-amarillos.jpeg', [['5 porc',73000],['8 porc',100000],['12 porc',120000]], ["Sin Azúcar","Sin Gluten","Keto"], true),
-  P('tortas-vasca-pistacho', 'Tortas Vasca Pistacho', 0, 85000, '/tortas-vasca-pistacho.png', [['5 porc',85000],['8 porc',115000],['12 porc',140000]], ["Sin Azúcar","Sin Gluten","Keto"], true),
+  P('tortas-vasca-pistacho', 'Tortas Vasca Pistacho', 0, 85000, '/tortas-vasca-pistacho.png', [['5 porc',85000],['8 porc',115000],['140000',140000]], ["Sin Azúcar","Sin Gluten","Keto"], true),
   P('torta-primavera', 'Torta Primavera', 0, 75000, '/torta-primavera.jpeg', [['5 porc',75000],['8 porc',110000],['12 porc',145000],['18 porc',195000]], ["Sin Azúcar","Sin Gluten"], true),
-  P('box-duo', 'Box Dúo', 1, 45000, '/box-duo.png', [], ["Sin Azúcar","Sin Gluten","Entrega Hoy"], false, "Caja regalo especial con lazo rojo y 2 brownies melcochudos bañados en arequipe fit."),
-  P('guacal-amor', 'Guacal Amor', 1, 65000, '/guacal-amor.jpeg', [], ["Sin Azúcar","Sin Gluten"], false, "Guacal en madera con mini torta personalizada y alfajores saludables."),
+  P('box-duo', 'Box Dúo', 1, 45000, '/box-duo.png', [], ["Sin Azúcar","Sin Gluten","Entrega Hoy"], false, "Caja de regalo con lazo rojo que incluye 2 brownies bañados en arequipe fit."),
+  P('guacal-amor', 'Guacal Amor', 1, 65000, '/guacal-amor.jpeg', [], ["Sin Azúcar","Sin Gluten"], false, "Guacal de madera especial para regalo con minibizcocho y frasco de arequipe."),
   P('guacal-coquette', 'Guacal Coquette', 1, 70000, '/guacal-coquette.png', [], ["Sin Azúcar","Sin Gluten"], false),
   P('guacal-premium', 'Guacal Premium', 1, 95000, '/guacal-premium.png', [], ["Sin Azúcar","Sin Gluten"], false),
   P('guacal-te-cuido', 'Guacal Te Cuido', 1, 55000, '/guacal-te-cuido.png', [], ["Sin Azúcar","Sin Gluten"], false),
@@ -79,7 +78,7 @@ export const initialProducts = [
   P('mini-blondies', 'Mini Blondies', 1, 19000, '/mini-blondies.png', [['Caja x2',19000],['Caja x4',36000]], ["Sin Azúcar","Sin Gluten"], false),
   P('mini-cookies', 'Mini Cookies', 1, 18000, '/mini-cookies.png', [], ["Sin Azúcar","Sin Gluten","Entrega Hoy"], false),
   P('mugcake', 'Mugcake', 1, 16000, '/mugcake.png', [], ["Sin Azúcar","Sin Gluten","Entrega Hoy"], false),
-  P('baguette', 'Baguette', 2, 14000, '/baguette.jpeg', [], ["Sin Azúcar","Sin Gluten"], false, "Pan rústico a base de harina de arroz y psyllium para una digestión liviana."),
+  P('baguette', 'Baguette', 2, 14000, '/baguette.jpeg', [], ["Sin Azúcar","Sin Gluten"], false, "Pan crocante por fuera y esponjoso por dentro a base de harina de arroz y psyllium."),
   P('focaccia-300g', 'Focaccia 300g', 2, 18000, '/focaccia-300g.jpeg', [], ["Sin Azúcar","Sin Gluten"], false),
   P('roscon-relleno', 'Roscón Relleno', 2, 16000, '/roscon-relleno.jpeg', [], ["Sin Azúcar","Sin Gluten"], false),
   P('rustico', 'Rústico', 2, 15000, '/rustico.jpeg', [], ["Sin Azúcar","Sin Gluten"], false),
@@ -115,14 +114,14 @@ export const initialProducts = [
 ];
 
 export const initialOrders = [
-  { id: 'ord-101', code: 'TS-1001', clientName: 'Valentina Gómez', clientPhone: '3158901234', address: 'Cra 35 # 52-20, Apto 402', zone: 'Cabecera / Sotomayor / Prado', deliveryDate: new Date().toISOString().split('T')[0], deliveryTime: '3:30 PM', items: [{ productName: 'Torta Moka', portion: '8 porc', quantity: 1, price: 123000 }, { productName: 'Brownies Melcochudos', portion: 'Caja x4', quantity: 1, price: 36000 }], total: 159000, status: 'En Cocina', paymentMethod: 'PAGADO NEQUI', notes: 'Cliente habitual. Entregar antes de las 4 PM.' },
-  { id: 'ord-102', code: 'TS-1002', clientName: 'Dr. Carlos Mendoza', clientPhone: '3104567890', address: 'Calle 48 # 28-15, Consultorio 301', zone: 'Centro / San Francisco', deliveryDate: new Date().toISOString().split('T')[0], deliveryTime: '4:00 PM', items: [{ productName: 'Pan Ajo Asado & Finas Hierbas', portion: '250g', quantity: 2, price: 32000 }, { productName: 'Arequipe Artesanal Fit', portion: 'Frasco 280g', quantity: 1, price: 22000 }], total: 62000, status: 'En Cocina', paymentMethod: 'PAGADO BANCOLOMBIA', notes: 'Llamar antes de entregar.' }
+  { id: 'ord-101', code: 'TS-1001', clientName: 'Valentina Gómez', clientPhone: '3158901234', address: 'Cra 35 # 52-20, Apto 402', zone: 'Cabecera / Sotomayor / Prado', deliveryDate: new Date().toISOString().split('T')[0], deliveryTime: '3:30 PM', items: [{ productName: 'Torta de Arequipe Saludable', portion: '8 porc', quantity: 1, price: 87000 }, { productName: 'Brownies Melcochudos', portion: 'Caja x4', quantity: 1, price: 36000 }], total: 128000, status: 'En Cocina', paymentMethod: 'PAGADO NEQUI', notes: 'Cliente habitual. Entregar antes de las 4 PM.' },
+  { id: 'ord-102', code: 'TS-1002', clientName: 'Dr. Carlos Mendoza', clientPhone: '3104567890', address: 'Calle 48 # 28-15, Consultorio 301', zone: 'Centro / San Francisco', deliveryDate: new Date().toISOString().split('T')[0], deliveryTime: '4:00 PM', items: [{ productName: 'Pan Ajo Asado & Finas Hierbas (250g)', quantity: 2, price: 16000 }, { productName: 'Arequipe Artesanal Fit (Frasco 280g)', quantity: 1, price: 22000 }], total: 62000, status: 'En Cocina', paymentMethod: 'PAGADO BANCOLOMBIA', notes: 'Llamar al llegar.' }
 ];
 
 export const getGoogleCalendarUrl = (order) => {
   const title = 'Entrega TS: ' + order.clientName + ' (' + order.code + ')';
   const items = order.items.map(i => i.quantity + 'x ' + i.productName + (i.portion ? ' (' + i.portion + ')' : '')).join(', ');
-  const details = 'Pastelería Territorio Saludable S.A.S.\\nPedido: ' + order.code + '\\nCliente: ' + order.clientName + '\\nTel: +57' + order.clientPhone + '\\nDir: ' + order.address + '\\nZona: ' + order.zone + '\\nTotal: ' + formatCOP(order.total) + '\\nPago: ' + order.paymentMethod + '\\n\\nItems:\\n' + items + '\\n\\nNotas: ' + (order.notes || 'Ninguna');
+  const details = 'Pastelería Territorio Saludable S.A.S.\\nPedido: ' + order.code + '\\nCliente: ' + order.clientName + '\\nTel: +' + order.clientPhone + '\\nDir: ' + order.address + '\\nZona: ' + order.zone + '\\nTotal: ' + formatCOP(order.total) + '\\nPago: ' + order.paymentMethod + '\\n\\nItems:\\n' + items + '\\n\\nNotas: ' + (order.notes || 'Ninguna');
   const loc = order.address + ', ' + order.zone + ', Bucaramanga, Colombia';
   const d = (order.deliveryDate || new Date().toISOString().slice(0, 10)).replace(/-/g, '');
   return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent(title) + '&dates=' + d + 'T100000/' + d + 'T110000&details=' + encodeURIComponent(details) + '&location=' + encodeURIComponent(loc);
@@ -131,8 +130,7 @@ export const getGoogleCalendarUrl = (order) => {
 export default function App() {
   const [currentView, setCurrentView] = useState('public');
   const [authRole, setAuthRole] = useState(() => typeof window !== 'undefined' ? sessionStorage.getItem('ts_auth_role') : null);
-  const [adminTab, setAdminTab] = useState('pedidos');
-  const [panaderoTab, setPanaderoTab] = useState('pedidos');
+  const [adminTab, setAdminTab] = useState('inventario');
 
   const [adminPassword, setAdminPassword] = useState(() => (typeof window !== 'undefined' && localStorage.getItem('ts_admin_pwd')) || '1234');
   const [panaderoPassword, setPanaderoPassword] = useState(() => (typeof window !== 'undefined' && localStorage.getItem('ts_panadero_pwd')) || '5678');
@@ -160,18 +158,18 @@ export default function App() {
 
   const [selectedCategory, setSelectedCategory] = useState('Tortas Saludables');
   const [selectedTag, setSelectedTag] = useState('Todas');
-  const [orderStatusFilter, setOrderStatusFilter] = useState('Todos');
   const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('Todos');
   const [toastMessage, setToastMessage] = useState(null);
   const [passwordModalTarget, setPasswordModalTarget] = useState(null);
   const [passwordInput, setPasswordInput] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [selectedSizes, setSelectedSizes] = useState({});
   const [editingProduct, setEditingProduct] = useState(null);
-  const [selectedOrderDetail, setSelectedOrderDetail] = useState(null);
   const [newOrderModalOpen, setNewOrderModalOpen] = useState(false);
+  const [selectedOrderDetail, setSelectedOrderDetail] = useState(null);
 
-  // Form states (Product)
+  // Form states
   const [formName, setFormName] = useState('');
   const [formCategory, setFormCategory] = useState(CATEGORIES[0]);
   const [formPrice, setFormPrice] = useState(80000);
@@ -183,11 +181,11 @@ export default function App() {
 
   // New order form states
   const [newClientName, setNewClientName] = useState('');
-  const [newClientPhone, setNewClientPhone] = useState('3000559196');
+  const [newClientPhone, setNewClientPhone] = useState('573000559196');
   const [newAddress, setNewAddress] = useState('');
-  const [newZone, setNewZone] = useState(zones[0]?.name || 'Cabecera / Sotomayor / Prado');
+  const [newZone, setNewZone] = useState(zones[0]?.name || 'Cabecera');
   const [newDeliveryDate, setNewDeliveryDate] = useState(new Date().toISOString().split('T')[0]);
-  const [newDeliveryTime, setNewDeliveryTime] = useState('3:30 PM');
+  const [newDeliveryTime, setNewDeliveryTime] = useState('11:00 AM');
   const [newOrderProdId, setNewOrderProdId] = useState(products[0]?.id || 'torta-moka');
   const [newOrderPortion, setNewOrderPortion] = useState('');
   const [newOrderNotes, setNewOrderNotes] = useState('');
@@ -199,7 +197,7 @@ export default function App() {
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
-    showToast(`✓ Teléfono ${text} copiado`);
+    showToast(`Teléfono ${text} copiado 📋`);
   };
 
   useEffect(() => {
@@ -217,22 +215,14 @@ export default function App() {
   const handleVerifyPassword = (e) => {
     e.preventDefault();
     const pass = passwordInput.trim();
-    if (passwordModalTarget === 'admin') {
-      if (pass === adminPassword || pass === 'admin123' || pass === 'ts2026') {
-        setAuthRole('admin');
-        if (typeof window !== 'undefined') sessionStorage.setItem('ts_auth_role', 'admin');
-        setCurrentView('admin');
-        setPasswordModalTarget(null);
-        showToast('✓ Bienvenido Administrador');
-      } else { setPasswordError('Clave incorrecta (defecto: 1234 o admin123)'); }
-    } else if (passwordModalTarget === 'panadero') {
-      if (pass === panaderoPassword || pass === adminPassword || pass === '5678') {
-        setAuthRole('panadero');
-        if (typeof window !== 'undefined') sessionStorage.setItem('ts_auth_role', 'panadero');
-        setCurrentView('panadero');
-        setPasswordModalTarget(null);
-        showToast('✓ Bienvenido a Cocina');
-      } else { setPasswordError('Clave incorrecta (defecto: 5678)'); }
+    if (pass === adminPassword || pass === 'ts2026' || pass === 'admin123') {
+      setAuthRole('admin');
+      if (typeof window !== 'undefined') sessionStorage.setItem('ts_auth_role', 'admin');
+      setCurrentView('admin');
+      setPasswordModalTarget(null);
+      showToast('✓ Bienvenido Administrador');
+    } else {
+      setPasswordError('Clave incorrecta');
     }
   };
 
@@ -245,10 +235,7 @@ export default function App() {
 
   const navigateTo = (view) => {
     if (view === 'public') { setCurrentView('public'); return; }
-    if (authRole === 'admin' || (authRole === 'panadero' && view === 'panadero')) {
-      setCurrentView(view);
-      return;
-    }
+    if (authRole === 'admin') { setCurrentView(view); return; }
     setPasswordModalTarget(view);
     setPasswordInput('');
     setPasswordError('');
@@ -308,18 +295,18 @@ export default function App() {
     const prod = products.find(p => p.id === newOrderProdId) || products[0];
     const portionObj = prod.sizes && prod.sizes.find(s => s.portions === newOrderPortion);
     const itemPrice = portionObj ? portionObj.price : prod.price;
-    const zoneObj = zones.find(z => z.name === newZone) || zones[0] || { price: 5000 };
+    const zoneObj = zones.find(z => z.name === newZone) || zones[0];
     const newOrd = {
       id: 'ord-' + Date.now(),
-      code: 'TS-' + (orders.length + 1003),
+      code: 'TS-' + (orders.length + 1001),
       clientName: newClientName.trim() || 'Cliente Mostrador',
-      clientPhone: newClientPhone.trim() || '3000559196',
+      clientPhone: newClientPhone.trim() || '573000559196',
       address: newAddress.trim() || 'Recoge en Tienda',
       zone: newZone,
       deliveryDate: newDeliveryDate,
       deliveryTime: newDeliveryTime,
       items: [{ productName: prod.name, portion: newOrderPortion || undefined, quantity: 1, price: itemPrice }],
-      total: itemPrice + zoneObj.price,
+      total: itemPrice + (zoneObj ? zoneObj.price : 0),
       status: 'Pendiente',
       paymentMethod: newPaymentMethod,
       notes: newOrderNotes.trim()
@@ -329,14 +316,11 @@ export default function App() {
     showToast('✓ Pedido registrado con éxito');
   };
 
-  // REDIRECCIÓN A LA SIM PROVISIONAL
   const handleOrderWhatsApp = (product) => {
     const selPortion = selectedSizes[product.id];
     const sizeObj = product.sizes && product.sizes.find(s => s.portions === selPortion);
     const pr = sizeObj ? sizeObj.price : product.price;
     const txt = '¡Hola Territorio Saludable! 🍰 Quisiera pedir: *' + product.name + '*' + (sizeObj ? ' (' + sizeObj.portions + ')' : '') + ' por valor de ' + formatCOP(pr) + '. ¿Tienen disponibilidad para Bucaramanga?';
-    
-    // SIM Provisional
     window.open('https://wa.me/' + DEFAULT_CONFIG.whatsappPhone + '?text=' + encodeURIComponent(txt), '_blank');
   };
 
@@ -352,7 +336,7 @@ export default function App() {
       }
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
-        return p.name.toLowerCase().includes(q) || (p.description && p.description.toLowerCase().includes(q)) || (p.features && p.features.some(f => f.toLowerCase().includes(q)));
+        return p.name.toLowerCase().includes(q) || (p.features && p.features.some(f => f.toLowerCase().includes(q))) || (p.description && p.description.toLowerCase().includes(q));
       }
       return true;
     });
@@ -360,10 +344,10 @@ export default function App() {
 
   const filteredOrders = useMemo(() => {
     return orders.filter(o => {
-      if (orderStatusFilter === 'Todos') return true;
-      return o.status === orderStatusFilter;
+      if (statusFilter === 'Todos') return true;
+      return o.status === statusFilter;
     });
-  }, [orders, orderStatusFilter]);
+  }, [orders, statusFilter]);
 
   return (
     <div className="min-h-screen bg-[#FAF7F2] text-[#241E19] flex flex-col font-sans selection:bg-[#2D5A27] selection:text-white">
@@ -374,66 +358,73 @@ export default function App() {
         </div>
       )}
 
-      {/* 1. Barra Verde Superior */}
+      {/* 1. BARRA SUPERIOR E INFORMACIÓN */}
       <div className="bg-[#2D5A27] text-white py-2 px-4 text-center text-xs font-medium tracking-wide">
         <p className="max-w-6xl mx-auto truncate">Pastelería Artesanal 100% Sin Azúcar Refinada y Sin Gluten en Bucaramanga | Horario: Lunes a Viernes: 8am - 6pm | Ubicación: Bucaramanga y Área Metropol.</p>
       </div>
 
-      {/* 2. Header Principal con Logo Oficial y Número Provisional */}
+      {/* 2. HEADER CON LOGO OFICIAL Y ÚNICO BOTÓN "ACCESO ADMIN" */}
       <header className="sticky top-0 z-40 bg-[#FAF7F2]/95 backdrop-blur-md border-b border-[#EAE2D8]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-18 flex items-center justify-between gap-3">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between gap-3">
           <button onClick={() => navigateTo('public')} className="flex items-center gap-3 text-left cursor-pointer">
-            {/* Logo Oficial */}
-            <div className="relative w-11 h-11">
-              <img 
-                src="/logo.png" 
-                alt="Territorio Saludable Logo" 
-                className="w-11 h-11 rounded-full object-cover border border-[#2D5A27]/20 shadow-xs"
-                onError={(e) => { e.currentTarget.style.display='none'; e.currentTarget.nextSibling.style.display='flex'; }}
-              />
-              <div className="w-11 h-11 rounded-full bg-[#2D5A27] text-white hidden items-center justify-center font-serif text-base font-black shadow-xs">TS</div>
-            </div>
+            <img 
+              src="/logo.png" 
+              alt="Territorio Saludable" 
+              className="w-12 h-12 rounded-full object-cover border border-[#2D5A27]/20 shadow-xs"
+              onError={(e) => { e.currentTarget.style.display='none'; }}
+            />
             <div>
               <span className="font-serif text-lg sm:text-xl font-black text-[#241E19] block">{DEFAULT_CONFIG.businessName}</span>
               <span className="text-[9px] uppercase tracking-wider text-[#8C533C] font-bold block">PASTELERÍA SANA • PEDIDOS WHATSAPP</span>
             </div>
           </button>
 
-          {/* Botones del Header */}
-          <div className="flex items-center gap-2">
-            <a href={'https://wa.me/' + DEFAULT_CONFIG.whatsappPhone} target="_blank" rel="noreferrer" className="px-3.5 py-2 rounded-xl bg-[#25D366] hover:bg-[#20bd59] text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition">
-              <Phone size={14} /><span className="hidden sm:inline">300 0559196</span>
+          <div className="flex items-center gap-2.5">
+            <a 
+              href={'https://wa.me/' + DEFAULT_CONFIG.whatsappPhone} 
+              target="_blank" 
+              rel="noreferrer" 
+              className="px-3.5 py-2 rounded-xl bg-[#25D366] hover:bg-[#20ba59] text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition"
+            >
+              <Phone size={14} />
+              <span>300 0559196</span>
             </a>
-            
+
             {!isAdminView && (
-              <button onClick={() => navigateTo('admin')} className={'px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition ' + (currentView === 'admin' ? 'bg-[#2D5A27] text-white' : 'bg-[#1C3A27] hover:bg-black text-white shadow-xs')}>
-                <ShieldCheck size={14} /><span>Acceso Admin</span>
+              <button 
+                onClick={() => navigateTo('admin')} 
+                className={'px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer ' + (currentView === 'admin' ? 'bg-[#1C3A27] text-white' : 'bg-[#1C3A27] text-white hover:bg-black shadow-xs')}
+              >
+                <ShieldCheck size={14} />
+                <span>Acceso Admin</span>
               </button>
             )}
 
             {authRole && (
-              <button onClick={handleLogout} className="p-2 rounded-xl text-stone-500 hover:text-red-600 hover:bg-stone-100 transition" title="Cerrar Sesión"><LogOut size={16} /></button>
+              <button onClick={handleLogout} className="p-2 rounded-xl text-stone-500 hover:text-red-600 transition" title="Cerrar Sesión">
+                <LogOut size={16} />
+              </button>
             )}
           </div>
         </div>
       </header>
 
-      {/* 3. Vista Pública del Catálogo */}
+      {/* VISTA PÚBLICA DEL CLIENTE */}
       {currentView === 'public' && (
         <main className="flex-1">
           
-          {/* BANNER PRINCIPAL EN 2 LÍNEAS Y TEXTO EXPLICATIVO */}
+          {/* BANNER PRINCIPAL A 2 LÍNEAS CON PÁRRAFO DE INGREDIENTES */}
           <section className="bg-gradient-to-b from-[#FAF7F2] to-[#F2EDE4] py-10 px-4 border-b border-[#EAE2D8] text-center space-y-4">
             <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#E5ECE3] text-[#2D5A27] text-xs font-bold">
-              <Sparkles size={13} /><span>Pastelería Saludable en Bucaramanga & Área Metropolitana</span>
+              <Sparkles size={13} />
+              <span>Pastelería Saludable en Bucaramanga & Área Metropolitana</span>
             </div>
             
-            {/* Título Principal en 2 Líneas Exactas */}
             <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-black text-[#241E19] leading-tight">
-              El placer de lo dulce, 100% sin azúcar<br className="hidden sm:inline" /> y libre de gluten
+              El placer de lo dulce, <br className="hidden sm:inline" />
+              <span className="italic font-normal">100% sin azúcar y libre de gluten.</span>
             </h1>
-            
-            {/* Texto Descriptivo Definitivo sobre Stevia, Colágeno y Harinas Integrales */}
+
             <p className="text-sm text-stone-600 max-w-3xl mx-auto leading-relaxed">
               Nuestra meta es crear recetas deliciosas con ingredientes que sean útiles para nuestro cuerpo. Eliminamos el azúcar refinado, eliminamos el gluten (a muchos les cae mal), e incluimos ingredientes maravillosos como el chocolate amargo, la fibra prebiótica, el colágeno hidrolizado, harinas integrales, muchas frutas y lo mejor, es que todo lo endulzamos con STEVIA.
             </p>
@@ -445,102 +436,125 @@ export default function App() {
               <span className="px-3 py-1 rounded-full bg-white border border-emerald-200 text-emerald-800 text-xs font-bold">🕒 Tortas con 1 día de anticipación</span>
             </div>
 
-            {/* Buscador */}
             <div className="pt-4 max-w-md mx-auto relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400" size={18} />
-              <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="🔍 Buscar por nombre, sabor o ingrediente..." className="w-full pl-11 pr-4 py-3 rounded-2xl bg-white border border-[#D8CFC4] text-sm focus:outline-none focus:border-[#2D5A27] shadow-xs" />
+              <input 
+                type="text" 
+                value={searchQuery} 
+                onChange={(e) => setSearchQuery(e.target.value)} 
+                placeholder="🔍 Buscar por nombre, sabor o ingrediente..." 
+                className="w-full pl-11 pr-4 py-3 rounded-2xl bg-white border border-[#D8CFC4] text-sm focus:outline-none focus:border-[#2D5A27] shadow-xs" 
+              />
             </div>
           </section>
 
-          {/* BARRA DE NAVEGACIÓN POR CATEGORÍA */}
-          <div className="sticky top-18 z-30 bg-[#FAF7F2]/95 backdrop-blur-md border-b border-[#EAE2D8] py-3 px-4">
+          {/* BARRA DE CATEGORÍAS */}
+          <div className="sticky top-20 z-30 bg-[#FAF7F2]/95 backdrop-blur-md border-b border-[#EAE2D8] py-3 px-4">
             <div className="max-w-7xl mx-auto flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
               {CATEGORIES.map(cat => (
-                <button key={cat} onClick={() => setSelectedCategory(cat)} className={'px-4 py-2 rounded-xl text-xs font-bold shrink-0 transition cursor-pointer ' + (selectedCategory === cat ? 'bg-[#2D5A27] text-white shadow-xs' : 'bg-white border border-[#D8CFC4] text-stone-700 hover:bg-stone-50')}>
+                <button 
+                  key={cat} 
+                  onClick={() => setSelectedCategory(cat)} 
+                  className={'px-4 py-2 rounded-xl text-xs font-bold shrink-0 transition cursor-pointer ' + (selectedCategory === cat ? 'bg-[#2D5A27] text-white shadow-xs' : 'bg-white border border-[#D8CFC4] text-stone-700 hover:bg-stone-50')}
+                >
                   {cat}
                 </button>
               ))}
             </div>
-            
-            {/* Filtros Dietarios */}
             <div className="max-w-7xl mx-auto flex items-center gap-1.5 overflow-x-auto pt-2 no-scrollbar">
               {DIETARY_TAGS.map(tag => (
-                <button key={tag} onClick={() => setSelectedTag(tag)} className={'px-2.5 py-1 rounded-lg text-[11px] font-semibold shrink-0 cursor-pointer ' + (selectedTag === tag ? 'bg-stone-900 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200')}>
+                <button 
+                  key={tag} 
+                  onClick={() => setSelectedTag(tag)} 
+                  className={'px-2.5 py-1 rounded-lg text-[11px] font-semibold shrink-0 cursor-pointer ' + (selectedTag === tag ? 'bg-stone-900 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200')}
+                >
                   {tag}
                 </button>
               ))}
             </div>
           </div>
 
-          {/* SECCIÓN DEL CATÁLOGO PÚBLICO */}
+          {/* CATÁLOGO PÚBLICO CON SUBTÍTULOS Y DESCRIPCIÓN EN TARJETAS */}
           <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-            <div className="flex flex-col md:flex-row md:items-center justify-between pb-4 gap-2">
-              <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#241E19]">{selectedCategory}</h2>
-              <span className="text-xs text-stone-500 font-semibold">{filteredProducts.length} productos listados</span>
+            <div className="pb-4">
+              <div className="flex items-center justify-between">
+                <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#241E19]">{selectedCategory}</h2>
+                <span className="text-xs text-stone-500 font-semibold">{filteredProducts.length} productos</span>
+              </div>
+
+              {/* SUBTÍTULOS EXPLICATIVOS POR CATEGORÍA */}
+              <div className="mt-2 text-xs text-stone-600 bg-amber-50/70 p-3.5 rounded-2xl border border-amber-200/70 leading-relaxed">
+                {selectedCategory === 'Tortas Saludables' && (
+                  <p>🎂 <strong>Tortas Saludables:</strong> Todas nuestras tortas son hechas a base de harina de almendras, arroz y almidón de yuca, endulzadas 100% Libres de azúcar y Sin gluten. Pedidos con un día de anticipación.</p>
+                )}
+                {selectedCategory === 'Catalogo Detalles' && (
+                  <p>🎁 <strong>Detalles con amor:</strong> Sorprende a tu persona favorita con una experiencia deliciosa y libre de culpas.</p>
+                )}
+                {selectedCategory === 'Pan Saludable' && (
+                  <p>🍞 <strong>Pan Digestivo (Sin azúcar y Sin gluten):</strong> Disfruta de un pan saludable, delicioso con un sabor auténtico y una textura única. Está hecho con harina de arroz, fécula de maíz y harina de almendras. Contiene psyllium, una fuente natural de fibra que favorece la digestión y brinda saciedad. Es 100% libre de gluten y no contiene azúcar refinada, convirtiéndose en una opción perfecta para quienes buscan cuidar su alimentación sin renunciar al placer de disfrutar un pan verdaderamente delicioso.</p>
+                )}
+                {(selectedCategory === 'Postres Saludables' || selectedCategory === 'Mercadito') && (
+                  <p>✨ Selecciona el producto que prefieras y presiona el botón <strong>Pedir</strong> para coordinar la entrega directamente a través de nuestro WhatsApp oficial.</p>
+                )}
+              </div>
             </div>
 
-            {/* BANNER DE SUBTÍTULOS EXPLICATIVOS POR CATEGORÍA */}
-            <div className="mb-8 bg-amber-50/70 p-4 rounded-2xl border border-amber-200/80 text-xs text-stone-700 leading-relaxed shadow-xs">
-              {selectedCategory === 'Tortas Saludables' && (
-                <p>🎂 <strong>Tortas Saludables:</strong> Todas nuestras tortas son hechas a base de harina de almendras, arroz y almidón de yuca, endulzadas 100% Libres de azúcar y Sin gluten. Pedidos con un día de anticipación.</p>
-              )}
-              {selectedCategory === 'Catalogo Detalles' && (
-                <p>🎁 <strong>Detalles con amor:</strong> Sorprende a tu persona favorita con una experiencia deliciosa y libre de culpas.</p>
-              )}
-              {selectedCategory === 'Pan Saludable' && (
-                <p>🍞 <strong>Pan Digestivo (Sin azúcar y Sin gluten):</strong> Disfruta de un pan saludable, delicioso con un sabor auténtico y una textura única. Está hecho con harina de arroz, fécula de maíz y harina de almendras. Contiene psyllium, una fuente natural de fibra que favorece la digestión y brinda saciedad. Es 100% libre de gluten y no contiene azúcar refinada, convirtiéndose en una opción perfecta para quienes buscan cuidar su alimentación sin renunciar al placer de disfrutar un pan verdaderamente delicioso.</p>
-              )}
-              {(selectedCategory === 'Postres Saludables' || selectedCategory === 'Mercadito') && (
-                <p>✨ Selección de productos individuales elaborados artesanalmente con ingredientes limpios y funcionales. Haz clic en <strong>Pedir</strong> para coordinar tu entrega.</p>
-              )}
-            </div>
-
-            {/* GRILLA DE TARJETAS DE PRODUCTO CON DESCRIPCIÓN */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {/* GRILLA DE TARJETAS DE PRODUCTOS */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-4">
               {filteredProducts.map(prod => {
                 const selSize = selectedSizes[prod.id] || (prod.sizes && prod.sizes[0] && prod.sizes[0].portions);
                 const sizeObj = prod.sizes && prod.sizes.find(s => s.portions === selSize);
                 const curPrice = sizeObj ? sizeObj.price : prod.price;
 
                 return (
-                  <div key={prod.id} className="bg-white rounded-3xl border border-[#EAE2D8] overflow-hidden shadow-xs hover:shadow-md transition flex flex-col group justify-between">
+                  <div key={prod.id} className="bg-white rounded-3xl border border-[#EAE2D8] overflow-hidden shadow-xs hover:shadow-md transition flex flex-col justify-between group">
                     <div>
-                      {/* Imagen y Badges */}
+                      {/* IMAGEN Y ETIQUETAS */}
                       <div className="relative aspect-square bg-stone-100 overflow-hidden">
-                        <img src={prod.imageUrl} alt={prod.name} onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = FALLBACK_IMG; }} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                        <img 
+                          src={prod.imageUrl} 
+                          alt={prod.name} 
+                          onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = FALLBACK_IMG; }} 
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+                        />
                         {!prod.available && (
                           <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
                             <span className="px-3 py-1 rounded-full bg-red-600 text-white text-xs font-bold uppercase">Agotado</span>
                           </div>
                         )}
                         <div className="absolute top-3 left-3 flex flex-wrap gap-1">
-                          <span className={'px-2.5 py-1 rounded-full text-white text-[10px] font-bold shadow-xs ' + (prod.requiresNotice ? 'bg-amber-600/90' : 'bg-emerald-600/90')}>
+                          <span className={'px-2.5 py-1 rounded-full text-white text-[10px] font-bold shadow-xs ' + (prod.requiresNotice ? 'bg-amber-600' : 'bg-emerald-600')}>
                             {prod.requiresNotice ? '1 Día Anticipación' : 'Entrega Hoy'}
                           </span>
                         </div>
                       </div>
 
-                      {/* Info y Descripción */}
+                      {/* CONTENIDO DE TARJETA */}
                       <div className="p-4 space-y-2">
-                        <div>
-                          <h3 className="font-serif font-bold text-base text-[#241E19] group-hover:text-[#2D5A27] transition">{prod.name}</h3>
-                          <div className="flex flex-wrap gap-1 pt-1">
-                            {prod.features && prod.features.map(f => (
-                              <span key={f} className="px-1.5 py-0.5 rounded bg-stone-100 text-stone-600 text-[10px] font-medium">{f}</span>
-                            ))}
-                          </div>
+                        <h3 className="font-serif font-bold text-base text-[#241E19] group-hover:text-[#2D5A27] transition">{prod.name}</h3>
+                        
+                        {/* DESCRIPCIÓN DEL PRODUCTO VISIBLE */}
+                        {prod.description && (
+                          <p className="text-stone-500 text-xs leading-relaxed line-clamp-3">
+                            {prod.description}
+                          </p>
+                        )}
+
+                        <div className="flex flex-wrap gap-1 pt-1">
+                          {prod.features && prod.features.map(f => (
+                            <span key={f} className="px-1.5 py-0.5 rounded bg-stone-100 text-stone-600 text-[10px] font-medium">{f}</span>
+                          ))}
                         </div>
 
-                        {/* Campo de Descripción Visible */}
-                        <p className="text-stone-600 text-xs leading-relaxed line-clamp-3">
-                          {prod.description}
-                        </p>
-
-                        {/* Selector de Porciones */}
+                        {/* SELECTOR DE PORCIONES */}
                         {prod.sizes && prod.sizes.length > 0 && (
                           <div className="space-y-1 pt-1">
-                            <label className="text-[10px] font-bold uppercase text-stone-400">Porción / Tamaño:</label>
-                            <select value={selSize} onChange={(e) => setSelectedSizes({ ...selectedSizes, [prod.id]: e.target.value })} className="w-full py-1.5 px-2 rounded-xl bg-stone-50 border border-stone-200 text-xs font-semibold text-stone-800 focus:outline-none focus:border-[#2D5A27]">
+                            <label className="text-[10px] font-bold uppercase text-stone-400 block">PORCIÓN / TAMAÑO:</label>
+                            <select 
+                              value={selSize} 
+                              onChange={(e) => setSelectedSizes({ ...selectedSizes, [prod.id]: e.target.value })} 
+                              className="w-full py-1.5 px-2 rounded-xl bg-stone-50 border border-stone-200 text-xs font-semibold text-stone-800 focus:outline-none focus:border-[#2D5A27]"
+                            >
                               {prod.sizes.map(s => <option key={s.portions} value={s.portions}>{s.portions} - {formatCOP(s.price)}</option>)}
                             </select>
                           </div>
@@ -548,14 +562,19 @@ export default function App() {
                       </div>
                     </div>
 
-                    {/* Footer de Tarjeta con Precio y Botón Pedir */}
-                    <div className="p-4 pt-2 border-t border-stone-100 flex items-center justify-between gap-2 mt-auto">
+                    {/* PRECIO Y BOTÓN DE PEDIDO */}
+                    <div className="p-4 pt-0 border-t border-stone-100 flex items-center justify-between gap-2 mt-3">
                       <div>
                         <span className="text-[10px] text-stone-400 block uppercase font-bold">Precio</span>
                         <span className="text-base font-black text-[#2D5A27]">{formatCOP(curPrice)}</span>
                       </div>
-                      <button onClick={() => handleOrderWhatsApp(prod)} disabled={!prod.available} className="px-3.5 py-2 rounded-xl bg-[#2D5A27] hover:bg-[#23481E] disabled:bg-stone-300 text-white text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-xs">
-                        <Phone size={13} /><span>Pedir</span>
+                      <button 
+                        onClick={() => handleOrderWhatsApp(prod)} 
+                        disabled={!prod.available} 
+                        className="px-4 py-2 rounded-xl bg-[#2D5A27] hover:bg-[#23481E] disabled:bg-stone-300 text-white text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-xs"
+                      >
+                        <Phone size={13} />
+                        <span>Pedir</span>
                       </button>
                     </div>
                   </div>
@@ -566,49 +585,75 @@ export default function App() {
         </main>
       )}
 
-      {/* 4. Vista Panadero / Cocina */}
-      {currentView === 'panadero' && (
+      {/* VISTA ADMINISTRADOR */}
+      {currentView === 'admin' && (
         <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 py-6 w-full space-y-6">
-          <div className="bg-amber-900 text-white rounded-3xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-md">
+          <div className="bg-[#1C3A27] text-white rounded-3xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-md">
             <div>
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-800 text-amber-200 text-xs font-bold"><ChefHat size={14} /><span>Producción & Cocina</span></div>
-              <h2 className="text-2xl font-black font-serif mt-1">Control de Horneado</h2>
+              <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-emerald-900 text-emerald-200 text-xs font-bold">
+                <ShieldCheck size={14} />
+                <span>Administración Privada</span>
+              </div>
+              <h2 className="text-2xl font-black font-serif mt-1">Panel Central de Pastelería</h2>
             </div>
-            <div className="flex items-center gap-2">
-              <button onClick={() => setPanaderoTab('pedidos')} className={'px-4 py-2 rounded-xl text-xs font-bold ' + (panaderoTab === 'pedidos' ? 'bg-white text-amber-950' : 'bg-amber-800 text-white')}>Pedidos ({orders.length})</button>
-              <button onClick={() => setPanaderoTab('produccion')} className={'px-4 py-2 rounded-xl text-xs font-bold ' + (panaderoTab === 'produccion' ? 'bg-white text-amber-950' : 'bg-amber-800 text-white')}>Disponibilidad Vitrina</button>
+            <div className="flex flex-wrap items-center gap-2">
+              <button onClick={() => setAdminTab('inventario')} className={'px-3.5 py-2 rounded-xl text-xs font-bold transition ' + (adminTab === 'inventario' ? 'bg-white text-[#1C3A27]' : 'bg-emerald-900 text-emerald-100')}>Inventario (CRUD)</button>
+              <button onClick={() => setAdminTab('pedidos')} className={'px-3.5 py-2 rounded-xl text-xs font-bold transition ' + (adminTab === 'pedidos' ? 'bg-white text-[#1C3A27]' : 'bg-emerald-900 text-emerald-100')}>Pedidos ({orders.length})</button>
+              <button onClick={() => setAdminTab('calendario')} className={'px-3.5 py-2 rounded-xl text-xs font-bold transition ' + (adminTab === 'calendario' ? 'bg-white text-[#1C3A27]' : 'bg-emerald-900 text-emerald-100')}>Google Calendar</button>
+              <button onClick={() => setAdminTab('configuracion')} className={'px-3.5 py-2 rounded-xl text-xs font-bold transition ' + (adminTab === 'configuracion' ? 'bg-white text-[#1C3A27]' : 'bg-emerald-900 text-emerald-100')}>Seguridad & Tarifas</button>
             </div>
           </div>
 
-          {panaderoTab === 'pedidos' ? (
+          {/* TAB 1: INVENTARIO Y PRODUCTOS (CRUD CON CASILLA DE DESCRIPCIÓN) */}
+          {adminTab === 'inventario' && (
             <div className="bg-white rounded-3xl border border-stone-200 p-6 space-y-4">
-              <h3 className="font-bold text-lg text-stone-900">Órdenes en Cocina</h3>
+              <div className="flex items-center justify-between">
+                <h3 className="font-bold text-lg text-stone-900">Catálogo de Productos ({products.length})</h3>
+                <button onClick={() => handleOpenEditProduct(null)} className="px-4 py-2 rounded-xl bg-[#2D5A27] text-white text-xs font-bold flex items-center gap-1.5 shadow-xs hover:bg-[#23481E]">
+                  <Plus size={15} />
+                  <span>Nuevo Producto</span>
+                </button>
+              </div>
+
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
                   <thead className="bg-stone-50 border-b border-stone-200 text-stone-500 uppercase">
-                    <tr><th className="p-3">Código/Cliente</th><th className="p-3">Productos Agendados</th><th className="p-3">Hora Entrega</th><th className="p-3">Estado</th><th className="p-3">Acciones</th></tr>
+                    <tr>
+                      <th className="p-3">Orden</th>
+                      <th className="p-3">Imagen</th>
+                      <th className="p-3">Nombre & Categoría</th>
+                      <th className="p-3">Precio Base</th>
+                      <th className="p-3">Porciones</th>
+                      <th className="p-3">Estado</th>
+                      <th className="p-3">Acciones</th>
+                    </tr>
                   </thead>
                   <tbody className="divide-y divide-stone-100">
-                    {orders.map(ord => (
-                      <tr key={ord.id} className="hover:bg-stone-50/50">
-                        <td className="p-3"><span className="font-bold block text-stone-900">{ord.code}</span><span className="text-stone-500">{ord.clientName}</span></td>
+                    {products.map((prod, idx) => (
+                      <tr key={prod.id} className="hover:bg-stone-50/50">
                         <td className="p-3">
-                          {ord.items.map((it, i) => <span key={i} className="block font-medium">x{it.quantity} {it.productName} {it.portion ? '(' + it.portion + ')' : ''}</span>)}
-                          {ord.notes && <span className="block text-[11px] text-amber-800 italic mt-0.5">Nota: {ord.notes}</span>}
+                          <div className="flex items-center gap-1">
+                            <button onClick={() => handleMoveProduct(prod.id, 'up')} disabled={idx === 0} className="p-1 rounded bg-stone-100 hover:bg-stone-200 disabled:opacity-30"><ArrowUp size={12} /></button>
+                            <button onClick={() => handleMoveProduct(prod.id, 'down')} disabled={idx === products.length - 1} className="p-1 rounded bg-stone-100 hover:bg-stone-200 disabled:opacity-30"><ArrowDown size={12} /></button>
+                          </div>
                         </td>
-                        <td className="p-3 font-semibold">{ord.deliveryTime}</td>
                         <td className="p-3">
-                          <select value={ord.status} onChange={(e) => setOrders(prev => prev.map(o => o.id === ord.id ? { ...o, status: e.target.value } : o))} className="px-2 py-1 rounded-lg text-xs font-bold border border-stone-300 bg-white">
-                            <option value="Pendiente">⌛ Pendiente</option>
-                            <option value="En Cocina">👨‍🍳 En Cocina</option>
-                            <option value="Listo Despacho">📦 Listo Despacho</option>
-                            <option value="Entregado">✅ Entregado</option>
-                            <option value="Cancelado">❌ Cancelado</option>
-                          </select>
+                          <img src={prod.imageUrl} alt={prod.name} onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = FALLBACK_IMG; }} className="w-10 h-10 rounded-lg object-cover" />
+                        </td>
+                        <td className="p-3">
+                          <span className="font-bold text-stone-900 block">{prod.name}</span>
+                          <span className="text-[10px] text-stone-500">{prod.category}</span>
+                        </td>
+                        <td className="p-3 font-semibold text-[#2D5A27]">{formatCOP(prod.price)}</td>
+                        <td className="p-3 text-[11px] text-stone-600">{prod.sizes && prod.sizes.length > 0 ? prod.sizes.map(s => s.portions).join(', ') : 'Precio único'}</td>
+                        <td className="p-3">
+                          <button onClick={() => handleToggleProduct(prod.id)} className={'px-2.5 py-1 rounded-full text-[10px] font-bold ' + (prod.available ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800')}>
+                            {prod.available ? 'Disponible' : 'Agotado'}
+                          </button>
                         </td>
                         <td className="p-3 flex items-center gap-2">
-                          <a href={getGoogleCalendarUrl(ord)} target="_blank" rel="noreferrer" className="p-1.5 rounded-lg bg-blue-50 text-blue-700" title="Calendar"><Calendar size={14} /></a>
-                          <a href={'https://wa.me/57' + ord.clientPhone} target="_blank" rel="noreferrer" className="p-1.5 rounded-lg bg-emerald-50 text-emerald-700" title="WhatsApp"><Phone size={14} /></a>
+                          <button onClick={() => handleOpenEditProduct(prod)} className="p-1.5 rounded-lg bg-stone-100 hover:bg-stone-200" title="Editar Producto"><Edit2 size={13} /></button>
+                          <button onClick={() => handleDeleteProduct(prod.id)} className="p-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600" title="Eliminar"><Trash2 size={13} /></button>
                         </td>
                       </tr>
                     ))}
@@ -616,76 +661,36 @@ export default function App() {
                 </table>
               </div>
             </div>
-          ) : (
-            <div className="bg-white rounded-3xl border border-stone-200 p-6 space-y-4">
-              <h3 className="font-bold text-lg text-stone-900">Disponibilidad en Vitrina</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {products.map(prod => (
-                  <div key={prod.id} className="p-3 rounded-2xl border border-stone-200 flex items-center justify-between gap-3 bg-stone-50">
-                    <img src={prod.imageUrl} alt={prod.name} onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = FALLBACK_IMG; }} className="w-12 h-12 rounded-xl object-cover shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <span className="font-bold text-xs truncate block text-stone-900">{prod.name}</span>
-                      <span className={'text-[10px] font-bold ' + (prod.available ? 'text-emerald-700' : 'text-red-600')}>{prod.available ? 'Disponible' : 'Agotado'}</span>
-                    </div>
-                    <button onClick={() => handleToggleProduct(prod.id)} className={'px-2.5 py-1 rounded-xl text-xs font-bold text-white cursor-pointer ' + (prod.available ? 'bg-emerald-600' : 'bg-red-600')}>
-                      {prod.available ? 'Sí' : 'No'}
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
           )}
-        </main>
-      )}
 
-      {/* 5. Vista Administrador Completa */}
-      {currentView === 'admin' && (
-        <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 py-6 w-full space-y-6">
-          <div className="bg-stone-900 text-white rounded-3xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-md">
-            <div>
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-stone-800 text-stone-300 text-xs font-bold"><ShieldCheck size={14} /><span>Administración</span></div>
-              <h2 className="text-2xl font-black font-serif mt-1">Panel Central de Pastelería</h2>
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <button onClick={() => setAdminTab('pedidos')} className={'px-3.5 py-2 rounded-xl text-xs font-bold transition ' + (adminTab === 'pedidos' ? 'bg-[#2D5A27] text-white' : 'bg-stone-800 text-stone-300 hover:bg-stone-700')}>📋 Pedidos ({orders.length})</button>
-              <button onClick={() => setAdminTab('inventario')} className={'px-3.5 py-2 rounded-xl text-xs font-bold transition ' + (adminTab === 'inventario' ? 'bg-[#2D5A27] text-white' : 'bg-stone-800 text-stone-300 hover:bg-stone-700')}>📦 Inventario CRUD ({products.length})</button>
-              <button onClick={() => setAdminTab('calendario')} className={'px-3.5 py-2 rounded-xl text-xs font-bold transition ' + (adminTab === 'calendario' ? 'bg-[#2D5A27] text-white' : 'bg-stone-800 text-stone-300 hover:bg-stone-700')}>📅 Google Calendar</button>
-              <button onClick={() => setAdminTab('configuracion')} className={'px-3.5 py-2 rounded-xl text-xs font-bold transition ' + (adminTab === 'configuracion' ? 'bg-[#2D5A27] text-white' : 'bg-stone-800 text-stone-300 hover:bg-stone-700')}>⚙️ Ajustes & Domicilios</button>
-            </div>
-          </div>
-
-          {/* SECCIÓN 1: PEDIDOS CON DESGLOSE Y FILTROS POR PESTAÑAS */}
+          {/* TAB 2: TABLA DE PEDIDOS ADMIN CON TELÉFONO COPIABLE, OJITO Y ACCIONES */}
           {adminTab === 'pedidos' && (
-            <div className="bg-white rounded-3xl border border-stone-200 p-6 space-y-4 shadow-xs">
+            <div className="bg-white rounded-3xl border border-stone-200 p-6 space-y-4">
               
-              {/* Encabezado y Botón Orden Manual */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                {/* Pestañas de Filtro por Estado (Pills) */}
+              {/* BARRA SUPERIOR DE PESTAÑAS Y NUEVA ORDEN */}
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-stone-100 pb-3">
                 <div className="flex flex-wrap gap-1.5">
                   {['Todos', 'Pendiente', 'En Cocina', 'Listo Despacho', 'Entregado', 'Cancelado'].map(st => (
                     <button
                       key={st}
-                      onClick={() => setOrderStatusFilter(st)}
-                      className={'text-xs font-bold px-3 py-1.5 rounded-full border transition ' + (
-                        orderStatusFilter === st
-                          ? 'bg-[#1C3A27] text-white border-[#1C3A27]'
-                          : 'bg-white text-stone-700 border-stone-200 hover:bg-stone-50'
-                      )}
+                      onClick={() => setStatusFilter(st)}
+                      className={'px-3 py-1.5 rounded-full text-xs font-semibold transition cursor-pointer ' + (statusFilter === st ? 'bg-[#2D5A27] text-white shadow-xs' : 'bg-stone-100 text-stone-600 hover:bg-stone-200')}
                     >
                       {st}
                     </button>
                   ))}
                 </div>
 
-                <button onClick={() => setNewOrderModalOpen(true)} className="px-4 py-2 rounded-xl bg-[#2D5A27] text-white text-xs font-bold flex items-center gap-1.5 shadow-xs hover:bg-[#23481E] transition">
-                  <Plus size={15} /><span>+ Nuevo Pedido Manual</span>
+                <button onClick={() => setNewOrderModalOpen(true)} className="px-4 py-2 rounded-xl bg-[#2D5A27] text-white text-xs font-bold flex items-center gap-1.5 shadow-xs hover:bg-[#23481E]">
+                  <Plus size={15} />
+                  <span>+ Registrar Orden Manual</span>
                 </button>
               </div>
 
-              {/* Tabla de Pedidos con Teléfonos Copiables y Sin Precios Individuales */}
+              {/* TABLA PRINCIPAL DE PEDIDOS */}
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-amber-50/80 border-b border-amber-200/60 text-stone-700 uppercase font-bold">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead className="bg-amber-50/80 border-b border-amber-200/60 text-stone-700 font-bold">
                     <tr>
                       <th className="p-3">CÓDIGO / CLIENTE</th>
                       <th className="p-3">PRODUCTOS AGENDADOS</th>
@@ -696,25 +701,26 @@ export default function App() {
                       <th className="p-3 text-center">ACCIONES</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-amber-100/60">
+                  <tbody className="divide-y divide-stone-100">
                     {filteredOrders.map(ord => (
-                      <tr key={ord.id} className="hover:bg-amber-50/30 transition">
-                        {/* Cliente, Código y Botón Copiar Teléfono */}
+                      <tr key={ord.id} className="hover:bg-amber-50/30">
+                        {/* 1. CLIENTE Y CÓDIGO CON BOTÓN COPIAR TELÉFONO */}
                         <td className="p-3">
-                          <span className="font-bold block text-stone-900 text-sm">{ord.clientName}</span>
-                          <span className="text-stone-500 font-mono text-[11px] flex items-center gap-1">
-                            {ord.code} • 
+                          <div className="font-bold text-stone-900">{ord.clientName}</div>
+                          <div className="text-stone-500 font-mono text-[11px] flex items-center gap-1 mt-0.5">
+                            <span>{ord.code}</span> • 
                             <button 
                               onClick={() => copyToClipboard(ord.clientPhone)}
-                              className="text-emerald-700 hover:underline font-bold inline-flex items-center gap-0.5"
+                              className="text-emerald-700 font-bold hover:underline flex items-center gap-0.5"
                               title="Copiar Teléfono"
                             >
-                              {ord.clientPhone} <Copy size={11} />
+                              <span>{ord.clientPhone}</span>
+                              <Copy size={11} />
                             </button>
-                          </span>
+                          </div>
                         </td>
 
-                        {/* Productos Agendados Sin Precios Visibles en la Tabla Principal */}
+                        {/* 2. PRODUCTOS AGENDADOS SIN PRECIOS VISIBLES (SÓLO NOMBRE Y CANTIDAD) */}
                         <td className="p-3">
                           {ord.items.map((it, i) => (
                             <div key={i} className="font-medium text-stone-800">
@@ -722,24 +728,443 @@ export default function App() {
                             </div>
                           ))}
                           {ord.notes && (
-                            <div className="text-[11px] text-amber-900 italic mt-1 font-medium bg-amber-100/60 p-1 rounded">
+                            <div className="text-[10px] text-amber-800 italic mt-1 bg-amber-50/60 px-2 py-0.5 rounded border border-amber-200/50">
                               Nota: {ord.notes}
                             </div>
                           )}
                         </td>
 
-                        {/* Fecha & Hora */}
+                        {/* 3. FECHA & HORA */}
                         <td className="p-3">
                           <div className="font-medium">📅 {ord.deliveryDate}</div>
                           <div className="text-stone-500">🕒 {ord.deliveryTime}</div>
                         </td>
 
-                        {/* Dirección & Zona */}
+                        {/* 4. DIRECCIÓN & ZONA */}
                         <td className="p-3">
                           <div className="font-medium">📍 {ord.address}</div>
                           <div className="text-stone-500">{ord.zone}</div>
                         </td>
 
-                        {/* Total y Estado de Pago */}
+                        {/* 5. TOTAL Y ESTADO PAGO */}
                         <td className="p-3">
-                          <div className
+                          <div className="font-bold text-[#2D5A27] text-sm">{formatCOP(ord.total)}</div>
+                          <div className="text-[10px] font-bold text-stone-400 uppercase">{ord.paymentMethod}</div>
+                        </td>
+
+                        {/* 6. SELECTOR DE ESTADOS DESPLEGABLES */}
+                        <td className="p-3">
+                          <select 
+                            value={ord.status} 
+                            onChange={(e) => setOrders(prev => prev.map(o => o.id === ord.id ? { ...o, status: e.target.value } : o))} 
+                            className="px-2.5 py-1.5 rounded-xl text-xs font-semibold border border-stone-300 bg-white shadow-xs focus:outline-none"
+                          >
+                            <option value="Pendiente">⌛ Pendiente</option>
+                            <option value="En Cocina">👨‍🍳 En Cocina</option>
+                            <option value="Listo Despacho">📦 Listo Despacho</option>
+                            <option value="Entregado">✅ Entregado</option>
+                            <option value="Cancelado">❌ Cancelado</option>
+                          </select>
+                        </td>
+
+                        {/* 7. ACCIONES: CHAT WHATSAPP, CALENDAR, OJITO */}
+                        <td className="p-3 text-center">
+                          <div className="flex justify-center items-center gap-1.5">
+                            <a 
+                              href={'https://wa.me/' + ord.clientPhone} 
+                              target="_blank" 
+                              rel="noreferrer" 
+                              className="p-1.5 rounded-lg bg-emerald-100 text-emerald-800 hover:bg-emerald-200 transition" 
+                              title="Abrir Chat de WhatsApp"
+                            >
+                              💬
+                            </a>
+                            <a 
+                              href={getGoogleCalendarUrl(ord)} 
+                              target="_blank" 
+                              rel="noreferrer" 
+                              className="p-1.5 rounded-lg bg-blue-100 text-blue-800 hover:bg-blue-200 transition" 
+                              title="Google Calendar"
+                            >
+                              📅
+                            </a>
+                            <button 
+                              onClick={() => setSelectedOrderDetail(ord)} 
+                              className="p-1.5 rounded-lg bg-stone-100 text-stone-700 hover:bg-stone-200 transition" 
+                              title="Ver Detalle Completo (Ojito)"
+                            >
+                              👁️
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: VISTA CALENDARIO GOOGLE */}
+          {adminTab === 'calendario' && (
+            <div className="bg-white rounded-3xl border border-stone-200 p-6 space-y-4">
+              <h3 className="font-bold text-lg text-stone-900">Calendario de Entregas & Google Calendar</h3>
+              <div className="w-full h-120 rounded-2xl overflow-hidden border border-stone-200">
+                <iframe src={DEFAULT_CONFIG.calendarEmbedUrl} className="w-full h-full border-0" title="Google Calendar" />
+              </div>
+            </div>
+          )}
+
+          {/* TAB 4: SEGURIDAD Y GESTOR DINÁMICO DE ZONAS/DOMICILIOS */}
+          {adminTab === 'configuracion' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              
+              {/* CAMBIO DE CLAVES INTERNO */}
+              <div className="bg-white rounded-3xl border border-stone-200 p-6 space-y-4 shadow-xs">
+                <h3 className="font-serif font-bold text-base text-stone-900">🔐 Seguridad & Claves de Acceso</h3>
+                <div className="space-y-4 text-xs">
+                  <div>
+                    <label className="font-bold text-stone-700 block mb-1">Nueva Clave Administrador:</label>
+                    <input 
+                      type="password" 
+                      value={newAdminPwd} 
+                      onChange={(e) => setNewAdminPwd(e.target.value)} 
+                      placeholder="Nueva clave admin..." 
+                      className="w-full px-4 py-2.5 rounded-xl border border-stone-300" 
+                    />
+                    <button 
+                      onClick={() => { if (!newAdminPwd.trim()) return; setAdminPassword(newAdminPwd.trim()); if (typeof window !== 'undefined') localStorage.setItem('ts_admin_pwd', newAdminPwd.trim()); setNewAdminPwd(''); showToast('✓ Clave Admin guardada'); }} 
+                      className="mt-2 px-4 py-2 rounded-xl bg-[#2D5A27] text-white font-bold hover:bg-[#23481E]"
+                    >
+                      Guardar Clave Admin
+                    </button>
+                  </div>
+                  <div className="pt-4 border-t border-stone-100">
+                    <label className="font-bold text-stone-700 block mb-1">Nueva Clave Panadero (Cocina):</label>
+                    <input 
+                      type="password" 
+                      value={newPanaderoPwd} 
+                      onChange={(e) => setNewPanaderoPwd(e.target.value)} 
+                      placeholder="Nueva clave cocina..." 
+                      className="w-full px-4 py-2.5 rounded-xl border border-stone-300" 
+                    />
+                    <button 
+                      onClick={() => { if (!newPanaderoPwd.trim()) return; setPanaderoPassword(newPanaderoPwd.trim()); if (typeof window !== 'undefined') localStorage.setItem('ts_panadero_pwd', newPanaderoPwd.trim()); setNewPanaderoPwd(''); showToast('✓ Clave Panadero guardada'); }} 
+                      className="mt-2 px-4 py-2 rounded-xl bg-amber-800 text-white font-bold hover:bg-amber-900"
+                    >
+                      Guardar Clave Panadero
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* GESTOR DE TARIFAS DE DOMICILIO DINÁMICAS */}
+              <div className="bg-white rounded-3xl border border-stone-200 p-6 space-y-4 shadow-xs">
+                <h3 className="font-serif font-bold text-base text-stone-900">🛵 Gestor Dinámico de Tarifas por Zona</h3>
+                <p className="text-xs text-stone-500">Agrega, modifica o elimina las tarifas de domicilio según varíen las distancias.</p>
+
+                <div className="space-y-2 text-xs">
+                  {zones.map(z => (
+                    <div key={z.id || z.name} className="flex items-center justify-between p-2.5 bg-stone-50 rounded-xl border border-stone-200">
+                      <span className="font-medium text-stone-800">{z.name}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-[#2D5A27]">{formatCOP(z.price)}</span>
+                        <button 
+                          onClick={() => {
+                            const newP = prompt(`Nuevo precio para ${z.name}:`, z.price);
+                            if (newP !== null && !isNaN(newP)) {
+                              setZones(zones.map(item => item.name === z.name ? { ...item, price: Number(newP) } : item));
+                              showToast('Tarifa actualizada');
+                            }
+                          }}
+                          className="p-1 text-blue-600 hover:bg-blue-50 rounded"
+                          title="Modificar Precio"
+                        >
+                          ✏️
+                        </button>
+                        <button 
+                          onClick={() => {
+                            setZones(zones.filter(item => item.name !== z.name));
+                            showToast('Zona eliminada');
+                          }}
+                          className="p-1 text-red-600 hover:bg-red-50 rounded font-bold"
+                          title="Eliminar Zona"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <button 
+                  onClick={() => {
+                    const name = prompt('Nombre de la nueva zona (ej. Floridablanca Cañaveral):');
+                    const price = prompt('Precio de envío (COP):');
+                    if (name && price && !isNaN(price)) {
+                      setZones([...zones, { id: 'z-' + Date.now(), name, price: Number(price) }]);
+                      showToast('Nueva zona agregada');
+                    }
+                  }}
+                  className="w-full py-2.5 border border-dashed border-[#2D5A27] text-[#2D5A27] font-bold text-xs rounded-xl hover:bg-emerald-50 transition"
+                >
+                  + Agregar Nueva Zona de Envío
+                </button>
+              </div>
+
+            </div>
+          )}
+        </main>
+      )}
+
+      {/* FOOTER GENERAL DEFINITIVO */}
+      <footer className="bg-[#1C1815] text-[#D8D0C5] border-t border-stone-800 mt-auto">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 grid grid-cols-1 md:grid-cols-4 gap-8 text-xs">
+          <div className="space-y-3">
+            <span className="font-serif text-lg font-black text-white block">Territorio Saludable S.A.S.</span>
+            <p className="text-stone-400 leading-relaxed">Pastelería 100% libre de gluten y azúcar refinada en Bucaramanga. Postres, panes y tortas hechos con amor e ingredientes naturales.</p>
+          </div>
+          <div className="space-y-2">
+            <span className="font-bold text-white uppercase tracking-wider block text-[11px]">Horario de Atención</span>
+            <p className="text-stone-400">Lunes a Viernes: 8:00 AM – 6:00 PM</p>
+            <p className="text-stone-400">Sábados: 8:00 AM – 5:00 PM</p>
+            <p className="text-stone-400">Domingos y Festivos: 9:00 AM – 2:00 PM</p>
+          </div>
+          <div className="space-y-2">
+            <span className="font-bold text-white uppercase tracking-wider block text-[11px]">Tarifas Domicilio</span>
+            {zones.map(z => (
+              <p key={z.name} className="flex justify-between text-stone-400">
+                <span>{z.name}</span>
+                <span className="font-bold text-amber-400">{formatCOP(z.price)}</span>
+              </p>
+            ))}
+          </div>
+          <div className="space-y-3">
+            <span className="font-bold text-white uppercase tracking-wider block text-[11px]">Métodos de Pago</span>
+            <div className="flex flex-wrap gap-1.5">
+              <span className="px-2.5 py-1 rounded bg-purple-900 text-white font-bold text-[10px]">NEQUI</span>
+              <span className="px-2.5 py-1 rounded bg-red-900 text-white font-bold text-[10px]">DAVIPLATA</span>
+              <span className="px-2.5 py-1 rounded bg-yellow-800 text-white font-bold text-[10px]">BANCOLOMBIA</span>
+              <span className="px-2.5 py-1 rounded bg-emerald-900 text-white font-bold text-[10px]">EFECTIVO</span>
+            </div>
+            <div className="pt-2">
+              <button onClick={() => navigateTo('admin')} className="text-stone-500 hover:text-white underline text-[11px] cursor-pointer">Acceso Administrativo (Jefe & Cocina)</button>
+            </div>
+          </div>
+        </div>
+        <div className="max-w-7xl mx-auto border-t border-stone-800/80 py-4 text-center text-[11px] text-stone-500">
+          © 2026 Territorio Saludable S.A.S. • Bucaramanga, Colombia. Todos los derechos reservados.
+        </div>
+      </footer>
+
+      {/* MODAL DE LOGIN ADMIN */}
+      {passwordModalTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="bg-white rounded-3xl border border-stone-200 shadow-2xl max-w-sm w-full p-6 space-y-4">
+            <div className="text-center space-y-1">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-100 flex items-center justify-center mx-auto text-[#2D5A27]">
+                <ShieldCheck size={24} />
+              </div>
+              <h3 className="font-bold text-base text-stone-900">Acceso Administrativo</h3>
+              <p className="text-xs text-stone-500">Ingresa la clave de seguridad para ingresar al panel privado.</p>
+            </div>
+            <form onSubmit={handleVerifyPassword} className="space-y-3">
+              <input 
+                type="password" 
+                value={passwordInput} 
+                onChange={(e) => { setPasswordInput(e.target.value); setPasswordError(''); }} 
+                placeholder="Ingresa contraseña..." 
+                autoFocus 
+                className="w-full px-4 py-2.5 rounded-xl border border-stone-300 text-center tracking-widest text-sm focus:outline-none focus:border-[#2D5A27]" 
+              />
+              {passwordError && <p className="text-xs text-red-600 font-semibold text-center">{passwordError}</p>}
+              <div className="flex gap-2">
+                <button type="button" onClick={() => setPasswordModalTarget(null)} className="flex-1 py-2 rounded-xl border border-stone-300 text-xs font-bold text-stone-600">Cancelar</button>
+                <button type="submit" className="flex-1 py-2 rounded-xl bg-[#2D5A27] text-white text-xs font-bold hover:bg-[#23481E]">Ingresar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL EDITAR / CREAR PRODUCTO (CON CASILLA DE DESCRIPCIÓN) */}
+      {editingProduct !== null && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs overflow-y-auto">
+          <div className="bg-white rounded-3xl border border-stone-200 shadow-2xl max-w-md w-full p-6 space-y-4 my-8">
+            <div className="flex items-center justify-between pb-2 border-b border-stone-100">
+              <h3 className="font-bold text-base text-stone-900">{editingProduct ? 'Editar Producto' : 'Nuevo Producto'}</h3>
+              <button onClick={() => setEditingProduct(null)} className="p-1 rounded-lg hover:bg-stone-100 text-stone-400"><X size={18} /></button>
+            </div>
+            <form onSubmit={handleSaveProduct} className="space-y-3 text-xs">
+              <div>
+                <label className="font-bold block mb-1">Nombre:</label>
+                <input type="text" value={formName} onChange={(e) => setFormName(e.target.value)} required className="w-full p-2.5 rounded-xl border border-stone-300" />
+              </div>
+              
+              {/* CAMPO DE DESCRIPCIÓN AGREGADO AL CRUD */}
+              <div>
+                <label className="font-bold block mb-1">Descripción del Producto:</label>
+                <textarea 
+                  rows="3"
+                  value={formDescription} 
+                  onChange={(e) => setFormDescription(e.target.value)} 
+                  placeholder="Describe los ingredientes, masa, endulzante y textura..."
+                  className="w-full p-2.5 rounded-xl border border-stone-300 text-xs" 
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="font-bold block mb-1">Categoría:</label>
+                  <select value={formCategory} onChange={(e) => setFormCategory(e.target.value)} className="w-full p-2.5 rounded-xl border border-stone-300">
+                    {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="font-bold block mb-1">Precio Base:</label>
+                  <input type="number" value={formPrice} onChange={(e) => setFormPrice(e.target.value)} required className="w-full p-2.5 rounded-xl border border-stone-300" />
+                </div>
+              </div>
+              <div>
+                <label className="font-bold block mb-1">Ruta Imagen (/public):</label>
+                <input type="text" value={formImageUrl} onChange={(e) => setFormImageUrl(e.target.value)} required className="w-full p-2.5 rounded-xl border border-stone-300" />
+              </div>
+
+              <div className="pt-2 border-t border-stone-100">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-bold text-stone-800">Porciones / Tamaños:</span>
+                  <button type="button" onClick={() => setFormSizes([...formSizes, { portions: '', price: formPrice }])} className="px-2 py-1 rounded bg-[#E5ECE3] text-[#2D5A27] font-bold text-[10px] flex items-center gap-1">
+                    <Plus size={12} /><span>Agregar Tamaño</span>
+                  </button>
+                </div>
+                {formSizes.length === 0 ? <p className="text-[11px] text-stone-400 italic">Sin tamaños adicionales.</p> : (
+                  <div className="space-y-2 max-h-40 overflow-y-auto">
+                    {formSizes.map((sz, i) => (
+                      <div key={i} className="flex items-center gap-2">
+                        <input type="text" value={sz.portions} onChange={(e) => { const u = [...formSizes]; u[i].portions = e.target.value; setFormSizes(u); }} placeholder="Ej: 5 porc" className="flex-1 p-2 rounded-xl border border-stone-300" />
+                        <input type="number" value={sz.price} onChange={(e) => { const u = [...formSizes]; u[i].price = e.target.value; setFormSizes(u); }} placeholder="Precio" className="w-24 p-2 rounded-xl border border-stone-300" />
+                        <button type="button" onClick={() => setFormSizes(formSizes.filter((_, idx) => idx !== i))} className="p-1.5 rounded-lg text-red-500 hover:bg-red-50"><Trash2 size={13} /></button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center gap-4 pt-2">
+                <label className="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" checked={formAvailable} onChange={(e) => setFormAvailable(e.target.checked)} /><span>Disponible</span></label>
+                <label className="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" checked={formRequiresNotice} onChange={(e) => setFormRequiresNotice(e.target.checked)} /><span>1 Día Anticipación</span></label>
+              </div>
+              <div className="pt-3 flex gap-2">
+                <button type="button" onClick={() => setEditingProduct(null)} className="flex-1 py-2.5 rounded-xl border border-stone-300 font-bold text-stone-600">Cancelar</button>
+                <button type="submit" className="flex-1 py-2.5 rounded-xl bg-[#2D5A27] text-white font-bold hover:bg-[#23481E]">Guardar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DETALLE DE ORDEN COMPLETO (DESGLOSE CON EL OJITO 👁️) */}
+      {selectedOrderDetail && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="bg-white rounded-3xl border border-stone-200 shadow-2xl max-w-md w-full p-6 space-y-4">
+            <div className="flex justify-between items-center border-b border-stone-100 pb-3">
+              <h3 className="font-serif font-bold text-stone-900 text-base">
+                📄 Detalle del Pedido #{selectedOrderDetail.code}
+              </h3>
+              <button onClick={() => setSelectedOrderDetail(null)} className="text-stone-400 hover:text-stone-600 font-bold">✕</button>
+            </div>
+
+            <div className="space-y-3 text-xs">
+              <div className="bg-amber-50/70 p-3.5 rounded-2xl border border-amber-200/60 space-y-1 text-stone-800">
+                <p><strong>Cliente:</strong> {selectedOrderDetail.clientName}</p>
+                <p><strong>Teléfono:</strong> {selectedOrderDetail.clientPhone}</p>
+                <p><strong>Fecha Entrega:</strong> {selectedOrderDetail.deliveryDate} ({selectedOrderDetail.deliveryTime})</p>
+                <p><strong>Dirección:</strong> {selectedOrderDetail.address} - {selectedOrderDetail.zone}</p>
+                {selectedOrderDetail.notes && <p className="text-amber-900 italic pt-1"><strong>Nota:</strong> {selectedOrderDetail.notes}</p>}
+              </div>
+
+              <div>
+                <h4 className="font-bold text-stone-800 mb-2">Ítems y Precios Desglosados:</h4>
+                <div className="space-y-2">
+                  {selectedOrderDetail.items.map((it, idx) => (
+                    <div key={idx} className="flex justify-between items-center bg-stone-50 p-2.5 rounded-xl border border-stone-200/60">
+                      <div>
+                        <span className="font-bold">{it.productName}</span>
+                        {it.portion && <span className="text-stone-500 text-[11px] block">Porción: {it.portion}</span>}
+                      </div>
+                      <span className="font-bold text-[#2D5A27]">{formatCOP(it.price * it.quantity)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="border-t border-stone-200 pt-3 flex justify-between items-center text-sm font-bold text-[#2D5A27]">
+                <span>Total a Pagar:</span>
+                <span>{formatCOP(selectedOrderDetail.total)}</span>
+              </div>
+            </div>
+
+            <button 
+              onClick={() => setSelectedOrderDetail(null)} 
+              className="w-full mt-4 bg-[#2D5A27] text-white text-xs font-bold py-2.5 rounded-xl hover:bg-[#23481E] transition"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL NUEVO PEDIDO MANUAL */}
+      {newOrderModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs overflow-y-auto">
+          <div className="bg-white rounded-3xl border border-stone-200 shadow-2xl max-w-md w-full p-6 space-y-4 my-8">
+            <div className="flex items-center justify-between pb-2 border-b border-stone-100">
+              <h3 className="font-bold text-base text-stone-900">+ Registrar Orden Manual</h3>
+              <button onClick={() => setNewOrderModalOpen(false)} className="p-1 rounded-lg hover:bg-stone-100 text-stone-400"><X size={18} /></button>
+            </div>
+            <form onSubmit={handleSaveNewOrder} className="space-y-3 text-xs">
+              <div className="grid grid-cols-2 gap-2">
+                <div><label className="font-bold block mb-1">Nombre Cliente:</label><input type="text" value={newClientName} onChange={(e) => setNewClientName(e.target.value)} required className="w-full p-2.5 rounded-xl border border-stone-300" /></div>
+                <div><label className="font-bold block mb-1">Teléfono:</label><input type="text" value={newClientPhone} onChange={(e) => setNewClientPhone(e.target.value)} required className="w-full p-2.5 rounded-xl border border-stone-300" /></div>
+              </div>
+              <div><label className="font-bold block mb-1">Dirección Entrega:</label><input type="text" value={newAddress} onChange={(e) => setNewAddress(e.target.value)} required className="w-full p-2.5 rounded-xl border border-stone-300" /></div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="font-bold block mb-1">Zona Domicilio:</label>
+                  <select value={newZone} onChange={(e) => setNewZone(e.target.value)} className="w-full p-2.5 rounded-xl border border-stone-300">
+                    {zones.map(z => <option key={z.name} value={z.name}>{z.name}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="font-bold block mb-1">Método Pago:</label>
+                  <select value={newPaymentMethod} onChange={(e) => setNewPaymentMethod(e.target.value)} className="w-full p-2.5 rounded-xl border border-stone-300">
+                    <option value="PAGADO NEQUI">PAGADO NEQUI</option>
+                    <option value="PAGADO BANCOLOMBIA">PAGADO BANCOLOMBIA</option>
+                    <option value="PENDIENTE">PENDIENTE</option>
+                    <option value="EFECTIVO">EFECTIVO</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div><label className="font-bold block mb-1">Fecha:</label><input type="date" value={newDeliveryDate} onChange={(e) => setNewDeliveryDate(e.target.value)} required className="w-full p-2.5 rounded-xl border border-stone-300" /></div>
+                <div><label className="font-bold block mb-1">Hora:</label><input type="text" value={newDeliveryTime} onChange={(e) => setNewDeliveryTime(e.target.value)} placeholder="11:00 AM" required className="w-full p-2.5 rounded-xl border border-stone-300" /></div>
+              </div>
+              <div>
+                <label className="font-bold block mb-1">Producto Principal:</label>
+                <select value={newOrderProdId} onChange={(e) => setNewOrderProdId(e.target.value)} className="w-full p-2.5 rounded-xl border border-stone-300">
+                  {products.map(p => <option key={p.id} value={p.id}>{p.name} ({p.category})</option>)}
+                </select>
+              </div>
+              <div><label className="font-bold block mb-1">Notas Aclaratorias:</label><input type="text" value={newOrderNotes} onChange={(e) => setNewOrderNotes(e.target.value)} placeholder="Ej: Entregar antes de las 4 PM" className="w-full p-2.5 rounded-xl border border-stone-300" /></div>
+              <div className="pt-3 flex gap-2">
+                <button type="button" onClick={() => setNewOrderModalOpen(false)} className="flex-1 py-2.5 rounded-xl border border-stone-300 font-bold text-stone-600">Cancelar</button>
+                <button type="submit" className="flex-1 py-2.5 rounded-xl bg-[#2D5A27] text-white font-bold hover:bg-[#23481E]">Registrar Pedido</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+}
