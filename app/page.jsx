@@ -3,9 +3,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   Search, Edit2, Trash2, Plus, ArrowUp, ArrowDown, Sparkles, Phone,
-  ShieldCheck, X, Clock, Lock, KeyRound, ChefHat, LogOut, MapPin,
-  Calendar, ShoppingBag, ClipboardList, Eye, Settings, ExternalLink, Check, Copy,
-  Instagram, Facebook, Sprout, ChevronLeft, ChevronRight
+  ShieldCheck, X, Clock, Lock, LogOut, MapPin, Calendar, ExternalLink,
+  Copy, Instagram, Facebook, Sprout, ChevronLeft, ChevronRight
 } from 'lucide-react';
 
 const FALLBACK_IMG = 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=500&auto=format&fit=crop&q=60';
@@ -67,7 +66,7 @@ const initialProducts = [
   P('maria-luisa', 'María Luisa', 0, 73000, '/maria-luisa.png', [['5 porc',73000],['8 porc',108000],['12 porc',145000],['18 porc',189000],['25 porc',249000]], ["Sin Azúcar","Sin Gluten"], true),
   P('matilda', 'Matilda', 0, 85000, '/matilda.jpeg', [['5 porc',85000],['8 porc',125000],['12 porc',158000],['18 porc',218000]], ["Sin Azúcar","Sin Gluten","Keto"], true),
   P('torta-vasca-frutos-rojos-o-amarillos', 'Torta Vasca Frutos Rojos o Amarillos', 0, 73000, '/torta-vasca-frutos-rojos-o-amarillos.jpeg', [['5 porc',73000],['8 porc',100000],['12 porc',120000]], ["Sin Azúcar","Sin Gluten","Keto"], true),
-  P('tortas-vasca-pistacho', 'Tortas Vasca Pistacho', 0, 85000, '/tortas-vasca-pistacho.png', [['5 porc',85000],['8 porc',115000],['140000',140000]], ["Sin Azúcar","Sin Gluten","Keto"], true),
+  P('tortas-vasca-pistacho', 'Tortas Vasca Pistacho', 0, 85000, '/tortas-vasca-pistacho.png', [['5 porc',85000],['8 porc',115000],['14 porc',140000]], ["Sin Azúcar","Sin Gluten","Keto"], true),
   P('torta-primavera', 'Torta Primavera', 0, 75000, '/torta-primavera.jpeg', [['5 porc',75000],['8 porc',110000],['12 porc',145000],['18 porc',195000]], ["Sin Azúcar","Sin Gluten"], true),
   
   P('copa-saludable', 'Copa Saludable', 1, 55000, '/copa-saludable.png', [], ["Sin Azúcar","Sin Gluten"], false, "Nuestra Copa Red Velvet Saludable combina capas irresistibles de bizcocho suave y esponjoso, yogurt griego, arequipe y crema chantilly, todo presentado en una elegante copa de vidrio. 100% libre de azúcar y gluten. Incluye tarjeta con mensaje personalizado."),
@@ -143,7 +142,7 @@ const getGoogleCalendarUrl = (order) => {
   return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent(title) + '&dates=' + d + 'T100000/' + d + 'T110000&details=' + encodeURIComponent(details) + '&location=' + encodeURIComponent(loc);
 };
 
-export default function App() {
+export default function Page() {
   const [currentView, setCurrentView] = useState('public');
   const [authRole, setAuthRole] = useState(() => typeof window !== 'undefined' ? sessionStorage.getItem('ts_auth_role') : null);
   const [adminTab, setAdminTab] = useState('inventario');
@@ -524,7 +523,6 @@ export default function App() {
 
       {currentView === 'public' && (
         <main className="flex-1">
-          
           <section className="bg-gradient-to-b from-[#FAF7F2] to-[#F2EDE4] py-12 px-4 border-b border-[#EAE2D8] text-center space-y-4">
             <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#E5ECE3] text-[#2D5A27] text-xs font-bold border border-emerald-200">
               <Sparkles size={13} />
@@ -599,7 +597,7 @@ export default function App() {
                   <p>🎁 <strong>Detalles con amor:</strong> Sorprende a tu persona favorita con una experiencia deliciosa y libre de culpas.</p>
                 )}
                 {selectedCategory === 'Pan Saludable' && (
-                  <p>🍞 <strong>Pan Digestivo (Sin azúcar y Sin gluten):</strong> Disfruta de un pan saludable, delicioso con un sabor auténtico y una textura única. Está hecho con harina de arroz, fécula de maíz y harina de almendras. Contiene psyllium, una fuente natural de fibra que favorece la digestión y brinda saciedad. Es 100% libre de gluten y no contiene azúcar refinada, convirtiéndose en una opción perfecta para quienes buscan cuidar su alimentación sin renunciar al placer de disfrutar un pan verdaderamente delicioso.</p>
+                  <p>🍞 <strong>Pan Digestivo (Sin azúcar y Sin gluten):</strong> Disfruta de un pan saludable, delicioso con un sabor auténtico y una textura única. Está hecho con harina de arroz, fécula de maíz y harina de almendras. Contiene psyllium, una fuente natural de fibra que favorece la digestión y brinda saciedad. Es 100% libre de gluten y no contiene azúcar refinada.</p>
                 )}
                 {(selectedCategory === 'Postres Saludables' || selectedCategory === 'Mercadito') && (
                   <p>✨ Selecciona el producto que prefieras y presiona el botón <strong>Pedir</strong> para coordinar la entrega directamente a través de nuestro WhatsApp oficial.</p>
@@ -741,315 +739,4 @@ export default function App() {
                           </div>
                         </td>
                         <td className="p-3">
-                          <img src={prod.imageUrl} alt={prod.name} onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = FALLBACK_IMG; }} className="w-10 h-10 rounded-lg object-cover" />
-                        </td>
-                        <td className="p-3">
-                          <span className="font-bold text-stone-900 block">{prod.name}</span>
-                          <span className="text-[10px] text-stone-500">{prod.category}</span>
-                        </td>
-                        <td className="p-3 font-semibold text-[#2D5A27]">{formatCOP(prod.price)}</td>
-                        <td className="p-3 text-[11px] text-stone-600">{prod.sizes && prod.sizes.length > 0 ? prod.sizes.map(s => s.portions).join(', ') : 'Precio único'}</td>
-                        <td className="p-3">
-                          <button onClick={() => handleToggleProduct(prod.id)} className={'px-2.5 py-1 rounded-full text-[10px] font-bold ' + (prod.available ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800')}>
-                            {prod.available ? 'Disponible' : 'Agotado'}
-                          </button>
-                        </td>
-                        <td className="p-3 flex items-center gap-2">
-                          <button onClick={() => handleOpenEditProduct(prod)} className="p-1.5 rounded-lg bg-stone-100 hover:bg-stone-200" title="Editar Producto"><Edit2 size={13} /></button>
-                          <button onClick={() => handleDeleteProduct(prod.id)} className="p-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600" title="Eliminar"><Trash2 size={13} /></button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {adminTab === 'pedidos' && (
-            <div className="bg-white rounded-3xl border border-stone-200 p-6 space-y-4">
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-stone-100 pb-3">
-                <div className="flex flex-wrap gap-1.5">
-                  {['Todos', 'Pendiente', 'En Cocina', 'Listo Despacho', 'Entregado', 'Cancelado'].map(st => (
-                    <button
-                      key={st}
-                      onClick={() => setStatusFilter(st)}
-                      className={'px-3 py-1.5 rounded-full text-xs font-semibold transition cursor-pointer ' + (statusFilter === st ? 'bg-[#2D5A27] text-white shadow-xs' : 'bg-stone-100 text-stone-600 hover:bg-stone-200')}
-                    >
-                      {st}
-                    </button>
-                  ))}
-                </div>
-
-                <button onClick={() => setNewOrderModalOpen(true)} className="px-4 py-2 rounded-xl bg-[#2D5A27] text-white text-xs font-bold flex items-center gap-1.5 shadow-xs hover:bg-[#23481E]">
-                  <Plus size={15} />
-                  <span>+ Registrar Orden Manual</span>
-                </button>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs border-collapse">
-                  <thead className="bg-amber-50/80 border-b border-amber-200/60 text-stone-700 font-bold">
-                    <tr>
-                      <th className="p-3">CÓDIGO / CLIENTE</th>
-                      <th className="p-3">PRODUCTOS AGENDADOS</th>
-                      <th className="p-3">FECHA & HORA</th>
-                      <th className="p-3">DIRECCIÓN & ZONA</th>
-                      <th className="p-3">TOTAL</th>
-                      <th className="p-3">ESTADO DEL PEDIDO</th>
-                      <th className="p-3 text-center">ACCIONES</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-stone-100">
-                    {filteredOrders.map(ord => (
-                      <tr key={ord.id} className="hover:bg-amber-50/30">
-                        <td className="p-3">
-                          <div className="font-bold text-stone-900">{ord.clientName}</div>
-                          <div className="text-stone-500 font-mono text-[11px] flex items-center gap-1 mt-0.5">
-                            <span>{ord.code}</span> • 
-                            <button 
-                              onClick={() => copyToClipboard(ord.clientPhone)}
-                              className="text-emerald-700 font-bold hover:underline flex items-center gap-0.5"
-                              title="Copiar Teléfono"
-                            >
-                              <span>{ord.clientPhone}</span>
-                              <Copy size={11} />
-                            </button>
-                          </div>
-                        </td>
-
-                        <td className="p-3">
-                          {ord.items.map((it, i) => (
-                            <div key={i} className="font-medium text-stone-800">
-                              x{it.quantity} {it.productName} {it.portion ? '(' + it.portion + ')' : ''}
-                            </div>
-                          ))}
-                          {ord.notes && (
-                            <div className="text-[10px] text-amber-800 italic mt-1 bg-amber-50/60 px-2 py-0.5 rounded border border-amber-200/50">
-                              Nota: {ord.notes}
-                            </div>
-                          )}
-                        </td>
-
-                        <td className="p-3">
-                          <div className="font-medium">📅 {ord.deliveryDate}</div>
-                          <div className="text-stone-500">🕒 {ord.deliveryTime}</div>
-                        </td>
-
-                        <td className="p-3">
-                          <div className="font-medium">📍 {ord.address}</div>
-                          <div className="text-stone-500">{ord.zone}</div>
-                        </td>
-
-                        <td className="p-3">
-                          <div className="font-bold text-[#2D5A27] text-sm">{formatCOP(ord.total)}</div>
-                          <div className="text-[10px] font-bold text-stone-400 uppercase">{ord.paymentMethod}</div>
-                        </td>
-
-                        <td className="p-3">
-                          <select 
-                            value={ord.status} 
-                            onChange={(e) => setOrders(prev => prev.map(o => o.id === ord.id ? { ...o, status: e.target.value } : o))} 
-                            className="px-2.5 py-1.5 rounded-xl text-xs font-semibold border border-stone-300 bg-white shadow-xs focus:outline-none"
-                          >
-                            <option value="Pendiente">⌛ Pendiente</option>
-                            <option value="En Cocina">👨‍🍳 En Cocina</option>
-                            <option value="Listo Despacho">📦 Listo Despacho</option>
-                            <option value="Entregado">✅ Entregado</option>
-                            <option value="Cancelado">❌ Cancelado</option>
-                          </select>
-                        </td>
-
-                        <td className="p-3 text-center">
-                          <div className="flex justify-center items-center gap-1.5">
-                            <a 
-                              href={'https://wa.me/' + ord.clientPhone} 
-                              target="_blank" 
-                              rel="noreferrer" 
-                              className="p-1.5 rounded-lg bg-emerald-100 text-emerald-800 hover:bg-emerald-200 transition" 
-                              title="Abrir Chat de WhatsApp"
-                            >
-                              💬
-                            </a>
-                            <a 
-                              href={getGoogleCalendarUrl(ord)} 
-                              target="_blank" 
-                              rel="noreferrer" 
-                              className="p-1.5 rounded-lg bg-blue-100 text-blue-800 hover:bg-blue-200 transition" 
-                              title="Google Calendar"
-                            >
-                              📅
-                            </a>
-                            <button 
-                              onClick={() => setSelectedOrderDetail(ord)} 
-                              className="p-1.5 rounded-lg bg-stone-100 text-stone-700 hover:bg-stone-200 transition" 
-                              title="Ver Detalle Completo (Ojito)"
-                            >
-                              👁️
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {adminTab === 'calendario' && (
-            <div className="space-y-6">
-              <div className="bg-white rounded-3xl border border-stone-200 p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div>
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-[#2D5A27] text-xs font-bold border border-emerald-200 mb-1">
-                    <Calendar size={13} />
-                    <span>Widget</span>
-                  </div>
-                  <h3 className="font-serif text-3xl font-black text-stone-900">Calendar</h3>
-                  <p className="text-xs text-stone-500">Visualiza las fechas de entrega agendadas, sincroniza con Google Calendar o consulta la agenda interactiva.</p>
-                </div>
-
-                <a 
-                  href={config.calendarEmbedUrl} 
-                  target="_blank" 
-                  rel="noreferrer" 
-                  className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1.5 transition shadow-xs shrink-0"
-                >
-                  <ExternalLink size={14} />
-                  <span>Abrir Google Calendar</span>
-                </a>
-              </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <div className="lg:col-span-7 bg-white rounded-3xl border border-stone-200 p-6 space-y-4 shadow-xs">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-serif text-xl font-bold text-stone-900">
-                      Noviembre 2026 <span className="text-xs text-stone-400 font-sans font-normal">({orders.length} pedidos totales)</span>
-                    </h4>
-                    <div className="flex items-center gap-1">
-                      <button className="p-2 rounded-xl border border-stone-200 text-stone-500 hover:bg-stone-50"><ChevronLeft size={16} /></button>
-                      <button className="p-2 rounded-xl border border-stone-200 text-stone-500 hover:bg-stone-50"><ChevronRight size={16} /></button>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-7 text-center font-bold text-[11px] text-stone-400 uppercase tracking-wider py-2">
-                    <div>DOM</div><div>LUN</div><div>MAR</div><div>MIÉ</div><div>JUE</div><div>VIE</div><div>SÁB</div>
-                  </div>
-
-                  <div className="grid grid-cols-7 gap-2">
-                    {Array.from({ length: 30 }, (_, i) => {
-                      const dayNum = i + 1;
-                      const dateStr = `2026-11-${dayNum.toString().padStart(2, '0')}`;
-                      const hasOrders = daysWithOrders.has(dateStr);
-                      const isSelected = selectedCalDateStr === dateStr;
-
-                      return (
-                        <button
-                          key={dayNum}
-                          onClick={() => setSelectedCalDateStr(dateStr)}
-                          className={
-                            'h-16 rounded-2xl flex flex-col items-center justify-center relative transition cursor-pointer font-bold text-sm border ' +
-                            (isSelected ? 'border-emerald-600 bg-emerald-50 text-emerald-900 shadow-xs ring-2 ring-emerald-500/20' : 
-                             hasOrders ? 'border-emerald-300 bg-emerald-50/50 text-stone-900 hover:bg-emerald-100/50' : 
-                             'border-stone-100 bg-stone-50/60 text-stone-700 hover:bg-stone-100')
-                          }
-                        >
-                          <span>{dayNum}</span>
-                          {hasOrders && (
-                            <span className="w-2 h-2 rounded-full bg-emerald-600 mt-1"></span>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div className="lg:col-span-5 bg-white rounded-3xl border border-stone-200 p-6 flex flex-col justify-between shadow-xs">
-                  <div>
-                    <div className="flex items-center justify-between border-b border-stone-100 pb-3">
-                      <div>
-                        <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block">ENTREGAS PROGRAMADAS PARA:</span>
-                        <h4 className="font-serif text-xl font-bold text-[#2D5A27]">{selectedCalDateStr}</h4>
-                      </div>
-                      <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold">
-                        {calendarOrdersForDate.length} pedido(s)
-                      </span>
-                    </div>
-
-                    <div className="py-6">
-                      {calendarOrdersForDate.length > 0 ? (
-                        <div className="space-y-3">
-                          {calendarOrdersForDate.map(ord => (
-                            <div key={ord.id} className="p-4 rounded-2xl bg-amber-50/60 border border-amber-200/60 space-y-2">
-                              <div className="flex items-center justify-between">
-                                <span className="font-bold text-stone-900">{ord.clientName} ({ord.code})</span>
-                                <span className="text-xs font-bold text-[#2D5A27]">{formatCOP(ord.total)}</span>
-                              </div>
-                              <p className="text-xs text-stone-600">📍 {ord.address} ({ord.zone})</p>
-                              <p className="text-xs text-stone-600">🕒 Hora: {ord.deliveryTime}</p>
-                              <div className="text-[11px] text-stone-700 pt-1 border-t border-amber-200/40">
-                                {ord.items.map((it, idx) => (
-                                  <div key={idx}>• {it.quantity}x {it.productName} {it.portion ? `(${it.portion})` : ''}</div>
-                                ))}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="text-center py-12 space-y-3 text-stone-400">
-                          <Calendar size={40} className="mx-auto text-stone-300 stroke-[1.5]" />
-                          <p className="text-xs font-semibold text-stone-500 max-w-xs mx-auto leading-relaxed">
-                            No hay entregas registradas para esta fecha.
-                          </p>
-                          <p className="text-[11px] text-stone-400 max-w-xs mx-auto">
-                            Haz clic en un día del calendario que tenga badge verde para ver los detalles.
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {adminTab === 'configuracion' && (
-            <div className="space-y-6">
-              <div className="bg-white rounded-3xl border border-stone-200 p-6 space-y-6 shadow-xs">
-                <div className="flex items-center justify-between border-b border-stone-100 pb-4">
-                  <div>
-                    <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold mb-1">
-                      <span>Solo Jefe</span>
-                    </div>
-                    <h3 className="font-serif text-2xl font-bold text-stone-900">Configuración de la Pastelería</h3>
-                    <p className="text-xs text-stone-500">Personaliza el número de WhatsApp oficial, redes sociales, horarios de atención y el Google Calendar.</p>
-                  </div>
-                </div>
-
-                <form onSubmit={handleSaveGeneralConfig} className="space-y-6">
-                  <div className="space-y-4">
-                    <h4 className="font-serif font-bold text-base text-stone-900 flex items-center gap-2">
-                      <Phone size={16} className="text-[#2D5A27]" />
-                      <span>Canales de Contacto & WhatsApp de Pedidos</span>
-                    </h4>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                      <div>
-                        <label className="font-bold text-stone-700 uppercase tracking-wider block mb-1">NÚMERO DE WHATSAPP (CON CÓDIGO DE PAÍS) *</label>
-                        <input 
-                          type="text" 
-                          value={cfgPhone} 
-                          onChange={(e) => setCfgPhone(e.target.value)} 
-                          required 
-                          className="w-full p-3 rounded-2xl bg-stone-50 border border-stone-200 font-mono text-stone-800" 
-                        />
-                        <span className="text-[10px] text-stone-400 mt-1 block">A este número llegarán todos los pedidos del catálogo digital.</span>
-                      </div>
-                      <div>
-                        <label className="font-bold text-stone-700 uppercase tracking-wider block mb-1">NOMBRE DEL NEGOCIO</label>
-                        <input 
-                          type="text" 
-                          value={cfgName} 
-                          onChange={(e) => setCfgName(e.target.value)} 
-                          required 
-                          className="w-full p-3 rounded-2xl bg-stone-50
+                          <img src={prod.imageUrl} alt
