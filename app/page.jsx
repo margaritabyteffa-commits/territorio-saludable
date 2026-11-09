@@ -31,15 +31,15 @@ const INITIAL_ZONES = [
   { id: 'z4', name: 'Girón / Piedecuesta', price: 15000 }
 ];
 
-export const formatCOP = (n) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(n);
-export const ensureSlash = (u) => !u ? '/torta-moka.png' : (u.startsWith('http') || u.startsWith('/') ? u : '/' + u);
+const formatCOP = (n) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(n);
+const ensureSlash = (u) => !u ? '/torta-moka.png' : (u.startsWith('http') || u.startsWith('/') ? u : '/' + u);
 
 const P = (id, name, catIdx, price, imageUrl, sizes = [], features = ['Sin Azúcar', 'Sin Gluten'], requiresNotice = false, description = '') => ({
   id, name, category: CATEGORIES[catIdx], price, imageUrl: ensureSlash(imageUrl), available: true, features, requiresNotice, description,
   sizes: sizes.map(([p, pr]) => ({ portions: p, price: pr, label: p + ' (' + formatCOP(pr) + ')' }))
 });
 
-export const initialProducts = [
+const initialProducts = [
   P('torta-moka', 'Torta Moka', 0, 84000, '/torta-moka.png', [['5 porc',84000],['8 porc',123000],['12 porc',155000],['18 porc',217000]], ["Sin Azúcar","Sin Gluten","Keto"], true, "Esponjoso bizcocho de cacao y café orgánico, rellenado con crema suave de arequipe sin azúcar."),
   P('torta-pistacho', 'Torta Pistacho', 0, 94000, '/torta-pistacho.png', [['5 porc',94000],['8 porc',141000],['12 porc',197000],['18 porc',274000],['25 porc',353000]], ["Sin Azúcar","Sin Gluten","Keto"], true, "Masa fina a base de harina de almendras y pistachos naturales molidos con stevia pura."),
   P('torta-chocoarequipe', 'Torta Choco-Arequipe', 0, 60000, '/torta-chocoarequipe.png', [['3 porc',60000],['5 porc',84000],['8 porc',123000],['12 porc',155000]], ["Sin Azúcar","Sin Gluten"], true, "Capas suaves de chocolate amargo artesanal con el más cremoso arequipe fit."),
@@ -70,7 +70,6 @@ export const initialProducts = [
   P('tortas-vasca-pistacho', 'Tortas Vasca Pistacho', 0, 85000, '/tortas-vasca-pistacho.png', [['5 porc',85000],['8 porc',115000],['140000',140000]], ["Sin Azúcar","Sin Gluten","Keto"], true),
   P('torta-primavera', 'Torta Primavera', 0, 75000, '/torta-primavera.jpeg', [['5 porc',75000],['8 porc',110000],['12 porc',145000],['18 porc',195000]], ["Sin Azúcar","Sin Gluten"], true),
   
-  // NUEVOS PRODUCTOS SOLICITADOS (CATÁLOGO DETALLES)
   P('copa-saludable', 'Copa Saludable', 1, 55000, '/copa-saludable.png', [], ["Sin Azúcar","Sin Gluten"], false, "Nuestra Copa Red Velvet Saludable combina capas irresistibles de bizcocho suave y esponjoso, yogurt griego, arequipe y crema chantilly, todo presentado en una elegante copa de vidrio. 100% libre de azúcar y gluten. Incluye tarjeta con mensaje personalizado."),
   P('postre-ilusion', 'Postre Ilusión', 1, 19000, '/postre-ilusion.png', [], ["Sin Azúcar","Sin Gluten"], false, "Postre mug cake sin azúcar y sin gluten. Contiene torta, arequipe, yogurt griego y fresa. Vaso de 9 onzas empacado en su cajita especial con tarjeta personalizada."),
   P('mini-marquesa-detalle', 'Mini Marquesa', 1, 35000, '/mini-marquesa.png', [], ["Sin Azúcar","Sin Gluten"], false, "Bizcocho de brownie hecho con chocolate semiamargo y arequipe. Decorado con chantilly, arequipe, mermelada de frutos rojos, fresas y arándanos. 100% endulzado con Stevia y libre de trigo. Empacada en Cajita con cinta y tarjeta. Tamaño personal."),
@@ -105,7 +104,6 @@ export const initialProducts = [
   P('bocadillo-y-queso-parmesano', 'Bocadillo y Queso Parmesano', 2, 18000, '/pan-bocadillo-y-queso-parmesano.jpg', [], ["Sin Azúcar","Sin Gluten"], false),
   P('ajo-y-finas-hierbas-250g', 'Ajo y Finas Hierbas 250g', 2, 16000, '/pan-ajo-y-finas-hierbas-250g-(Salado).png', [], ["Sin Azúcar","Sin Gluten"], false),
   
-  // NUEVOS PRODUCTOS SOLICITADOS (POSTRES SALUDABLES)
   P('postre-con-helado-nuevo', 'Postre con Helado', 3, 17000, '/postre-con-helado.png', [], ["Sin Azúcar","Sin Gluten"], false, "Postre en capas con torta, arequipe, yogurt griego, frutos secos y helado con colágeno hidrolizado. Sin azúcar y sin gluten."),
   P('mini-brownies-caja', 'Mini Brownies', 3, 23000, '/mini-brownies.png', [['Caja x4',23000],['Caja x8',44000]], ["Sin Azúcar","Sin Gluten","Keto"], false, "Delicioso y melcochudo bizcocho hecho con una mezcla de harina de almendras, harina de arroz, arequipe y chocolate semiamargo, con una capa de arequipe cero azúcar en la mitad, decoración en arequipe, chocolate y chantilly."),
   P('blondie-caja', 'Blondie', 3, 19000, '/blondie.png', [['Caja x2',19000],['Caja x4',36000]], ["Sin Azúcar","Sin Gluten"], false, "Delicioso bizcocho hecho con harina de almendras, harina de arroz, arequipe y chocolate blanco decoración en arequipe."),
@@ -131,12 +129,12 @@ export const initialProducts = [
   P('arepas-libres-de-gluten', 'Arepas Libres de Gluten', 4, 16000, '/arepas-libres-de-gluten.jpeg', [], ["Sin Azúcar","Sin Gluten"], false)
 ];
 
-export const initialOrders = [
+const initialOrders = [
   { id: 'ord-101', code: 'TS-1001', clientName: 'Valentina Gómez', clientPhone: '3158901234', address: 'Cra 35 # 52-20, Apto 402', zone: 'Cabecera / Sotomayor / Prado', deliveryDate: '2026-11-09', deliveryTime: '3:30 PM', items: [{ productName: 'Torta de Arequipe Saludable', portion: '8 porc', quantity: 1, price: 87000 }, { productName: 'Brownies Melcochudos', portion: 'Caja x4', quantity: 1, price: 36000 }], total: 128000, status: 'En Cocina', paymentMethod: 'PAGADO NEQUI', notes: 'Cliente habitual. Entregar antes de las 4 PM.' },
   { id: 'ord-102', code: 'TS-1002', clientName: 'Dr. Carlos Mendoza', clientPhone: '3104567890', address: 'Calle 48 # 28-15, Consultorio 301', zone: 'Centro / San Francisco', deliveryDate: '2026-11-09', deliveryTime: '4:00 PM', items: [{ productName: 'Pan Ajo Asado & Finas Hierbas (250g)', quantity: 2, price: 16000 }, { productName: 'Arequipe Artesanal Fit (Frasco 280g)', quantity: 1, price: 22000 }], total: 62000, status: 'En Cocina', paymentMethod: 'PAGADO BANCOLOMBIA', notes: 'Llamar al llegar.' }
 ];
 
-export const getGoogleCalendarUrl = (order) => {
+const getGoogleCalendarUrl = (order) => {
   const title = 'Entrega TS: ' + order.clientName + ' (' + order.code + ')';
   const items = order.items.map(i => i.quantity + 'x ' + i.productName + (i.portion ? ' (' + i.portion + ')' : '')).join(', ');
   const details = 'Pastelería Territorio Saludable S.A.S.\\nPedido: ' + order.code + '\\nCliente: ' + order.clientName + '\\nTel: +' + order.clientPhone + '\\nDir: ' + order.address + '\\nZona: ' + order.zone + '\\nTotal: ' + formatCOP(order.total) + '\\nPago: ' + order.paymentMethod + '\\n\\nItems:\\n' + items + '\\n\\nNotas: ' + (order.notes || 'Ninguna');
@@ -194,7 +192,6 @@ export default function App() {
   const [newOrderModalOpen, setNewOrderModalOpen] = useState(false);
   const [selectedOrderDetail, setSelectedOrderDetail] = useState(null);
 
-  // Form states de Productos
   const [formName, setFormName] = useState('');
   const [formCategory, setFormCategory] = useState(CATEGORIES[0]);
   const [formPrice, setFormPrice] = useState(80000);
@@ -204,7 +201,6 @@ export default function App() {
   const [formRequiresNotice, setFormRequiresNotice] = useState(true);
   const [formSizes, setFormSizes] = useState([]);
 
-  // Form states de Nuevo Pedido Manual
   const [newClientName, setNewClientName] = useState('');
   const [newClientPhone, setNewClientPhone] = useState(config.whatsappPhone);
   const [newAddress, setNewAddress] = useState('');
@@ -216,7 +212,6 @@ export default function App() {
   const [newOrderNotes, setNewOrderNotes] = useState('');
   const [newPaymentMethod, setNewPaymentMethod] = useState('PAGADO NEQUI');
 
-  // Form states de Configuración General
   const [cfgName, setCfgName] = useState(config.businessName);
   const [cfgPhone, setCfgPhone] = useState(config.whatsappPhone);
   const [cfgInsta, setCfgInsta] = useState(config.instagramUrl);
@@ -229,7 +224,6 @@ export default function App() {
   const [newAdminPwd, setNewAdminPwd] = useState('');
   const [newPanaderoPwd, setNewPanaderoPwd] = useState('');
 
-  // ESTADOS DEL CALENDARIO INTERACTIVO
   const [selectedCalDateStr, setSelectedCalDateStr] = useState('2026-11-09');
 
   const showToast = (msg) => { setToastMessage(msg); setTimeout(() => setToastMessage(null), 3000); };
@@ -317,7 +311,6 @@ export default function App() {
     setProducts(prev => prev.map(p => p.id === id ? { ...p, available: !p.available } : p));
   };
 
-  // MANEJADOR EDITAR / CREAR NUEVO PRODUCTO CORREGIDO
   const handleOpenEditProduct = (prod) => {
     if (prod) {
       setEditingProduct(prod);
@@ -443,5 +436,620 @@ export default function App() {
         </div>
       )}
 
-      {/* 1. BARRA SUPERIOR E INFORMACIÓN */}
-      <div className="bg-[#1C3A27] text-emerald-10
+      <div className="bg-[#1C3A27] text-emerald-100 py-2 px-4 text-xs font-medium tracking-wide border-b border-emerald-900/50">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-1 text-center sm:text-left">
+          <div className="flex items-center gap-2 truncate">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <p className="truncate">🌱 Pastelería Artesanal 100% Sin Azúcar Refinada y Sin Gluten en Bucaramanga</p>
+          </div>
+          <div className="flex items-center gap-4 text-[11px] text-emerald-200/90 shrink-0">
+            <span>🕒 {config.hoursMonFri}</span>
+            <span>📍 Bucaramanga y Área Metropol.</span>
+          </div>
+        </div>
+      </div>
+
+      <header className="sticky top-0 z-40 bg-[#FAF7F2]/95 backdrop-blur-md border-b border-[#EAE2D8]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between gap-3">
+          
+          <button onClick={() => navigateTo('public')} className="flex items-center gap-3 text-left cursor-pointer group">
+            <div className="w-11 h-11 rounded-2xl bg-[#2D5A27] flex items-center justify-center text-white shadow-xs shrink-0 overflow-hidden relative group-hover:scale-105 transition-transform">
+              <img 
+                src="/logo.png" 
+                alt="Territorio Saludable Logo" 
+                className="w-full h-full object-cover z-10"
+                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+              />
+              <Sprout className="w-6 h-6 text-emerald-200 absolute" />
+            </div>
+            <div>
+              <span className="font-serif text-xl sm:text-2xl font-bold text-[#2D5A27] block tracking-tight leading-none">
+                {config.businessName}
+              </span>
+              <span className="text-[9px] uppercase tracking-widest text-[#8C533C] font-bold block mt-1">
+                PASTELERÍA SANA • PEDIDOS WHATSAPP
+              </span>
+            </div>
+          </button>
+
+          <div className="flex items-center gap-2 sm:gap-3">
+            <a 
+              href={config.instagramUrl} 
+              target="_blank" 
+              rel="noreferrer" 
+              className="w-9 h-9 rounded-full bg-[#EFE8DC] hover:bg-[#E3D9C6] flex items-center justify-center text-[#5C4033] transition shadow-2xs"
+              title="Instagram Oficial"
+            >
+              <Instagram size={17} />
+            </a>
+
+            <a 
+              href={config.facebookUrl} 
+              target="_blank" 
+              rel="noreferrer" 
+              className="w-9 h-9 rounded-full bg-[#EFE8DC] hover:bg-[#E3D9C6] flex items-center justify-center text-[#5C4033] transition shadow-2xs"
+              title="Facebook Oficial"
+            >
+              <Facebook size={17} />
+            </a>
+
+            <a 
+              href={'https://wa.me/' + config.whatsappPhone} 
+              target="_blank" 
+              rel="noreferrer" 
+              className="px-3.5 py-2 rounded-full bg-[#EFE8DC] hover:bg-[#E3D9C6] text-[#241E19] text-xs font-bold flex items-center gap-1.5 transition"
+            >
+              <Phone size={14} className="text-[#2D5A27]" />
+              <span className="font-semibold">{config.whatsappPhone.replace('57', '')}</span>
+            </a>
+
+            {currentView !== 'admin' && (
+              <button 
+                onClick={() => navigateTo('admin')} 
+                className="px-4 py-2 rounded-full bg-[#1C3A27] hover:bg-black text-white text-xs font-bold flex items-center gap-1.5 transition cursor-pointer shadow-xs"
+              >
+                <ShieldCheck size={14} className="text-amber-400" />
+                <span>Acceso Admin</span>
+              </button>
+            )}
+
+            {authRole && (
+              <button onClick={handleLogout} className="p-2 rounded-xl text-stone-500 hover:text-red-600 transition" title="Cerrar Sesión">
+                <LogOut size={16} />
+              </button>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {currentView === 'public' && (
+        <main className="flex-1">
+          
+          <section className="bg-gradient-to-b from-[#FAF7F2] to-[#F2EDE4] py-12 px-4 border-b border-[#EAE2D8] text-center space-y-4">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#E5ECE3] text-[#2D5A27] text-xs font-bold border border-emerald-200">
+              <Sparkles size={13} />
+              <span>Pastelería Saludable en Bucaramanga & Área Metropolitana</span>
+            </div>
+            
+            <h1 className="font-serif text-3xl sm:text-5xl lg:text-6xl font-black text-[#241E19] leading-tight tracking-tight max-w-4xl mx-auto">
+              El placer de lo dulce, <span className="text-[#2D5A27] italic font-serif">100% sin</span> <br />
+              <span className="text-[#2D5A27] italic font-serif">azúcar</span> y libre de gluten.
+            </h1>
+
+            <p className="text-sm text-stone-600 max-w-3xl mx-auto leading-relaxed pt-2">
+              Nuestra meta es crear recetas deliciosas con ingredientes que sean útiles para nuestro cuerpo. Eliminamos el azúcar refinado, eliminamos el gluten (a muchos les cae mal), e incluimos ingredientes maravillosos como el chocolate amargo, la fibra prebiótica, el colágeno hidrolizado, harinas integrales, muchas frutas y lo mejor, es que todo lo endulzamos con STEVIA.
+            </p>
+
+            <div className="flex flex-wrap items-center justify-center gap-2 pt-3">
+              <span className="px-3 py-1 rounded-full bg-white border border-emerald-200 text-emerald-800 text-xs font-bold shadow-2xs">✓ 0% Azúcar refinada</span>
+              <span className="px-3 py-1 rounded-full bg-white border border-emerald-200 text-emerald-800 text-xs font-bold shadow-2xs">✓ 100% Libres de gluten</span>
+              <span className="px-3 py-1 rounded-full bg-white border border-emerald-200 text-emerald-800 text-xs font-bold shadow-2xs">♡ Aptas para diabéticos</span>
+              <span className="px-3 py-1 rounded-full bg-white border border-emerald-200 text-emerald-800 text-xs font-bold shadow-2xs">🕒 Tortas con 1 día de anticipación</span>
+            </div>
+
+            <div className="pt-4 max-w-md mx-auto relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400" size={18} />
+              <input 
+                type="text" 
+                value={searchQuery} 
+                onChange={(e) => setSearchQuery(e.target.value)} 
+                placeholder="🔍 Buscar por nombre, sabor o ingrediente..." 
+                className="w-full pl-11 pr-4 py-3 rounded-2xl bg-white border border-[#D8CFC4] text-sm focus:outline-none focus:border-[#2D5A27] shadow-xs" 
+              />
+            </div>
+          </section>
+
+          <div className="sticky top-20 z-30 bg-[#FAF7F2]/95 backdrop-blur-md border-b border-[#EAE2D8] py-3 px-4">
+            <div className="max-w-7xl mx-auto flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
+              {CATEGORIES.map(cat => (
+                <button 
+                  key={cat} 
+                  onClick={() => setSelectedCategory(cat)} 
+                  className={'px-4 py-2 rounded-xl text-xs font-bold shrink-0 transition cursor-pointer ' + (selectedCategory === cat ? 'bg-[#2D5A27] text-white shadow-xs' : 'bg-white border border-[#D8CFC4] text-stone-700 hover:bg-stone-50')}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+            <div className="max-w-7xl mx-auto flex items-center gap-1.5 overflow-x-auto pt-2 no-scrollbar">
+              {DIETARY_TAGS.map(tag => (
+                <button 
+                  key={tag} 
+                  onClick={() => setSelectedTag(tag)} 
+                  className={'px-2.5 py-1 rounded-lg text-[11px] font-semibold shrink-0 cursor-pointer ' + (selectedTag === tag ? 'bg-stone-900 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200')}
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+            <div className="pb-4">
+              <div className="flex items-center justify-between">
+                <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#241E19]">{selectedCategory}</h2>
+                <span className="text-xs text-stone-500 font-semibold">{filteredProducts.length} productos</span>
+              </div>
+
+              <div className="mt-2 text-xs text-stone-600 bg-amber-50/70 p-3.5 rounded-2xl border border-amber-200/70 leading-relaxed">
+                {selectedCategory === 'Tortas Saludables' && (
+                  <p>🎂 <strong>Tortas Saludables:</strong> Todas nuestras tortas son hechas a base de harina de almendras, arroz y almidón de yuca, endulzadas 100% Libres de azúcar y Sin gluten. Pedidos con un día de anticipación.</p>
+                )}
+                {selectedCategory === 'Catalogo Detalles' && (
+                  <p>🎁 <strong>Detalles con amor:</strong> Sorprende a tu persona favorita con una experiencia deliciosa y libre de culpas.</p>
+                )}
+                {selectedCategory === 'Pan Saludable' && (
+                  <p>🍞 <strong>Pan Digestivo (Sin azúcar y Sin gluten):</strong> Disfruta de un pan saludable, delicioso con un sabor auténtico y una textura única. Está hecho con harina de arroz, fécula de maíz y harina de almendras. Contiene psyllium, una fuente natural de fibra que favorece la digestión y brinda saciedad. Es 100% libre de gluten y no contiene azúcar refinada, convirtiéndose en una opción perfecta para quienes buscan cuidar su alimentación sin renunciar al placer de disfrutar un pan verdaderamente delicioso.</p>
+                )}
+                {(selectedCategory === 'Postres Saludables' || selectedCategory === 'Mercadito') && (
+                  <p>✨ Selecciona el producto que prefieras y presiona el botón <strong>Pedir</strong> para coordinar la entrega directamente a través de nuestro WhatsApp oficial.</p>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-4">
+              {filteredProducts.map(prod => {
+                const selSize = selectedSizes[prod.id] || (prod.sizes && prod.sizes[0] && prod.sizes[0].portions);
+                const sizeObj = prod.sizes && prod.sizes.find(s => s.portions === selSize);
+                const curPrice = sizeObj ? sizeObj.price : prod.price;
+
+                return (
+                  <div key={prod.id} className="bg-white rounded-3xl border border-[#EAE2D8] overflow-hidden shadow-xs hover:shadow-md transition flex flex-col justify-between group">
+                    <div>
+                      <div className="relative aspect-square bg-stone-100 overflow-hidden">
+                        <img 
+                          src={prod.imageUrl} 
+                          alt={prod.name} 
+                          onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = FALLBACK_IMG; }} 
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+                        />
+                        {!prod.available && (
+                          <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                            <span className="px-3 py-1 rounded-full bg-red-600 text-white text-xs font-bold uppercase">Agotado</span>
+                          </div>
+                        )}
+                        <div className="absolute top-3 left-3 flex flex-wrap gap-1">
+                          <span className={'px-2.5 py-1 rounded-full text-white text-[10px] font-bold shadow-xs ' + (prod.requiresNotice ? 'bg-amber-600' : 'bg-emerald-600')}>
+                            {prod.requiresNotice ? '1 Día Anticipación' : 'Entrega Hoy'}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="p-4 space-y-2">
+                        <h3 className="font-serif font-bold text-base text-[#241E19] group-hover:text-[#2D5A27] transition">{prod.name}</h3>
+                        
+                        {prod.description && (
+                          <p className="text-stone-500 text-xs leading-relaxed line-clamp-3">
+                            {prod.description}
+                          </p>
+                        )}
+
+                        <div className="flex flex-wrap gap-1 pt-1">
+                          {prod.features && prod.features.map(f => (
+                            <span key={f} className="px-1.5 py-0.5 rounded bg-stone-100 text-stone-600 text-[10px] font-medium">{f}</span>
+                          ))}
+                        </div>
+
+                        {prod.sizes && prod.sizes.length > 0 && (
+                          <div className="space-y-1 pt-1">
+                            <label className="text-[10px] font-bold uppercase text-stone-400 block">PORCIÓN / TAMAÑO:</label>
+                            <select 
+                              value={selSize} 
+                              onChange={(e) => setSelectedSizes({ ...selectedSizes, [prod.id]: e.target.value })} 
+                              className="w-full py-1.5 px-2 rounded-xl bg-stone-50 border border-stone-200 text-xs font-semibold text-stone-800 focus:outline-none focus:border-[#2D5A27]"
+                            >
+                              {prod.sizes.map(s => <option key={s.portions} value={s.portions}>{s.portions} - {formatCOP(s.price)}</option>)}
+                            </select>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="p-4 pt-0 border-t border-stone-100 flex items-center justify-between gap-2 mt-3">
+                      <div>
+                        <span className="text-[10px] text-stone-400 block uppercase font-bold">Precio</span>
+                        <span className="text-base font-black text-[#2D5A27]">{formatCOP(curPrice)}</span>
+                      </div>
+                      <button 
+                        onClick={() => handleOrderWhatsApp(prod)} 
+                        disabled={!prod.available} 
+                        className="px-4 py-2 rounded-xl bg-[#2D5A27] hover:bg-[#23481E] disabled:bg-stone-300 text-white text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-xs"
+                      >
+                        <Phone size={13} />
+                        <span>Pedir</span>
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        </main>
+      )}
+
+      {currentView === 'admin' && (
+        <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 py-6 w-full space-y-6">
+          <div className="bg-[#1C3A27] text-white rounded-3xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-md">
+            <div>
+              <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-emerald-900 text-emerald-200 text-xs font-bold">
+                <ShieldCheck size={14} />
+                <span>Administración Privada</span>
+              </div>
+              <h2 className="text-2xl font-black font-serif mt-1">Panel Central de Pastelería</h2>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <button onClick={() => setAdminTab('inventario')} className={'px-3.5 py-2 rounded-xl text-xs font-bold transition ' + (adminTab === 'inventario' ? 'bg-white text-[#1C3A27]' : 'bg-emerald-900 text-emerald-100')}>Inventario (CRUD)</button>
+              <button onClick={() => setAdminTab('pedidos')} className={'px-3.5 py-2 rounded-xl text-xs font-bold transition ' + (adminTab === 'pedidos' ? 'bg-white text-[#1C3A27]' : 'bg-emerald-900 text-emerald-100')}>Pedidos ({orders.length})</button>
+              <button onClick={() => setAdminTab('calendario')} className={'px-3.5 py-2 rounded-xl text-xs font-bold transition ' + (adminTab === 'calendario' ? 'bg-white text-[#1C3A27]' : 'bg-emerald-900 text-emerald-100')}>Calendario de Entregas</button>
+              <button onClick={() => setAdminTab('configuracion')} className={'px-3.5 py-2 rounded-xl text-xs font-bold transition ' + (adminTab === 'configuracion' ? 'bg-white text-[#1C3A27]' : 'bg-emerald-900 text-emerald-100')}>Configuración & Tarifas</button>
+            </div>
+          </div>
+
+          {adminTab === 'inventario' && (
+            <div className="bg-white rounded-3xl border border-stone-200 p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-bold text-lg text-stone-900">Catálogo de Productos ({products.length})</h3>
+                <button 
+                  onClick={() => handleOpenEditProduct(null)} 
+                  className="px-4 py-2 rounded-xl bg-[#2D5A27] text-white text-xs font-bold flex items-center gap-1.5 shadow-xs hover:bg-[#23481E] cursor-pointer"
+                >
+                  <Plus size={15} />
+                  <span>Nuevo Producto</span>
+                </button>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-stone-50 border-b border-stone-200 text-stone-500 uppercase">
+                    <tr>
+                      <th className="p-3">Orden</th>
+                      <th className="p-3">Imagen</th>
+                      <th className="p-3">Nombre & Categoría</th>
+                      <th className="p-3">Precio Base</th>
+                      <th className="p-3">Porciones</th>
+                      <th className="p-3">Estado</th>
+                      <th className="p-3">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-stone-100">
+                    {products.map((prod, idx) => (
+                      <tr key={prod.id} className="hover:bg-stone-50/50">
+                        <td className="p-3">
+                          <div className="flex items-center gap-1">
+                            <button onClick={() => handleMoveProduct(prod.id, 'up')} disabled={idx === 0} className="p-1 rounded bg-stone-100 hover:bg-stone-200 disabled:opacity-30"><ArrowUp size={12} /></button>
+                            <button onClick={() => handleMoveProduct(prod.id, 'down')} disabled={idx === products.length - 1} className="p-1 rounded bg-stone-100 hover:bg-stone-200 disabled:opacity-30"><ArrowDown size={12} /></button>
+                          </div>
+                        </td>
+                        <td className="p-3">
+                          <img src={prod.imageUrl} alt={prod.name} onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = FALLBACK_IMG; }} className="w-10 h-10 rounded-lg object-cover" />
+                        </td>
+                        <td className="p-3">
+                          <span className="font-bold text-stone-900 block">{prod.name}</span>
+                          <span className="text-[10px] text-stone-500">{prod.category}</span>
+                        </td>
+                        <td className="p-3 font-semibold text-[#2D5A27]">{formatCOP(prod.price)}</td>
+                        <td className="p-3 text-[11px] text-stone-600">{prod.sizes && prod.sizes.length > 0 ? prod.sizes.map(s => s.portions).join(', ') : 'Precio único'}</td>
+                        <td className="p-3">
+                          <button onClick={() => handleToggleProduct(prod.id)} className={'px-2.5 py-1 rounded-full text-[10px] font-bold ' + (prod.available ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800')}>
+                            {prod.available ? 'Disponible' : 'Agotado'}
+                          </button>
+                        </td>
+                        <td className="p-3 flex items-center gap-2">
+                          <button onClick={() => handleOpenEditProduct(prod)} className="p-1.5 rounded-lg bg-stone-100 hover:bg-stone-200" title="Editar Producto"><Edit2 size={13} /></button>
+                          <button onClick={() => handleDeleteProduct(prod.id)} className="p-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600" title="Eliminar"><Trash2 size={13} /></button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {adminTab === 'pedidos' && (
+            <div className="bg-white rounded-3xl border border-stone-200 p-6 space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-stone-100 pb-3">
+                <div className="flex flex-wrap gap-1.5">
+                  {['Todos', 'Pendiente', 'En Cocina', 'Listo Despacho', 'Entregado', 'Cancelado'].map(st => (
+                    <button
+                      key={st}
+                      onClick={() => setStatusFilter(st)}
+                      className={'px-3 py-1.5 rounded-full text-xs font-semibold transition cursor-pointer ' + (statusFilter === st ? 'bg-[#2D5A27] text-white shadow-xs' : 'bg-stone-100 text-stone-600 hover:bg-stone-200')}
+                    >
+                      {st}
+                    </button>
+                  ))}
+                </div>
+
+                <button onClick={() => setNewOrderModalOpen(true)} className="px-4 py-2 rounded-xl bg-[#2D5A27] text-white text-xs font-bold flex items-center gap-1.5 shadow-xs hover:bg-[#23481E]">
+                  <Plus size={15} />
+                  <span>+ Registrar Orden Manual</span>
+                </button>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead className="bg-amber-50/80 border-b border-amber-200/60 text-stone-700 font-bold">
+                    <tr>
+                      <th className="p-3">CÓDIGO / CLIENTE</th>
+                      <th className="p-3">PRODUCTOS AGENDADOS</th>
+                      <th className="p-3">FECHA & HORA</th>
+                      <th className="p-3">DIRECCIÓN & ZONA</th>
+                      <th className="p-3">TOTAL</th>
+                      <th className="p-3">ESTADO DEL PEDIDO</th>
+                      <th className="p-3 text-center">ACCIONES</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-stone-100">
+                    {filteredOrders.map(ord => (
+                      <tr key={ord.id} className="hover:bg-amber-50/30">
+                        <td className="p-3">
+                          <div className="font-bold text-stone-900">{ord.clientName}</div>
+                          <div className="text-stone-500 font-mono text-[11px] flex items-center gap-1 mt-0.5">
+                            <span>{ord.code}</span> • 
+                            <button 
+                              onClick={() => copyToClipboard(ord.clientPhone)}
+                              className="text-emerald-700 font-bold hover:underline flex items-center gap-0.5"
+                              title="Copiar Teléfono"
+                            >
+                              <span>{ord.clientPhone}</span>
+                              <Copy size={11} />
+                            </button>
+                          </div>
+                        </td>
+
+                        <td className="p-3">
+                          {ord.items.map((it, i) => (
+                            <div key={i} className="font-medium text-stone-800">
+                              x{it.quantity} {it.productName} {it.portion ? '(' + it.portion + ')' : ''}
+                            </div>
+                          ))}
+                          {ord.notes && (
+                            <div className="text-[10px] text-amber-800 italic mt-1 bg-amber-50/60 px-2 py-0.5 rounded border border-amber-200/50">
+                              Nota: {ord.notes}
+                            </div>
+                          )}
+                        </td>
+
+                        <td className="p-3">
+                          <div className="font-medium">📅 {ord.deliveryDate}</div>
+                          <div className="text-stone-500">🕒 {ord.deliveryTime}</div>
+                        </td>
+
+                        <td className="p-3">
+                          <div className="font-medium">📍 {ord.address}</div>
+                          <div className="text-stone-500">{ord.zone}</div>
+                        </td>
+
+                        <td className="p-3">
+                          <div className="font-bold text-[#2D5A27] text-sm">{formatCOP(ord.total)}</div>
+                          <div className="text-[10px] font-bold text-stone-400 uppercase">{ord.paymentMethod}</div>
+                        </td>
+
+                        <td className="p-3">
+                          <select 
+                            value={ord.status} 
+                            onChange={(e) => setOrders(prev => prev.map(o => o.id === ord.id ? { ...o, status: e.target.value } : o))} 
+                            className="px-2.5 py-1.5 rounded-xl text-xs font-semibold border border-stone-300 bg-white shadow-xs focus:outline-none"
+                          >
+                            <option value="Pendiente">⌛ Pendiente</option>
+                            <option value="En Cocina">👨‍🍳 En Cocina</option>
+                            <option value="Listo Despacho">📦 Listo Despacho</option>
+                            <option value="Entregado">✅ Entregado</option>
+                            <option value="Cancelado">❌ Cancelado</option>
+                          </select>
+                        </td>
+
+                        <td className="p-3 text-center">
+                          <div className="flex justify-center items-center gap-1.5">
+                            <a 
+                              href={'https://wa.me/' + ord.clientPhone} 
+                              target="_blank" 
+                              rel="noreferrer" 
+                              className="p-1.5 rounded-lg bg-emerald-100 text-emerald-800 hover:bg-emerald-200 transition" 
+                              title="Abrir Chat de WhatsApp"
+                            >
+                              💬
+                            </a>
+                            <a 
+                              href={getGoogleCalendarUrl(ord)} 
+                              target="_blank" 
+                              rel="noreferrer" 
+                              className="p-1.5 rounded-lg bg-blue-100 text-blue-800 hover:bg-blue-200 transition" 
+                              title="Google Calendar"
+                            >
+                              📅
+                            </a>
+                            <button 
+                              onClick={() => setSelectedOrderDetail(ord)} 
+                              className="p-1.5 rounded-lg bg-stone-100 text-stone-700 hover:bg-stone-200 transition" 
+                              title="Ver Detalle Completo (Ojito)"
+                            >
+                              👁️
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {adminTab === 'calendario' && (
+            <div className="space-y-6">
+              <div className="bg-white rounded-3xl border border-stone-200 p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-[#2D5A27] text-xs font-bold border border-emerald-200 mb-1">
+                    <Calendar size={13} />
+                    <span>Widget</span>
+                  </div>
+                  <h3 className="font-serif text-3xl font-black text-stone-900">Calendar</h3>
+                  <p className="text-xs text-stone-500">Visualiza las fechas de entrega agendadas, sincroniza con Google Calendar o consulta la agenda interactiva.</p>
+                </div>
+
+                <a 
+                  href={config.calendarEmbedUrl} 
+                  target="_blank" 
+                  rel="noreferrer" 
+                  className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1.5 transition shadow-xs shrink-0"
+                >
+                  <ExternalLink size={14} />
+                  <span>Abrir Google Calendar</span>
+                </a>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div className="lg:col-span-7 bg-white rounded-3xl border border-stone-200 p-6 space-y-4 shadow-xs">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-serif text-xl font-bold text-stone-900">
+                      Noviembre 2026 <span className="text-xs text-stone-400 font-sans font-normal">({orders.length} pedidos totales)</span>
+                    </h4>
+                    <div className="flex items-center gap-1">
+                      <button className="p-2 rounded-xl border border-stone-200 text-stone-500 hover:bg-stone-50"><ChevronLeft size={16} /></button>
+                      <button className="p-2 rounded-xl border border-stone-200 text-stone-500 hover:bg-stone-50"><ChevronRight size={16} /></button>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-7 text-center font-bold text-[11px] text-stone-400 uppercase tracking-wider py-2">
+                    <div>DOM</div><div>LUN</div><div>MAR</div><div>MIÉ</div><div>JUE</div><div>VIE</div><div>SÁB</div>
+                  </div>
+
+                  <div className="grid grid-cols-7 gap-2">
+                    {Array.from({ length: 30 }, (_, i) => {
+                      const dayNum = i + 1;
+                      const dateStr = `2026-11-${dayNum.toString().padStart(2, '0')}`;
+                      const hasOrders = daysWithOrders.has(dateStr);
+                      const isSelected = selectedCalDateStr === dateStr;
+
+                      return (
+                        <button
+                          key={dayNum}
+                          onClick={() => setSelectedCalDateStr(dateStr)}
+                          className={
+                            'h-16 rounded-2xl flex flex-col items-center justify-center relative transition cursor-pointer font-bold text-sm border ' +
+                            (isSelected ? 'border-emerald-600 bg-emerald-50 text-emerald-900 shadow-xs ring-2 ring-emerald-500/20' : 
+                             hasOrders ? 'border-emerald-300 bg-emerald-50/50 text-stone-900 hover:bg-emerald-100/50' : 
+                             'border-stone-100 bg-stone-50/60 text-stone-700 hover:bg-stone-100')
+                          }
+                        >
+                          <span>{dayNum}</span>
+                          {hasOrders && (
+                            <span className="w-2 h-2 rounded-full bg-emerald-600 mt-1"></span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="lg:col-span-5 bg-white rounded-3xl border border-stone-200 p-6 flex flex-col justify-between shadow-xs">
+                  <div>
+                    <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+                      <div>
+                        <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block">ENTREGAS PROGRAMADAS PARA:</span>
+                        <h4 className="font-serif text-xl font-bold text-[#2D5A27]">{selectedCalDateStr}</h4>
+                      </div>
+                      <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold">
+                        {calendarOrdersForDate.length} pedido(s)
+                      </span>
+                    </div>
+
+                    <div className="py-6">
+                      {calendarOrdersForDate.length > 0 ? (
+                        <div className="space-y-3">
+                          {calendarOrdersForDate.map(ord => (
+                            <div key={ord.id} className="p-4 rounded-2xl bg-amber-50/60 border border-amber-200/60 space-y-2">
+                              <div className="flex items-center justify-between">
+                                <span className="font-bold text-stone-900">{ord.clientName} ({ord.code})</span>
+                                <span className="text-xs font-bold text-[#2D5A27]">{formatCOP(ord.total)}</span>
+                              </div>
+                              <p className="text-xs text-stone-600">📍 {ord.address} ({ord.zone})</p>
+                              <p className="text-xs text-stone-600">🕒 Hora: {ord.deliveryTime}</p>
+                              <div className="text-[11px] text-stone-700 pt-1 border-t border-amber-200/40">
+                                {ord.items.map((it, idx) => (
+                                  <div key={idx}>• {it.quantity}x {it.productName} {it.portion ? `(${it.portion})` : ''}</div>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-12 space-y-3 text-stone-400">
+                          <Calendar size={40} className="mx-auto text-stone-300 stroke-[1.5]" />
+                          <p className="text-xs font-semibold text-stone-500 max-w-xs mx-auto leading-relaxed">
+                            No hay entregas registradas para esta fecha.
+                          </p>
+                          <p className="text-[11px] text-stone-400 max-w-xs mx-auto">
+                            Haz clic en un día del calendario que tenga badge verde para ver los detalles.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {adminTab === 'configuracion' && (
+            <div className="space-y-6">
+              <div className="bg-white rounded-3xl border border-stone-200 p-6 space-y-6 shadow-xs">
+                <div className="flex items-center justify-between border-b border-stone-100 pb-4">
+                  <div>
+                    <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold mb-1">
+                      <span>Solo Jefe</span>
+                    </div>
+                    <h3 className="font-serif text-2xl font-bold text-stone-900">Configuración de la Pastelería</h3>
+                    <p className="text-xs text-stone-500">Personaliza el número de WhatsApp oficial, redes sociales, horarios de atención y el Google Calendar.</p>
+                  </div>
+                </div>
+
+                <form onSubmit={handleSaveGeneralConfig} className="space-y-6">
+                  <div className="space-y-4">
+                    <h4 className="font-serif font-bold text-base text-stone-900 flex items-center gap-2">
+                      <Phone size={16} className="text-[#2D5A27]" />
+                      <span>Canales de Contacto & WhatsApp de Pedidos</span>
+                    </h4>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                      <div>
+                        <label className="font-bold text-stone-700 uppercase tracking-wider block mb-1">NÚMERO DE WHATSAPP (CON CÓDIGO DE PAÍS) *</label>
+                        <input 
+                          type="text" 
+                          value={cfgPhone} 
+                          onChange={(e) => setCfgPhone(e.target.value)} 
+                          required 
+                          className="w-full p-3 rounded-2xl bg-stone-50 border border-stone-200 font-mono text-stone-800" 
+                        />
+                        <span className="text-[10px] text-stone-400 mt-1 block">A este número llegarán todos los pedidos del catálogo digital.</span>
+                      </div>
+                      <div>
+                        <label className="font-bold text-stone-700 uppercase tracking-wider block mb-1">NOMBRE DEL NEGOCIO</label>
+                        <input 
+                          type="text" 
+                          value={cfgName} 
+                          onChange={(e) => setCfgName(e.target.value)} 
+                          required 
+                          className="w-full p-3 rounded-2xl bg-stone-50
