@@ -478,7 +478,7 @@ export default function Page() {
           <button onClick={() => navigateTo('public')} className="flex items-center gap-3 text-left cursor-pointer group">
             <div className="w-11 h-11 rounded-2xl bg-[#2D5A27] flex items-center justify-center text-white shadow-xs shrink-0 overflow-hidden relative group-hover:scale-105 transition-transform">
               <img 
-                src="/logo.png" 
+                src="/logo.jpg" 
                 alt="Territorio Saludable Logo" 
                 className="w-full h-full object-cover z-10"
                 onError={(e) => { e.currentTarget.style.display = 'none'; }}
