@@ -1365,9 +1365,26 @@ export default function Page() {
                   <input type="number" value={formPrice} onChange={(e) => setFormPrice(e.target.value)} required className="w-full p-2.5 rounded-xl border border-stone-300" />
                 </div>
               </div>
+              
               <div>
                 <label className="font-bold block mb-1">Ruta Imagen (/public):</label>
-                <input type="text" value={formImageUrl} onChange={(e) => setFormImageUrl(e.target.value)} required className="w-full p-2.5 rounded-xl border border-stone-300" />
+                <select 
+                  value={formImageUrl} 
+                  onChange={(e) => setFormImageUrl(e.target.value)} 
+                  className="w-full p-2.5 rounded-xl border border-stone-300 bg-stone-50 font-mono text-xs mb-1"
+                >
+                  <option value="/copa-saludable.png">/copa-saludable.png (Copa Saludable)</option>
+                  <option value="/postre-ilusion.png">/postre-ilusion.png (Postre Ilusión)</option>
+                  <option value="/mini-marquesa.png">/mini-marquesa.png (Mini Marquesa)</option>
+                  <option value="/postre-con-helado.png">/postre-con-helado.png (Postre con Helado)</option>
+                  <option value="/mini-brownies.png">/mini-brownies.png (Mini Brownies)</option>
+                  <option value="/blondie.png">/blondie.png (Blondie)</option>
+                  <option value="/torta-moka.png">/torta-moka.png (Torta Moka)</option>
+                  <option value="/box-duo.png">/box-duo.png (Box Dúo)</option>
+                  <option value="/guacal-amor.jpeg">/guacal-amor.jpeg (Guacal Amor)</option>
+                  <option value="/baguette.jpeg">/baguette.jpeg (Baguette)</option>
+                </select>
+                <input type="text" value={formImageUrl} onChange={(e) => setFormImageUrl(e.target.value)} placeholder="O escribe la ruta exacta..." className="w-full p-2.5 rounded-xl border border-stone-300 font-mono text-xs" />
               </div>
 
               <div className="pt-2 border-t border-stone-100">
