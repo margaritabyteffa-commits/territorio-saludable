@@ -532,7 +532,8 @@ export default function Page() {
             {currentView !== 'admin' && (
               <button 
                 onClick={() => navigateTo('admin')} 
-               className="hidden sm:flex px-4 py-2 rounded-full bg-[#1C3A27] hover:bg-black text-white text-xs font-bold items-center gap-1.5 transition cursor-pointer shadow-xs"
+             className="hidden sm:flex px-4 py-2 rounded-full bg-[#1C3A27] hover:bg-black text-white text-xs font-bold items-center gap-1.5 transition cursor-pointer shadow-xs"
+              >
                 <ShieldCheck size={14} className="text-amber-400" />
                 <span>Acceso Admin</span>
               </button>
