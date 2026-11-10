@@ -584,28 +584,31 @@ export default function Page() {
             </div>
           </section>
 
-          <div className="sticky top-20 z-30 bg-[#FAF7F2]/95 backdrop-blur-md border-b border-[#EAE2D8] py-3 px-4">
-            <div className="max-w-7xl mx-auto flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
-              {CATEGORIES.map(cat => (
-                <button 
-                  key={cat} 
-                  onClick={() => setSelectedCategory(cat)} 
-                  className={'px-4 py-2 rounded-xl text-xs font-bold shrink-0 transition cursor-pointer ' + (selectedCategory === cat ? 'bg-[#2D5A27] text-white shadow-xs' : 'bg-white border border-[#D8CFC4] text-stone-700 hover:bg-stone-50')}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-            <div className="max-w-7xl mx-auto flex items-center gap-1.5 overflow-x-auto pt-2 no-scrollbar">
-              {DIETARY_TAGS.map(tag => (
-                <button 
-                  key={tag} 
-                  onClick={() => setSelectedTag(tag)} 
-                  className={'px-2.5 py-1 rounded-lg text-[11px] font-semibold shrink-0 cursor-pointer ' + (selectedTag === tag ? 'bg-stone-900 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200')}
-                >
-                  {tag}
-                </button>
-              ))}
+{/* MENÚ SUPERIOR MÓVIL FIJO Y LIMPIO */}
+          <div className="sticky top-20 z-35 bg-[#FAF7F2] backdrop-blur-md border-b border-[#EAE2D8] py-3 px-4 shadow-xs">
+            <div className="max-w-7xl mx-auto">
+              <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
+                {CATEGORIES.map(cat => (
+                  <button 
+                    key={cat} 
+                    onClick={() => setSelectedCategory(cat)} 
+                    className={'px-4 py-2 rounded-xl text-xs font-bold shrink-0 transition cursor-pointer ' + (selectedCategory === cat ? 'bg-[#2D5A27] text-white shadow-xs' : 'bg-white border border-[#D8CFC4] text-stone-700 hover:bg-stone-50')}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+              <div className="flex items-center gap-1.5 overflow-x-auto pt-2 no-scrollbar">
+                {DIETARY_TAGS.map(tag => (
+                  <button 
+                    key={tag} 
+                    onClick={() => setSelectedTag(tag)} 
+                    className={'px-2.5 py-1 rounded-lg text-[11px] font-semibold shrink-0 cursor-pointer ' + (selectedTag === tag ? 'bg-stone-900 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200')}
+                  >
+                    {tag}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
