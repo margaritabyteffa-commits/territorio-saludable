@@ -73,9 +73,9 @@ const initialProducts = [
   P('tortas-vasca-pistacho', 'Tortas Vasca Pistacho', 0, 85000, '/tortas-vasca-pistacho.png', [['5 porc',85000],['8 porc',115000],['14 porc',140000]], ["Sin Azúcar","Sin Gluten","Keto"], true),
   P('torta-primavera', 'Torta Primavera', 0, 75000, '/torta-primavera.jpeg', [['5 porc',75000],['8 porc',110000],['12 porc',145000],['18 porc',195000]], ["Sin Azúcar","Sin Gluten"], true),
   
-  P('copa-saludable', 'Copa Saludable', 1, 55000, '/copa-saludable.png', [], ["Sin Azúcar","Sin Gluten"], false, "Nuestra Copa Red Velvet Saludable combina capas irresistibles de bizcocho suave y esponjoso, yogurt griego, arequipe y crema chantilly, todo presentado en una elegante copa de vidrio. 100% libre de azúcar y gluten. Incluye tarjeta con mensaje personalizado."),
+  P('copa-saludable', 'Copa Saludable', 1, 55000, '/copa-saludable.jpeg', [], ["Sin Azúcar","Sin Gluten"], false, "Nuestra Copa Red Velvet Saludable combina capas irresistibles de bizcocho suave y esponjoso, yogurt griego, arequipe y crema chantilly, todo presentado en una elegante copa de vidrio. 100% libre de azúcar y gluten. Incluye tarjeta con mensaje personalizado."),
   P('postre-ilusion', 'Postre Ilusión', 1, 19000, '/postre-ilusion.png', [], ["Sin Azúcar","Sin Gluten"], false, "Postre mug cake sin azúcar y sin gluten. Contiene torta, arequipe, yogurt griego y fresa. Vaso de 9 onzas empacado en su cajita especial con tarjeta personalizada."),
-  P('mini-marquesa-detalle', 'Mini Marquesa', 1, 35000, '/mini-marquesa.png', [], ["Sin Azúcar","Sin Gluten"], false, "Bizcocho de brownie hecho con chocolate semiamargo y arequipe. Decorado con chantilly, arequipe, mermelada de frutos rojos, fresas y arándanos. 100% endulzado con Stevia y libre de trigo. Empacada en Cajita con cinta y tarjeta. Tamaño personal."),
+  P('mini-marquesa-detalle', 'Mini Marquesa', 1, 35000, '/mini-marquesa.jpeg', [], ["Sin Azúcar","Sin Gluten"], false, "Bizcocho de brownie hecho con chocolate semiamargo y arequipe. Decorado con chantilly, arequipe, mermelada de frutos rojos, fresas y arándanos. 100% endulzado con Stevia y libre de trigo. Empacada en Cajita con cinta y tarjeta. Tamaño personal."),
   P('postre-con-helado-nuevo', 'Postre con Helado', 3, 17000, '/postre-con-helado.png', [], ["Sin Azúcar","Sin Gluten"], false, "Postre en capas con torta, arequipe, yogurt griego, frutos secos y helado con colágeno hidrolizado. Sin azúcar y sin gluten."),
   P('mini-brownies-caja', 'Mini Brownies', 3, 23000, '/mini-brownies.png', [['Caja x4',23000],['Caja x8',44000]], ["Sin Azúcar","Sin Gluten","Keto"], false, "Delicioso y melcochudo bizcocho hecho con una mezcla de harina de almendras, harina de arroz, arequipe y chocolate semiamargo, con una capa de arequipe cero azúcar en la mitad, decoración en arequipe, chocolate y chantilly."),
   P('blondie-caja', 'Blondie', 3, 19000, '/blondie.png', [['Caja x2',19000],['Caja x4',36000]], ["Sin Azúcar","Sin Gluten"], false, "Delicioso bizcocho hecho con harina de almendras, harina de arroz, arequipe y chocolate blanco decoración en arequipe."),
@@ -548,6 +548,34 @@ export default function Page() {
         </div>
       </header>
 
+{/* Barra de categorías y etiquetas fija y con fondo sólido */}
+          <div className="sticky top-20 z-30 bg-[#FAF7F2] backdrop-blur-md border-b border-[#EAE2D8] py-3 px-4 shadow-2xs">
+            <div className="max-w-7xl mx-auto space-y-2">
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
+                {CATEGORIES.map(cat => (
+                  <button 
+                    key={cat} 
+                    onClick={() => setSelectedCategory(cat)} 
+                    className={'px-4 py-2 rounded-xl text-xs font-bold shrink-0 transition cursor-pointer ' + (selectedCategory === cat ? 'bg-[#2D5A27] text-white shadow-xs' : 'bg-white border border-[#D8CFC4] text-stone-700 hover:bg-stone-50')}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+              <div className="flex items-center gap-1.5 overflow-x-auto pt-1 no-scrollbar">
+                {DIETARY_TAGS.map(tag => (
+                  <button 
+                    key={tag} 
+                    onClick={() => setSelectedTag(tag)} 
+                    className={'px-2.5 py-1 rounded-lg text-[11px] font-semibold shrink-0 cursor-pointer ' + (selectedTag === tag ? 'bg-stone-900 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200')}
+                  >
+                    {tag}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+      
       {currentView === 'public' && (
         <main className="flex-1">
           <section className="bg-gradient-to-b from-[#FAF7F2] to-[#F2EDE4] py-12 px-4 border-b border-[#EAE2D8] text-center space-y-4">
