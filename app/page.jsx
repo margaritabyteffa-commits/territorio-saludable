@@ -73,7 +73,6 @@ const initialProducts = [
   P('tortas-vasca-pistacho', 'Tortas Vasca Pistacho', 0, 85000, '/tortas-vasca-pistacho.png', [['5 porc',85000],['8 porc',115000],['14 porc',140000]], ["Sin Azúcar","Sin Gluten","Keto"], true),
   P('torta-primavera', 'Torta Primavera', 0, 75000, '/torta-primavera.jpeg', [['5 porc',75000],['8 porc',110000],['12 porc',145000],['18 porc',195000]], ["Sin Azúcar","Sin Gluten"], true),
   
-  // FOTOS CORREGIDAS PARA LOS 6 NUEVOS PRODUCTOS:
   P('copa-saludable', 'Copa Saludable', 1, 55000, '/copa-saludable.png', [], ["Sin Azúcar","Sin Gluten"], false, "Nuestra Copa Red Velvet Saludable combina capas irresistibles de bizcocho suave y esponjoso, yogurt griego, arequipe y crema chantilly, todo presentado en una elegante copa de vidrio. 100% libre de azúcar y gluten. Incluye tarjeta con mensaje personalizado."),
   P('postre-ilusion', 'Postre Ilusión', 1, 19000, '/postre-ilusion.png', [], ["Sin Azúcar","Sin Gluten"], false, "Postre mug cake sin azúcar y sin gluten. Contiene torta, arequipe, yogurt griego y fresa. Vaso de 9 onzas empacado en su cajita especial con tarjeta personalizada."),
   P('mini-marquesa-detalle', 'Mini Marquesa', 1, 35000, '/mini-marquesa.png', [], ["Sin Azúcar","Sin Gluten"], false, "Bizcocho de brownie hecho con chocolate semiamargo y arequipe. Decorado con chantilly, arequipe, mermelada de frutos rojos, fresas y arándanos. 100% endulzado con Stevia y libre de trigo. Empacada en Cajita con cinta y tarjeta. Tamaño personal."),
@@ -235,7 +234,8 @@ export default function Page() {
           setCfgSun(parsed.hoursSun || DEFAULT_CONFIG.hoursSun);
           setCfgEmbedUrl(parsed.calendarEmbedUrl || DEFAULT_CONFIG.calendarEmbedUrl);
         }
-        const prd = localStorage.getItem('ts_products_catalog_v7');
+        // CAMBIO DE CLAVE DE CACHÉ PARA FORZAR LA CARGA DE LAS NUEVAS IMÁGENES:
+        const prd = localStorage.getItem('ts_products_catalog_v8');
         if (prd) {
           const parsed = JSON.parse(prd);
           if (Array.isArray(parsed) && parsed.length >= 75) setProducts(parsed);
@@ -257,7 +257,7 @@ export default function Page() {
   }, []);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') localStorage.setItem('ts_products_catalog_v7', JSON.stringify(products));
+    if (typeof window !== 'undefined') localStorage.setItem('ts_products_catalog_v8', JSON.stringify(products));
   }, [products]);
 
   useEffect(() => {
