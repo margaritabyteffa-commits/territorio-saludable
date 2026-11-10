@@ -459,13 +459,13 @@ export default function Page() {
         </div>
       )}
 
-      <div className="bg-[#1C3A27] text-emerald-100 py-2 px-4 text-xs font-medium tracking-wide border-b border-emerald-900/50">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-1 text-center sm:text-left">
-          <div className="flex items-center gap-2 truncate">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <p className="truncate">🌱 Pastelería Artesanal 100% Sin Azúcar Refinada y Sin Gluten en Bucaramanga</p>
+     <div className="bg-[#1C3A27] text-emerald-100 py-2.5 px-4 text-xs font-medium tracking-wide border-b border-emerald-900/50">
+        <div className="max-w-7xl mx-auto flex flex-col items-center justify-center gap-1.5 text-center">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+            <p className="text-[11px] sm:text-xs">🌱 Pastelería Artesanal 100% Sin Azúcar Refinada y Sin Gluten en Bucaramanga</p>
           </div>
-          <div className="flex items-center gap-4 text-[11px] text-emerald-200/90 shrink-0">
+          <div className="flex flex-wrap items-center justify-center gap-3 text-[10px] sm:text-[11px] text-emerald-200/90">
             <span>🕒 {config.hoursMonFri}</span>
             <span>📍 Bucaramanga y Área Metropol.</span>
           </div>
@@ -492,7 +492,7 @@ export default function Page() {
               <span className="font-serif text-xl sm:text-2xl font-bold text-[#2D5A27] block tracking-tight leading-none">
                 {config.businessName}
               </span>
-              <span className="text-[9px] uppercase tracking-widest text-[#8C533C] font-bold block mt-1">
+              <span className="text-[8px] sm:text-[9px] uppercase tracking-widest text-[#8C533C] font-bold block mt-1">
                 PASTELERÍA SANA • PEDIDOS WHATSAPP
               </span>
             </div>
