@@ -49,20 +49,32 @@ export async function POST(request) {
 
 async function sendWhatsAppMessage(toPhone, textMessage) {
   const token = process.env.WHATSAPP_TOKEN;
- const phoneId = process.env.WHATSAPP_PHONE_ID || process.env.WHATSAPP_PHONE_NUMBER_ID;
+  const phoneId = process.env.WHATSAPP_PHONE_ID || process.env.WHATSAPP_PHONE_NUMBER_ID || '1357870974083653';
 
-  const url = `https://graph.facebook.com/v17.0/${phoneId}/messages`;
+  const url = `https://graph.facebook.com/v21.0/${phoneId}/messages`;
 
-  await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      messaging_product: 'whatsapp',
-      to: toPhone,
-      text: { body: textMessage },
-    }),
-  });
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        messaging_product: 'whatsapp',
+        to: toPhone,
+        text: { body: textMessage },
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error('Error enviando mensaje de Meta WhatsApp:', JSON.stringify(data));
+    } else {
+      console.log('Mensaje enviado con éxito:', data);
+    }
+  } catch (error) {
+    console.error('Error de red al llamar a Meta Graph API:', error);
+  }
 }
