@@ -21,6 +21,16 @@ const DEFAULT_CONFIG = {
 };
 
 const CATEGORIES = ['Tortas Saludables', 'Catalogo Detalles', 'Pan Saludable', 'Postres Saludables', 'Mercadito'];
+
+// Mapeo de IDs para anclas directas desde el bot de WhatsApp
+const CATEGORY_IDS = {
+  'Tortas Saludables': 'tortas',
+  'Catalogo Detalles': 'detalles',
+  'Pan Saludable': 'pan',
+  'Postres Saludables': 'postres',
+  'Mercadito': 'mercadito'
+};
+
 const DIETARY_TAGS = ['Todas', 'Keto', 'Sin Gluten', 'Sin Azúcar', 'Sin Lácteos', 'Entrega Hoy', 'Con Anticipación'];
 
 const INITIAL_ZONES = [
@@ -234,7 +244,6 @@ export default function Page() {
           setCfgSun(parsed.hoursSun || DEFAULT_CONFIG.hoursSun);
           setCfgEmbedUrl(parsed.calendarEmbedUrl || DEFAULT_CONFIG.calendarEmbedUrl);
         }
-        // CAMBIO DE CLAVE DE CACHÉ PARA FORZAR LA CARGA DE LAS NUEVAS IMÁGENES:
         const prd = localStorage.getItem('ts_products_catalog_v8');
         if (prd) {
           const parsed = JSON.parse(prd);
@@ -459,7 +468,8 @@ export default function Page() {
         </div>
       )}
 
-     <div className="bg-[#1C3A27] text-emerald-100 py-2 px-3 text-[11px] font-medium tracking-wide border-b border-emerald-900/50">
+      {/* BANNER SUPERIOR INFORMATIVO */}
+      <div className="bg-[#1C3A27] text-emerald-100 py-2 px-3 text-[11px] font-medium tracking-wide border-b border-emerald-900/50">
         <div className="max-w-7xl mx-auto flex flex-col items-center gap-1 text-center">
           <div className="flex items-center gap-1.5 justify-center">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
@@ -472,6 +482,7 @@ export default function Page() {
         </div>
       </div>
 
+      {/* HEADER PRINCIPAL */}
       <header className="sticky top-0 z-40 bg-[#FAF7F2]/95 backdrop-blur-md border-b border-[#EAE2D8]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between gap-3">
           
@@ -532,7 +543,7 @@ export default function Page() {
             {currentView !== 'admin' && (
               <button 
                 onClick={() => navigateTo('admin')} 
-             className="hidden sm:flex px-4 py-2 rounded-full bg-[#1C3A27] hover:bg-black text-white text-xs font-bold items-center gap-1.5 transition cursor-pointer shadow-xs"
+                className="hidden sm:flex px-4 py-2 rounded-full bg-[#1C3A27] hover:bg-black text-white text-xs font-bold items-center gap-1.5 transition cursor-pointer shadow-xs"
               >
                 <ShieldCheck size={14} className="text-amber-400" />
                 <span>Acceso Admin</span>
@@ -548,38 +559,40 @@ export default function Page() {
         </div>
       </header>
 
-{/* Barra de categorías: Deslizable en PC/Tablet, pero en filas estáticas verticalmente en Celular */}
-          <div className="sticky top-20 z-30 bg-[#FAF7F2] backdrop-blur-md border-b border-[#EAE2D8] py-3 px-4 shadow-2xs">
-            <div className="max-w-7xl mx-auto space-y-2">
-              {/* Categorías principales: En celular se acomodan en filas o botones estáticos limpios */}
-              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-1.5 pb-1">
-                {CATEGORIES.map(cat => (
-                  <button 
-                    key={cat} 
-                    onClick={() => setSelectedCategory(cat)} 
-                    className={'px-3.5 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ' + (selectedCategory === cat ? 'bg-[#2D5A27] text-white shadow-xs' : 'bg-white border border-[#D8CFC4] text-stone-700 hover:bg-stone-50')}
-                  >
-                    {cat}
-                  </button>
-                ))}
-              </div>
-              {/* Etiquetas dietéticas */}
-              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-1.5 pt-1">
-                {DIETARY_TAGS.map(tag => (
-                  <button 
-                    key={tag} 
-                    onClick={() => setSelectedTag(tag)} 
-                    className={'px-2.5 py-1 rounded-lg text-[11px] font-semibold cursor-pointer ' + (selectedTag === tag ? 'bg-stone-900 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200')}
-                  >
-                    {tag}
-                  </button>
-                ))}
-              </div>
-            </div>
+      {/* BARRA DE NAVEGACIÓN Y FILTROS FIJA (Navegación horizontal scrollable limpia) */}
+      <div className="sticky top-20 z-30 bg-[#FAF7F2] backdrop-blur-md border-b border-[#EAE2D8] py-3 px-4 shadow-2xs">
+        <div className="max-w-7xl mx-auto space-y-2">
+          {/* Categorías principales con enlaces de ancla */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+            {CATEGORIES.map(cat => (
+              <a 
+                key={cat} 
+                href={`#${CATEGORY_IDS[cat]}`}
+                onClick={() => setSelectedCategory(cat)} 
+                className={'px-3.5 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer shrink-0 ' + (selectedCategory === cat ? 'bg-[#2D5A27] text-white shadow-xs' : 'bg-white border border-[#D8CFC4] text-stone-700 hover:bg-stone-50')}
+              >
+                {cat}
+              </a>
+            ))}
           </div>
-      
+          {/* Etiquetas dietéticas */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pt-1 no-scrollbar">
+            {DIETARY_TAGS.map(tag => (
+              <button 
+                key={tag} 
+                onClick={() => setSelectedTag(tag)} 
+                className={'px-2.5 py-1 rounded-lg text-[11px] font-semibold shrink-0 cursor-pointer ' + (selectedTag === tag ? 'bg-stone-900 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200')}
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {currentView === 'public' && (
         <main className="flex-1">
+          {/* SECCIÓN HERO */}
           <section className="bg-gradient-to-b from-[#FAF7F2] to-[#F2EDE4] py-12 px-4 border-b border-[#EAE2D8] text-center space-y-4">
             <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#E5ECE3] text-[#2D5A27] text-xs font-bold border border-emerald-200">
               <Sparkles size={13} />
@@ -614,36 +627,9 @@ export default function Page() {
             </div>
           </section>
 
-{/* MENÚ SUPERIOR MÓVIL FIJO Y LIMPIO */}
-          <div className="sticky top-20 z-35 bg-[#FAF7F2] backdrop-blur-md border-b border-[#EAE2D8] py-3 px-4 shadow-xs">
-            <div className="max-w-7xl mx-auto">
-              <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
-                {CATEGORIES.map(cat => (
-                  <button 
-                    key={cat} 
-                    onClick={() => setSelectedCategory(cat)} 
-                    className={'px-4 py-2 rounded-xl text-xs font-bold shrink-0 transition cursor-pointer ' + (selectedCategory === cat ? 'bg-[#2D5A27] text-white shadow-xs' : 'bg-white border border-[#D8CFC4] text-stone-700 hover:bg-stone-50')}
-                  >
-                    {cat}
-                  </button>
-                ))}
-              </div>
-              <div className="flex items-center gap-1.5 overflow-x-auto pt-2 no-scrollbar">
-                {DIETARY_TAGS.map(tag => (
-                  <button 
-                    key={tag} 
-                    onClick={() => setSelectedTag(tag)} 
-                    className={'px-2.5 py-1 rounded-lg text-[11px] font-semibold shrink-0 cursor-pointer ' + (selectedTag === tag ? 'bg-stone-900 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200')}
-                  >
-                    {tag}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
+          {/* LISTADO DE PRODUCTOS CON ANCLAS ASIGNADAS (id="tortas", id="detalles", etc.) */}
           <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-            <div className="pb-4">
+            <div id={CATEGORY_IDS[selectedCategory]} className="pb-4 scroll-mt-36">
               <div className="flex items-center justify-between">
                 <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#241E19]">{selectedCategory}</h2>
                 <span className="text-xs text-stone-500 font-semibold">{filteredProducts.length} productos</span>
@@ -1297,6 +1283,7 @@ export default function Page() {
         </main>
       )}
 
+      {/* FOOTER */}
       <footer className="bg-[#1C1815] text-[#D8D0C5] border-t border-stone-800 mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 grid grid-cols-1 md:grid-cols-4 gap-8 text-xs">
           <div className="space-y-3">
@@ -1336,6 +1323,7 @@ export default function Page() {
         </div>
       </footer>
 
+      {/* MODAL DE CONTRASEÑA */}
       {passwordModalTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
           <div className="bg-white rounded-3xl border border-stone-200 shadow-2xl max-w-sm w-full p-6 space-y-4">
@@ -1365,6 +1353,7 @@ export default function Page() {
         </div>
       )}
 
+      {/* MODAL EDITAR PRODUCTO */}
       {editingProduct !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs overflow-y-auto">
           <div className="bg-white rounded-3xl border border-stone-200 shadow-2xl max-w-md w-full p-6 space-y-4 my-8">
@@ -1456,6 +1445,7 @@ export default function Page() {
         </div>
       )}
 
+      {/* MODAL DETALLE DE PEDIDO */}
       {selectedOrderDetail && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
           <div className="bg-white rounded-3xl border border-stone-200 shadow-2xl max-w-md w-full p-6 space-y-4">
@@ -1506,6 +1496,7 @@ export default function Page() {
         </div>
       )}
 
+      {/* MODAL ORDEN MANUAL */}
       {newOrderModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs overflow-y-auto">
           <div className="bg-white rounded-3xl border border-stone-200 shadow-2xl max-w-md w-full p-6 space-y-4 my-8">
