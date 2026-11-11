@@ -29,13 +29,17 @@ export async function POST(request) {
       const senderPhone = message.from;
       
       const welcomeMessage = 
-        "¡Hola! 👋 Bienvenido a *Territorio Saludable*. 🍰\n\n" +
-        "Nos alegra mucho saludarte. Somos tu pastelería artesanal 100% libre de gluten y sin azúcar refinada en Bucaramanga. 🌱\n\n" +
-        "¿Qué te gustaría hacer hoy?\n" +
-        "1️⃣ Ver nuestro Catálogo Web\n" +
-        "2️⃣ Consultar Horarios y Domicilios\n" +
-        "3️⃣ Hablar con un asesor\n\n" +
-        "Visita nuestra tienda aquí: https://territorio-saludable.vercel.app";
+  "¡Hola! Bienvenido a *Territorio Saludable* 🌱.\n" +
+  "¿Qué delicia sin azúcar te provoca hoy?\n\n" +
+  "Responde con el número de tu preferencia:\n" +
+  "1️⃣ Tortas Saludables\n" +
+  "2️⃣ Catalogo Detalles\n" +
+  "3️⃣ Pan Saludable\n" +
+  "4️⃣ Postre Saludable\n" +
+  "5️⃣ Mercadito\n" +
+  "6️⃣ 📖 Ver el Catálogo Completo\n" +
+  "7️⃣ 👩‍🍳 Hablar con un asesor\n\n" +
+  "Visita nuestra tienda web: https://territorio-saludable.vercel.app";
 
       await sendWhatsAppMessage(senderPhone, welcomeMessage);
     }
