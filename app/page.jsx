@@ -22,7 +22,6 @@ const DEFAULT_CONFIG = {
 
 const CATEGORIES = ['Tortas Saludables', 'Catalogo Detalles', 'Pan Saludable', 'Postres Saludables', 'Mercadito'];
 
-// Mapeo de IDs para anclas directas desde el bot de WhatsApp
 const CATEGORY_IDS = {
   'Tortas Saludables': 'tortas',
   'Catalogo Detalles': 'detalles',
@@ -559,34 +558,37 @@ export default function Page() {
         </div>
       </header>
 
-      {/* BARRA DE NAVEGACIÓN Y FILTROS FIJA (Navegación horizontal scrollable limpia) */}
+      {/* BARRA DE NAVEGACIÓN Y FILTROS AJUSTADA PARA MÓVIL (SIN DESPLAZAMIENTO LATERAL) */}
       <div className="sticky top-20 z-30 bg-[#FAF7F2] backdrop-blur-md border-b border-[#EAE2D8] py-3 px-4 shadow-2xs">
-        <div className="max-w-7xl mx-auto space-y-2">
-          {/* Categorías principales con enlaces de ancla */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+        <div className="max-w-7xl mx-auto space-y-2.5">
+          
+          {/* Categorías principales: flex-wrap para que se acomoden solas en móvil */}
+          <div className="flex flex-wrap justify-center sm:justify-start gap-1.5 w-full">
             {CATEGORIES.map(cat => (
               <a 
                 key={cat} 
                 href={`#${CATEGORY_IDS[cat]}`}
                 onClick={() => setSelectedCategory(cat)} 
-                className={'px-3.5 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer shrink-0 ' + (selectedCategory === cat ? 'bg-[#2D5A27] text-white shadow-xs' : 'bg-white border border-[#D8CFC4] text-stone-700 hover:bg-stone-50')}
+                className={'px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer text-center flex-1 sm:flex-none whitespace-nowrap ' + (selectedCategory === cat ? 'bg-[#2D5A27] text-white shadow-xs' : 'bg-white border border-[#D8CFC4] text-stone-700 hover:bg-stone-50')}
               >
                 {cat}
               </a>
             ))}
           </div>
-          {/* Etiquetas dietéticas */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pt-1 no-scrollbar">
+
+          {/* Filtros dietéticos: flex-wrap */}
+          <div className="flex flex-wrap justify-center sm:justify-start gap-1.5 w-full pt-1">
             {DIETARY_TAGS.map(tag => (
               <button 
                 key={tag} 
                 onClick={() => setSelectedTag(tag)} 
-                className={'px-2.5 py-1 rounded-lg text-[11px] font-semibold shrink-0 cursor-pointer ' + (selectedTag === tag ? 'bg-stone-900 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200')}
+                className={'px-2.5 py-1 rounded-lg text-[11px] font-semibold cursor-pointer ' + (selectedTag === tag ? 'bg-stone-900 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200')}
               >
                 {tag}
               </button>
             ))}
           </div>
+
         </div>
       </div>
 
@@ -627,7 +629,7 @@ export default function Page() {
             </div>
           </section>
 
-          {/* LISTADO DE PRODUCTOS CON ANCLAS ASIGNADAS (id="tortas", id="detalles", etc.) */}
+          {/* LISTADO DE PRODUCTOS CON ANCLAS ASIGNADAS */}
           <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
             <div id={CATEGORY_IDS[selectedCategory]} className="pb-4 scroll-mt-36">
               <div className="flex items-center justify-between">
