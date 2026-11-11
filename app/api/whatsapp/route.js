@@ -1,21 +1,107 @@
 import { NextResponse } from 'next/server';
 
-// 1. Verificación del Webhook para Meta
-export async function GET(request) {
-  const url = new URL(request.url);
-  const mode = url.searchParams.get('hub.mode');
-  const token = url.searchParams.get('hub.verify_token');
-  const challenge = url.searchParams.get('hub.challenge');
+// Configuración de variables de entorno
+const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN;
+const PHONE_NUMBER_ID = process.env.WHATSAPP_PHONE_ID;
+const GEMINI_API_KEY = process.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
 
-  const VERIFY_TOKEN = process.env.VERIFY_TOKEN || process.env.WHATSAPP_VERIFY_TOKEN || 'territorio2026';
+const BASE_URL = 'https://territorio-saludable.vercel.app';
 
-  if (mode === 'subscribe' && token === VERIFY_TOKEN) {
-    return new Response(challenge, { status: 200 });
+// Respuestas estáticas para opciones numéricas del menú
+const MENU_RESPONSES = {
+  '1': `¡Nuestras tortas son deliciosas y sin culpa! 🍰\n\nMíralas aquí:\n${BASE_URL}/#tortas\n\nCuando sepas cuál te gusta, ¡escríbeme su nombre por aquí o selecciónala directamente desde la página! 🍰✨\n\nResponde 0 o Menu para volver al menú principal.`,
+  '2': `¡Sorprende a alguien especial con nuestros detalles saludables! 🎁\n\nConsulta el catálogo completo aquí:\n${BASE_URL}/#detalles\n\n¡Escríbenos el detalle que deseas encargar o tu fecha especial!\n\nResponde 0 o Menu para volver al menú principal.`,
+  '3': `¡Panes artesanos 100% sin azúcar y sin gluten! 🍞\n\nMira nuestras variedades aquí:\n${BASE_URL}/#pan\n\n¡Escríbeme el pan que deseas encargar!\n\nResponde 0 o Menu para volver al menú principal.`,
+  '4': `¡Postres saludables para disfrutar cualquier día! 🍮\n\nExplora la lista completa:\n${BASE_URL}/#postres\n\nEscríbenos cuál te provoca pedir hoy.\n\nResponde 0 o Menu para volver al menú principal.`,
+  '5': `¡Bienvenidos a nuestro Mercadito Saludable! 🛒\n\nProductos e insumos naturales aquí:\n${BASE_URL}/#mercadito\n\nResponde 0 o Menu para volver al menú principal.`,
+  '0': `¡Hola! Bienvenid@ a *Territorio Saludable* 🍰🌱\n\nPastelería 100% Sin Azúcar Refinada y Libres de Gluten en Bucaramanga.\n\nSelecciona una opción enviando el número:\n1️⃣ Tortas Saludables\n2️⃣ Catálogo Detalles\n3️⃣ Pan Saludable\n4️⃣ Postres Saludables\n5️⃣ Mercadito\n\nO escribe directamente lo que estás buscando.`,
+  'menu': `¡Hola! Bienvenid@ a *Territorio Saludable* 🍰🌱\n\nPastelería 100% Sin Azúcar Refinada y Libres de Gluten en Bucaramanga.\n\nSelecciona una opción enviando el número:\n1️⃣ Tortas Saludables\n2️⃣ Catálogo Detalles\n3️⃣ Pan Saludable\n4️⃣ Postres Saludables\n5️⃣ Mercadito\n\nO escribe directamente lo que estás buscando.`
+};
+
+// Función para enviar mensaje a la API de WhatsApp Graph Meta
+async function sendWhatsAppMessage(to, text) {
+  try {
+    const response = await fetch(
+      `https://graph.facebook.com/v18.0/${PHONE_NUMBER_ID}/messages`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${WHATSAPP_TOKEN}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          messaging_product: 'whatsapp',
+          recipient_type: 'individual',
+          to: to,
+          type: 'text',
+          text: { body: text }
+        })
+      }
+    );
+
+    const data = await response.json();
+    if (!response.ok) {
+      console.error('Error enviando mensaje de Meta WhatsApp:', JSON.stringify(data));
+    }
+    return data;
+  } catch (error) {
+    console.error('Excepción al enviar mensaje a WhatsApp:', error);
   }
-  return new Response('Token de verificación inválido', { status: 403 });
 }
 
-// 2. Recepción de mensajes y respuesta del bot
+// Consultar a Gemini cuando el usuario escribe texto libre (ej: "Torta zanahoria")
+async function getAIResponse(userPrompt) {
+  if (!GEMINI_API_KEY) {
+    return `¡Gracias por tu interés en *${userPrompt}*! 🍰 Puedes ver la información completa y porciones disponibles en nuestro catálogo: ${BASE_URL}/#tortas`;
+  }
+
+  try {
+    const systemInstruction = `Eres el asistente virtual de la pastelería "Territorio Saludable" en Bucaramanga.
+Todas nuestras tortas, panes y postres son 100% sin azúcar refinada (endulzados con Stevia) y libres de gluten.
+Las tortas requieren 1 día de anticipación.
+Sé amable, conciso y responde brevemente sobre el producto consultado ("${userPrompt}"), indicando que pueden hacer el pedido directamente por este chat o en el enlace de la tienda: ${BASE_URL}`;
+
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [
+            {
+              role: 'user',
+              parts: [{ text: `${systemInstruction}\n\nCliente: ${userPrompt}` }]
+            }
+          ]
+        })
+      }
+    );
+
+    const data = await res.json();
+    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    return reply || `¡Gracias por preguntar por *${userPrompt}*! 🍰 Puedes consultar detalles y porciones en nuestra página: ${BASE_URL}`;
+  } catch (err) {
+    console.error('Error llamando a Gemini AI:', err);
+    return `¡Gracias por escribirnos sobre *${userPrompt}*! 🍰 Puedes verificar disponibilidad y porciones en nuestro sitio web: ${BASE_URL}`;
+  }
+}
+
+// GET para verificación del Webhook de Meta
+export async function GET(request) {
+  const { searchParams } = new URL(request.url);
+  const mode = searchParams.get('hub.mode');
+  const token = searchParams.get('hub.verify_token');
+  const challenge = searchParams.get('hub.challenge');
+
+  const MY_VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN || 'territorio_token_secret';
+
+  if (mode === 'subscribe' && token === MY_VERIFY_TOKEN) {
+    return new Response(challenge, { status: 200 });
+  }
+  return new Response('Verification failed', { status: 403 });
+}
+
+// POST para recibir mensajes entrantes de WhatsApp
 export async function POST(request) {
   try {
     const body = await request.json();
@@ -26,124 +112,25 @@ export async function POST(request) {
     const message = value?.messages?.[0];
 
     if (message && message.type === 'text') {
-      const senderPhone = message.from;
-      const userText = message.text.body.trim().toLowerCase();
+      const from = message.from; // Número del cliente
+      const incomingText = message.text.body.trim();
+      const normalizedText = incomingText.toLowerCase();
 
-      let replyMessage = '';
-
-      // Opción 1: Tortas Saludables
-      if (userText === '1' || userText.includes('torta')) {
-        replyMessage = 
-          "¡Nuestras tortas son deliciosas y sin culpa! 🍰\n\n" +
-          "Míralas aquí:\n" +
-          "https://territorio-saludable.vercel.app/#tortas\n\n" +
-          "Cuando sepas cuál te gusta, ¡escríbeme su nombre por aquí o selecciónala directamente desde la página! 🍰✨\n\n" +
-          "_Responde *0* o *Menu* para volver al menú principal._";
-      } 
-      // Opción 2: Catalogo Detalles
-      else if (userText === '2' || userText.includes('detalle')) {
-        replyMessage = 
-          "¡Sorprende a alguien especial con nuestras opciones saludables! 🎁\n\n" +
-          "Mira nuestros detalles aquí:\n" +
-          "https://territorio-saludable.vercel.app/#detalles\n\n" +
-          "Cuando sepas cuál te gusta, ¡escríbeme su nombre por aquí o selecciónalo en la página! 🎁✨\n\n" +
-          "_Responde *0* o *Menu* para volver al menú principal._";
+      // 1. Si el usuario envía una opción conocida (0, 1, 2, 3, 4, 5, menu, hola)
+      if (MENU_RESPONSES[normalizedText]) {
+        await sendWhatsAppMessage(from, MENU_RESPONSES[normalizedText]);
+      } else if (normalizedText === 'hola') {
+        await sendWhatsAppMessage(from, MENU_RESPONSES['0']);
+      } else {
+        // 2. Si escribe un producto libre (ej: "Torta zanahoria"), responde la IA / catálogo
+        const aiReply = await getAIResponse(incomingText);
+        await sendWhatsAppMessage(from, aiReply);
       }
-      // Opción 3: Pan Saludable
-      else if (userText === '3' || userText.includes('pan')) {
-        replyMessage = 
-          "¡El mejor pan artesanal 100% libre de gluten y saludable! 🍞\n\n" +
-          "Míralo aquí:\n" +
-          "https://territorio-saludable.vercel.app/#pan\n\n" +
-          "Cuando sepas cuál te gusta, ¡escríbeme su nombre por aquí o selecciónalo en la página! 🍞✨\n\n" +
-          "_Responde *0* o *Menu* para volver al menú principal._";
-      }
-      // Opción 4: Postre Saludable
-      else if (userText === '4' || userText.includes('postre') || userText.includes('helado')) {
-        replyMessage = 
-          "¡Postres y helados deliciosos sin azúcar añadida! 🍨\n\n" +
-          "Míralos aquí:\n" +
-          "https://territorio-saludable.vercel.app/#postres\n\n" +
-          "Cuando sepas cuál te gusta, ¡escríbeme su nombre por aquí o selecciónalo en la página! 🍨✨\n\n" +
-          "_Responde *0* o *Menu* para volver al menú principal._";
-      }
-      // Opción 5: Mercadito
-      else if (userText === '5' || userText.includes('mercadito') || userText.includes('mercado')) {
-        replyMessage = 
-          "¡Nuestros productos de mercadito fit para tu día a día! 🥑\n\n" +
-          "Míralos aquí:\n" +
-          "https://territorio-saludable.vercel.app/#mercadito\n\n" +
-          "Cuando sepas cuál te gusta, ¡escríbeme su nombre por aquí o selecciónalo en la página! 🥑✨\n\n" +
-          "_Responde *0* o *Menu* para volver al menú principal._";
-      }
-      // Opción 6: Ver el Catálogo Completo
-      else if (userText === '6' || userText.includes('catalogo')) {
-        replyMessage = 
-          "📖 *Catálogo Completo Territorio Saludable*\n\n" +
-          "Explora toda nuestra variedad de repostería artesanal en el siguiente enlace:\n" +
-          "https://territorio-saludable.vercel.app\n\n" +
-          "_Responde *0* o *Menu* para volver al menú principal._";
-      } 
-      // Opción 7: Hablar con un asesor
-      else if (userText === '7' || userText.includes('asesor')) {
-        replyMessage = 
-          "👩‍🍳 *Atención Personalizada*\n\n" +
-          "Un asesor de Territorio Saludable revisará tu mensaje en breve para ayudarte con tu pedido o responder tus dudas sobre ingredientes.\n\n" +
-          "¡Gracias por tu paciencia!";
-      } 
-      // Menú Principal
-      else {
-        replyMessage = 
-          "¡Hola! Bienvenido a *Territorio Saludable* 🌱.\n" +
-          "¿Qué delicia sin azúcar te provoca hoy?\n\n" +
-          "Responde con el número de tu preferencia:\n" +
-          "1️⃣ Tortas Saludables\n" +
-          "2️⃣ Catalogo Detalles\n" +
-          "3️⃣ Pan Saludable\n" +
-          "4️⃣ Postre Saludable\n" +
-          "5️⃣ Mercadito\n" +
-          "6️⃣ 📖 Ver el Catálogo Completo\n" +
-          "7️⃣ 👩‍🍳 Hablar con un asesor\n\n" +
-          "Visita nuestra tienda web: https://territorio-saludable.vercel.app";
-      }
-
-      await sendWhatsAppMessage(senderPhone, replyMessage);
     }
 
-    return NextResponse.json({ success: true }, { status: 200 });
+    return NextResponse.json({ status: 'ok' }, { status: 200 });
   } catch (error) {
-    console.error('Error en el webhook:', error);
+    console.error('Error procesando el Webhook de WhatsApp:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
-  }
-}
-
-// 3. Función auxiliar para el envío a la API de Meta Graph
-async function sendWhatsAppMessage(toPhone, textMessage) {
-  const token = process.env.WHATSAPP_TOKEN;
-  const phoneId = process.env.WHATSAPP_PHONE_ID || process.env.WHATSAPP_PHONE_NUMBER_ID || '1483210214864841';
-
-  const url = `https://graph.facebook.com/v21.0/${phoneId}/messages`;
-
-  try {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        messaging_product: 'whatsapp',
-        to: toPhone,
-        text: { body: textMessage },
-      }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      console.error('Error enviando mensaje de Meta WhatsApp:', JSON.stringify(data));
-    }
-  } catch (error) {
-    console.error('Error de red al llamar a Meta Graph API:', error);
   }
 }
