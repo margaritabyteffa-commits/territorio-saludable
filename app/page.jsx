@@ -11,7 +11,7 @@ const FALLBACK_IMG = 'https://images.unsplash.com/photo-1578985545062-69928b1d95
 
 const DEFAULT_CONFIG = {
   businessName: 'Territorio Saludable',
-  whatsappPhone: '573000559196',
+  whatsappPhone: '573000559196', // <- Asegúrate de que tenga el 57 + tu número
   instagramUrl: 'https://instagram.com/territoriosaludable',
   facebookUrl: 'https://facebook.com/territoriosaludable',
   calendarEmbedUrl: 'https://calendar.google.com/calendar/embed?src=territoriosaludable%40gmail.com&ctz=America%2FBogota',
