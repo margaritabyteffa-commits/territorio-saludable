@@ -36,10 +36,46 @@ export async function POST(request) {
         replyMessage = 
           "¡Nuestras tortas son deliciosas y sin culpa! 🍰\n\n" +
           "Míralas aquí:\n" +
-          "https://territorio-saludable.vercel.app/tortas\n\n" +
+          "https://territorio-saludable.vercel.app/#tortas\n\n" +
           "Cuando sepas cuál te gusta, ¡escríbeme su nombre por aquí o selecciónala directamente desde la página! 🍰✨\n\n" +
           "_Responde *0* o *Menu* para volver al menú principal._";
       } 
+      // Opción 2: Catalogo Detalles
+      else if (userText === '2' || userText.includes('detalle')) {
+        replyMessage = 
+          "¡Sorprende a alguien especial con nuestras opciones saludables! 🎁\n\n" +
+          "Mira nuestros detalles aquí:\n" +
+          "https://territorio-saludable.vercel.app/#detalles\n\n" +
+          "Cuando sepas cuál te gusta, ¡escríbeme su nombre por aquí o selecciónalo en la página! 🎁✨\n\n" +
+          "_Responde *0* o *Menu* para volver al menú principal._";
+      }
+      // Opción 3: Pan Saludable
+      else if (userText === '3' || userText.includes('pan')) {
+        replyMessage = 
+          "¡El mejor pan artesanal 100% libre de gluten y saludable! 🍞\n\n" +
+          "Míralo aquí:\n" +
+          "https://territorio-saludable.vercel.app/#pan\n\n" +
+          "Cuando sepas cuál te gusta, ¡escríbeme su nombre por aquí o selecciónalo en la página! 🍞✨\n\n" +
+          "_Responde *0* o *Menu* para volver al menú principal._";
+      }
+      // Opción 4: Postre Saludable
+      else if (userText === '4' || userText.includes('postre') || userText.includes('helado')) {
+        replyMessage = 
+          "¡Postres y helados deliciosos sin azúcar añadida! 🍨\n\n" +
+          "Míralos aquí:\n" +
+          "https://territorio-saludable.vercel.app/#postres\n\n" +
+          "Cuando sepas cuál te gusta, ¡escríbeme su nombre por aquí o selecciónalo en la página! 🍨✨\n\n" +
+          "_Responde *0* o *Menu* para volver al menú principal._";
+      }
+      // Opción 5: Mercadito
+      else if (userText === '5' || userText.includes('mercadito') || userText.includes('mercado')) {
+        replyMessage = 
+          "¡Nuestros productos de mercadito fit para tu día a día! 🥑\n\n" +
+          "Míralos aquí:\n" +
+          "https://territorio-saludable.vercel.app/#mercadito\n\n" +
+          "Cuando sepas cuál te gusta, ¡escríbeme su nombre por aquí o selecciónalo en la página! 🥑✨\n\n" +
+          "_Responde *0* o *Menu* para volver al menú principal._";
+      }
       // Opción 6: Ver el Catálogo Completo
       else if (userText === '6' || userText.includes('catalogo')) {
         replyMessage = 
@@ -55,7 +91,7 @@ export async function POST(request) {
           "Un asesor de Territorio Saludable revisará tu mensaje en breve para ayudarte con tu pedido o responder tus dudas sobre ingredientes.\n\n" +
           "¡Gracias por tu paciencia!";
       } 
-      // Menú Principal (Opción por defecto o si escriben 0 / Hola)
+      // Menú Principal
       else {
         replyMessage = 
           "¡Hola! Bienvenido a *Territorio Saludable* 🌱.\n" +
