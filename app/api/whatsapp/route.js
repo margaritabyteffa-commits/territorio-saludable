@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 
+// 1. Verificación del Webhook para Meta
 export async function GET(request) {
   const url = new URL(request.url);
   const mode = url.searchParams.get('hub.mode');
@@ -14,6 +15,7 @@ export async function GET(request) {
   return new Response('Token de verificación inválido', { status: 403 });
 }
 
+// 2. Recepción de mensajes y respuesta del bot
 export async function POST(request) {
   try {
     const body = await request.json();
@@ -29,27 +31,32 @@ export async function POST(request) {
 
       let replyMessage = '';
 
-      // Evaluación del mensaje del usuario
-   if (userText === '1' || userText.includes('torta')) {
-  replyMessage = 
-    "¡Nuestras tortas son deliciosas y sin culpa! 🍰\n\n" +
-    "Míralas aquí:\n" +
-    "https://territorio-saludable.vercel.app/tortas\n\n" +
-    "Cuando sepas cuál te gusta, ¡escríbeme su nombre por aquí o selecciónala directamente desde la página! 🍰✨\n\n" +
-    "_Responde *0* o *Menu* para volver al menú principal._";
-}
-      } else if (userText === '6' || userText.includes('catalogo')) {
+      // Opción 1: Tortas Saludables
+      if (userText === '1' || userText.includes('torta')) {
+        replyMessage = 
+          "¡Nuestras tortas son deliciosas y sin culpa! 🍰\n\n" +
+          "Míralas aquí:\n" +
+          "https://territorio-saludable.vercel.app/tortas\n\n" +
+          "Cuando sepas cuál te gusta, ¡escríbeme su nombre por aquí o selecciónala directamente desde la página! 🍰✨\n\n" +
+          "_Responde *0* o *Menu* para volver al menú principal._";
+      } 
+      // Opción 6: Ver el Catálogo Completo
+      else if (userText === '6' || userText.includes('catalogo')) {
         replyMessage = 
           "📖 *Catálogo Completo Territorio Saludable*\n\n" +
           "Explora toda nuestra variedad de repostería artesanal en el siguiente enlace:\n" +
-          "https://territorio-saludable.vercel.app";
-      } else if (userText === '7' || userText.includes('asesor')) {
+          "https://territorio-saludable.vercel.app\n\n" +
+          "_Responde *0* o *Menu* para volver al menú principal._";
+      } 
+      // Opción 7: Hablar con un asesor
+      else if (userText === '7' || userText.includes('asesor')) {
         replyMessage = 
           "👩‍🍳 *Atención Personalizada*\n\n" +
           "Un asesor de Territorio Saludable revisará tu mensaje en breve para ayudarte con tu pedido o responder tus dudas sobre ingredientes.\n\n" +
           "¡Gracias por tu paciencia!";
-      } else {
-        // Menú Principal por defecto
+      } 
+      // Menú Principal (Opción por defecto o si escriben 0 / Hola)
+      else {
         replyMessage = 
           "¡Hola! Bienvenido a *Territorio Saludable* 🌱.\n" +
           "¿Qué delicia sin azúcar te provoca hoy?\n\n" +
@@ -74,6 +81,7 @@ export async function POST(request) {
   }
 }
 
+// 3. Función auxiliar para el envío a la API de Meta Graph
 async function sendWhatsAppMessage(toPhone, textMessage) {
   const token = process.env.WHATSAPP_TOKEN;
   const phoneId = process.env.WHATSAPP_PHONE_ID || process.env.WHATSAPP_PHONE_NUMBER_ID || '1483210214864841';
