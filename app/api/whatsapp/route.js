@@ -30,16 +30,14 @@ export async function POST(request) {
       let replyMessage = '';
 
       // Evaluación del mensaje del usuario
-      if (userText === '1' || userText.includes('torta')) {
-        replyMessage = 
-          "🎂 *Tortas Saludables (100% Sin Azúcar y Sin Gluten)*\n\n" +
-          "Nuestras tortas son endulzadas naturalmente y perfectas para cuidar tu salud sin perder el sabor:\n\n" +
-          "• *Torta de Chocolate & Almendras* (Sin gluten)\n" +
-          "• *Torta Zanahoria Fit* (Con cobertura de queso crema ligero)\n" +
-          "• *Torta Red Velvet Saludable*\n\n" +
-          "📲 Ver fotos y pedir directamente en la tienda web:\n" +
-          "https://territorio-saludable.vercel.app\n\n" +
-          "_Responde *0* o *Menu* para volver al menú principal._";
+   if (userText === '1' || userText.includes('torta')) {
+  replyMessage = 
+    "¡Nuestras tortas son deliciosas y sin culpa! 🍰\n\n" +
+    "Míralas aquí:\n" +
+    "https://territorio-saludable.vercel.app/tortas\n\n" +
+    "Cuando sepas cuál te gusta, ¡escríbeme su nombre por aquí o selecciónala directamente desde la página! 🍰✨\n\n" +
+    "_Responde *0* o *Menu* para volver al menú principal._";
+}
       } else if (userText === '6' || userText.includes('catalogo')) {
         replyMessage = 
           "📖 *Catálogo Completo Territorio Saludable*\n\n" +
