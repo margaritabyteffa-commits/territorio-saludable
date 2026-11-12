@@ -347,8 +347,40 @@ export async function POST(request) {
         case 'ASK_CLIENT_NAME':
           session.orderData.clientName = incomingText;
           session.state = 'ASK_ADDRESS';
-          // Ejemplo neutro sin dirección real
-          await sendWhatsAppMessage(from, `2. ¿Cuál es la *dirección exacta de entrega* en Bucaramanga o Área Metropolitana?\n(📌 Ejemplo: Cra 35 # 52-20, Barrio Cabecera):`);
+          await sendWhatsAppMessage(
+            from,
+            `2. ¿Cuál es la *dirección exacta de entrega*?\nPor favor incluye *barrio o municipio*, y si aplica, *torre, apartamento o casa*.\n\n📌 _Ejemplo: Cra 35 # 52-20, Torre 2 Apto 401, Barrio Cabecera_`
+          );
+          break;
+
+        case 'ASK_ADDRESS':
+          session.orderData.address = incomingText;
+          const shippingCalc = await calculateShippingByAddress(incomingText);
+          
+          if (shippingCalc.found) {
+            // Detectó el barrio/municipio: guarda la tarifa y salta directo a quien recibe
+            session.orderData.shippingCost = shippingCalc.tarifa;
+            session.orderData.zoneName = shippingCalc.zona;
+            session.state = 'ASK_RECIPIENT_NAME';
+            await sendWhatsAppMessage(from, `3. ¿Cuál es el *nombre de la persona que recibe* el pedido?`);
+          } else {
+            // No escribió el barrio/municipio: se lo pide de forma natural sin listas
+            session.state = 'ASK_NEIGHBORHOOD';
+            await sendWhatsAppMessage(
+              from,
+              `¿En qué *barrio o municipio* (Bucaramanga, Floridablanca, Girón o Piedecuesta) queda esa dirección para calcular el valor de tu domicilio?`
+            );
+          }
+          break;
+
+        case 'ASK_NEIGHBORHOOD':
+          session.orderData.address = `${session.orderData.address} (${incomingText})`;
+          const secondCalc = await calculateShippingByAddress(incomingText);
+          session.orderData.shippingCost = secondCalc.found ? secondCalc.tarifa : 7000;
+          session.orderData.zoneName = secondCalc.found ? secondCalc.zona : incomingText;
+          
+          session.state = 'ASK_RECIPIENT_NAME';
+          await sendWhatsAppMessage(from, `3. ¿Cuál es el *nombre de la persona que recibe* el pedido?`);
           break;
 
         case 'ASK_ADDRESS':
