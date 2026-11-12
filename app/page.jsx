@@ -1224,29 +1224,28 @@ export default function Page() {
                   </div>
                 </div>
 
-                <div className="bg-white rounded-3xl border border-stone-200 p-6 space-y-4 shadow-xs">
+             <div className="bg-white rounded-3xl border border-stone-200 p-6 space-y-4 shadow-xs">
                   <h3 className="font-serif font-bold text-base text-stone-900 flex items-center gap-2">
                     <MapPin size={16} className="text-[#2D5A27]" />
-                    <span>Gestor Dinámico de Tarifas por Zona</span>
+                    <span>Zonas de Cobertura de Envío</span>
                   </h3>
-                  <p className="text-xs text-stone-500">Agrega, modifica o elimina las tarifas de domicilio según varíen las distancias.</p>
+                  <p className="text-xs text-stone-500">Administra los sectores y municipios activos para entregas a domicilio.</p>
 
                   <div className="space-y-2 text-xs">
                     {zones.map(z => (
                       <div key={z.id || z.name} className="flex items-center justify-between p-3 bg-stone-50 rounded-2xl border border-stone-200/80">
                         <span className="font-medium text-stone-800">{z.name}</span>
-                        <div className="flex items-center gap-3">
-                          <span className="font-bold text-[#2D5A27]">{formatCOP(z.price)}</span>
+                        <div className="flex items-center gap-2">
                           <button 
                             onClick={() => {
-                              const newP = prompt(`Nuevo precio para ${z.name}:`, z.price);
-                              if (newP !== null && !isNaN(newP)) {
-                                setZones(zones.map(item => item.name === z.name ? { ...item, price: Number(newP) } : item));
-                                showToast('Tarifa actualizada');
+                              const newName = prompt(`Editar nombre de zona:`, z.name);
+                              if (newName && newName.trim()) {
+                                setZones(zones.map(item => item.name === z.name ? { ...item, name: newName.trim() } : item));
+                                showToast('Zona actualizada');
                               }
                             }}
                             className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition"
-                            title="Modificar Precio"
+                            title="Editar Zona"
                           >
                             ✏️
                           </button>
@@ -1267,23 +1266,17 @@ export default function Page() {
 
                   <button 
                     onClick={() => {
-                      const name = prompt('Nombre de la nueva zona (ej. Floridablanca Cañaveral):');
-                      const price = prompt('Precio de envío (COP):');
-                      if (name && price && !isNaN(price)) {
-                        setZones([...zones, { id: 'z-' + Date.now(), name, price: Number(price) }]);
+                      const name = prompt('Nombre de la nueva zona o sector (ej. Piedecuesta / Ruitoque):');
+                      if (name && name.trim()) {
+                        setZones([...zones, { id: 'z-' + Date.now(), name: name.trim(), price: 0 }]);
                         showToast('Nueva zona agregada');
                       }
                     }}
                     className="w-full py-3 border border-dashed border-[#2D5A27] text-[#2D5A27] font-bold text-xs rounded-2xl hover:bg-emerald-50 transition"
                   >
-                    + Agregar Nueva Zona de Envío
+                    + Agregar Nueva Zona de Cobertura
                   </button>
                 </div>
-              </div>
-            </div>
-          )}
-        </main>
-      )}
 
       {/* FOOTER */}
       <footer className="bg-[#1C1815] text-[#D8D0C5] border-t border-stone-800 mt-auto">
@@ -1299,13 +1292,15 @@ export default function Page() {
             <p className="text-stone-400">{config.hoursSun}</p>
           </div>
           <div className="space-y-2">
-            <span className="font-bold text-white uppercase tracking-wider block text-[11px]">Tarifas Domicilio</span>
+            <span className="font-bold text-white uppercase tracking-wider block text-[11px]">Zonas de Cobertura</span>
             {zones.map(z => (
-              <p key={z.name} className="flex justify-between text-stone-400">
-                <span>{z.name}</span>
-                <span className="font-bold text-amber-400">{formatCOP(z.price)}</span>
+              <p key={z.name} className="text-stone-400">
+                • {z.name}
               </p>
             ))}
+            <p className="text-[10px] text-amber-400/90 pt-1 italic">
+              * El valor exacto del domicilio se calcula según tu barrio al confirmar por WhatsApp.
+            </p>
           </div>
           <div className="space-y-3">
             <span className="font-bold text-white uppercase tracking-wider block text-[11px]">Métodos de Pago</span>
