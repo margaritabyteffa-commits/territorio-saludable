@@ -322,18 +322,24 @@ export async function POST(request) {
       }
       const session = userSessions[from];
 
-      // Detección prioritaria de pedido desde botón Web
+    // Detección prioritaria de pedido desde botón Web (acumula productos en el carrito)
       const webOrder = parseWebOrderMessage(incomingText);
       if (webOrder) {
-        session.fromWeb = true;
-        session.cart = [webOrder.item];
-        session.itemsDetail = [{ name: webOrder.item, price: webOrder.price }];
+        if (session.cart.length === 0) {
+          session.fromWeb = true;
+        } else if (!webOrder.item.toLowerCase().includes('1 día anticipación')) {
+          // Mantiene el estado anterior si ya había algo que requería anticipación
+        }
+        session.cart.push(webOrder.item);
+        session.itemsDetail.push({ name: webOrder.item, price: webOrder.price });
         session.state = 'ASK_ADD_MORE';
         const cleanName = webOrder.item.replace(/\[.*?\]/g, '').trim();
-        await sendWhatsAppMessage(from, `¡Excelente elección! 🍰 He agregado *${cleanName}* (${formatCOP(webOrder.price)}) a tu pedido.\n\n¿Deseas agregar otro producto más?\n1️⃣ Sí\n2️⃣ No`);
+        await sendWhatsAppMessage(
+          from,
+          `¡Excelente elección! 🍰 He agregado *${cleanName}* (${formatCOP(webOrder.price)}) a tu pedido.\n\n¿Deseas agregar otro producto más?\n1️⃣ Sí\n2️⃣ No`
+        );
         return NextResponse.json({ status: 'ok' });
       }
-
       // Saludo o reinicio
       if (normalizedText === '0' || normalizedText === 'menu' || normalizedText === 'hola') {
         session.state = 'IDLE';
@@ -408,20 +414,14 @@ export async function POST(request) {
         case 'ASK_ADD_MORE':
           if (normalizedText === '1' || normalizedText === 'si' || normalizedText === 'sí') {
             session.state = 'IDLE';
-            await sendWhatsAppMessage(from, `Escribe el nombre del otro producto o presiona *0* para ver el menú:`);
+            await sendWhatsAppMessage(
+              from,
+              `¡Súper! Revisa nuestro catálogo completo y añade el otro producto que desees:\n${BASE_URL}\n\n_(También puedes escribirme su nombre y porciones por aquí)_ 🍰✨`
+            );
           } else {
             session.state = 'ASK_CLIENT_NAME';
             await sendWhatsAppMessage(from, `¡Perfecto! Vamos a tomar tus datos para la entrega.\n\n1. ¿Cuál es el *nombre completo de la persona que realiza el pedido*?`);
           }
-          break;
-
-        case 'ASK_CLIENT_NAME':
-          session.orderData.clientName = incomingText;
-          session.state = 'ASK_ADDRESS';
-          await sendWhatsAppMessage(
-            from,
-            `2. ¿Cuál es la *dirección exacta de entrega*?\nPor favor incluye *barrio o municipio*, y si aplica, *torre, apartamento o casa*.\n\n📌 _Ejemplo: Cra 35 # 52-20, Torre 2 Apto 401, Barrio Cabecera_`
-          );
           break;
 
         case 'ASK_ADDRESS':
