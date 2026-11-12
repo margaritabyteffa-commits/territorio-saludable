@@ -8,13 +8,80 @@ const GEMINI_API_KEY = process.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API
 const ADMIN_PHONE = '573000559196';
 const BASE_URL = 'https://territorio-saludable.vercel.app';
 
-// Tarifas de domicilio por zonas
-const ZONAS_DOMICILIO = [
-  { name: 'Cabecera / Sotomayor / Prado', price: 5000, keywords: ['cabecera', 'sotomayor', 'prado', 'antiguo campestre'] },
-  { name: 'Centro / San Francisco', price: 7000, keywords: ['centro', 'san francisco', 'alarcón', 'comuneros', 'la concordia'] },
-  { name: 'Floridablanca / Cañaveral', price: 10000, keywords: ['floridablanca', 'cañaveral', 'provenza', 'el bosque', 'cañaveral'] },
-  { name: 'Girón / Piedecuesta', price: 15000, keywords: ['girón', 'giron', 'piedecuesta', 'ruitoque'] }
+// Matriz oculta de barrios y tarifas de Bucaramanga y Área Metropolitana
+const BARRIOS_TARIFAS = [
+  { 
+    tarifa: 5000, 
+    zona: 'Cabecera / Sotomayor / Prado', 
+    barrios: ['cabecera', 'sotomayor', 'prado', 'antiguo campestre', 'mejoras publicas', 'mejoras públicas', 'conucos', 'la floresta', 'bolivar', 'bolívar', 'pan de azucar', 'pan de azúcar', 'terrazas', 'altos de cabecera'] 
+  },
+  { 
+    tarifa: 7000, 
+    zona: 'Centro / San Francisco / Ciudadela', 
+    barrios: ['centro', 'san francisco', 'alarcon', 'alarcón', 'comuneros', 'la concordia', 'ricaurte', 'mutis', 'real de minas', 'ciudadela', 'diamante', 'provenza', 'san alonso', 'la aurora', 'universidad', 'antonia santos', 'garcia rovira', 'garcía rovira', 'el rocio', 'el rocío', 'cacique', 'tejar'] 
+  },
+  { 
+    tarifa: 10000, 
+    zona: 'Floridablanca / Cañaveral', 
+    barrios: ['floridablanca', 'cañaveral', 'canaveral', 'el bosque', 'lagos', 'zapamanga', 'la cumbre', 'altamira', 'molinos', 'bucaros', 'búcaros', 'caldas', 'fatima', 'fátima', 'villabel', 'caracolí', 'caracoli'] 
+  },
+  { 
+    tarifa: 12000, 
+    zona: 'Norte / Morrorico / La Feria', 
+    barrios: ['morrorico', 'la feria', 'kennedy', 'cafe madrid', 'café madrid', 'colorados', 'estoraques', 'campo hermoso', 'gaitan', 'gaitán', 'modelo', 'chapinero', 'girardot'] 
+  },
+  { 
+    tarifa: 15000, 
+    zona: 'Girón / Piedecuesta / Ruitoque', 
+    barrios: ['giron', 'girón', 'piedecuesta', 'ruitoque', 'menzuly', 'valle de menzuly', 'guatiguara', 'guatiguará', 'barro blanco', 'poblado', 'rincon de giron', 'rincón de girón'] 
+  }
 ];
+
+// Función que analiza la dirección y calcula el domicilio automáticamente
+async function calculateShippingByAddress(addressText) {
+  const clean = addressText.toLowerCase();
+  
+  // 1. Buscar coincidencia directa en la tabla de barrios
+  for (const group of BARRIOS_TARIFAS) {
+    if (group.barrios.some(b => clean.includes(b))) {
+      return { found: true, tarifa: group.tarifa, zona: group.zona };
+    }
+  }
+
+  // 2. Si no está en la lista manual pero tiene texto suficiente, consulta ubicación a Gemini
+  if (GEMINI_API_KEY && clean.length > 10) {
+    try {
+      const prompt = `Eres un experto en geografía de Bucaramanga, Floridablanca, Girón y Piedecuesta (Santander, Colombia).
+El cliente escribió esta dirección: "${addressText}".
+Si menciona un barrio, conjunto o municipio identificable, asigna el costo de domicilio desde Cabecera (Bucaramanga) respondiendo ÚNICAMENTE con uno de estos números:
+- 5000 (Sector Cabecera, Sotomayor, Prado, Mejoras Públicas, Terrazas, Conucos)
+- 7000 (Centro, San Francisco, Real de Minas, Provenza, Diamante, Mutis, San Alonso, Aurora, Cacique)
+- 10000 (Floridablanca casco antiguo, Cañaveral, Lagos, Bosque, Zapamanga, Cumbre)
+- 12000 (Norte de Bucaramanga, Morrorico, Campo Hermoso, La Feria, Café Madrid)
+- 15000 (Girón, Piedecuesta, Ruitoque, Menzuly)
+Si el texto SOLO tiene nomenclatura (calle/carrera/número) y NO menciona ningún barrio, conjunto ni municipio, responde exactamente: FALTA_BARRIO`;
+
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: prompt }] }] })
+        }
+      );
+      const data = await res.json();
+      const ans = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
+      const num = parseInt(ans.replace(/\D/g, ''));
+      if ([5000, 7000, 10000, 12000, 15000].includes(num)) {
+        return { found: true, tarifa: num, zona: 'Área Metropolitana' };
+      }
+    } catch (e) {
+      console.error('Error calculando barrio con IA:', e);
+    }
+  }
+
+  return { found: false };
+}
 
 // Matriz completa de precios exactos por producto y porción
 const PRICE_CATALOG = {
