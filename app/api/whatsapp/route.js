@@ -297,7 +297,8 @@ export async function POST(request) {
 
       // Detección de orden web
       const webOrder = parseWebOrderMessage(incomingText);
-      if (webOrder) {
+     if (webOrder) {
+        session.fromWeb = true;
         session.cart = [webOrder.item];
         session.itemsDetail = [{ name: webOrder.item, price: webOrder.price }];
         session.state = 'ASK_ADD_MORE';
@@ -310,6 +311,7 @@ export async function POST(request) {
           if (MENU_RESPONSES[normalizedText]) {
             await sendWhatsAppMessage(from, MENU_RESPONSES[normalizedText]);
           } else {
+            session.fromWeb = false;
             const calculatedPrice = getCalculatedPrice(incomingText);
             if (normalizedText.includes('porc') || normalizedText.includes('porciones') || normalizedText.includes('personal')) {
               session.cart.push(incomingText);
@@ -422,12 +424,25 @@ export async function POST(request) {
           await sendWhatsAppMessage(from, `4. ¿Cuál es el *número de teléfono/celular de la persona que recibe*?`);
           break;
 
-        case 'ASK_RECIPIENT_PHONE':
+       case 'ASK_RECIPIENT_PHONE':
           session.orderData.recipientPhone = incomingText;
           session.state = 'ASK_DELIVERY_DATE';
-          await sendWhatsAppMessage(from, `5. ¿Para qué *fecha* deseas la entrega? (Ejemplo: Mañana 12 de Noviembre):`);
-          break;
 
+          const needsTomorrow = cartRequiresOneDayNotice(session);
+          if (needsTomorrow) {
+            const tomorrowStr = getDynamicDateExample(1);
+            await sendWhatsAppMessage(
+              from,
+              `5. ¿Para qué *fecha* deseas la entrega?\n⚠️ _Recuerda que este pedido se agenda con 1 día de anticipación (a partir de mañana)._\n\n📌 _Ejemplo: ${tomorrowStr} o 15 de noviembre:_`
+            );
+          } else {
+            const todayStr = getDynamicDateExample(0);
+            await sendWhatsAppMessage(
+              from,
+              `5. ¿Para qué *fecha* deseas la entrega?\n✨ _Estos productos tienen disponibilidad para entrega hoy mismo o la fecha que prefieras._\n\n📌 _Ejemplo: Hoy ${todayStr} o 15 de noviembre:_`
+            );
+          }
+          break;
         case 'ASK_DELIVERY_DATE':
           session.orderData.deliveryDate = incomingText;
           session.state = 'ASK_DELIVERY_TIME';
