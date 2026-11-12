@@ -146,14 +146,14 @@ async function sendWhatsAppMessage(to, text) {
 }
 
 function parseWebOrderMessage(text) {
-  if (text.includes('Quisiera pedir:')) {
-    const parts = text.split('Quisiera pedir:');
+  if (text.includes('Quiero pedir:')) {
+    const parts = text.split('Quiero pedir:');
     if (parts[1]) {
-      const detail = parts[1].split('por valor de')[0].trim();
+      const detail = parts[1].split('- $')[0].trim();
       let price = getCalculatedPrice(detail);
       if (text.includes('$')) {
-        const pStr = text.split('$')[1]?.split('.')[0]?.replace(/\D/g, '');
-        if (pStr) price = Number(pStr) * 1000;
+        const pStr = text.split('$')[1]?.replace(/[^\d]/g, '');
+        if (pStr && Number(pStr) > 1000) price = Number(pStr);
       }
       return { item: detail, price };
     }
