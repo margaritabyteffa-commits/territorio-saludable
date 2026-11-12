@@ -3,9 +3,7 @@ import { NextResponse } from 'next/server';
 const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN;
 const PHONE_NUMBER_ID = process.env.WHATSAPP_PHONE_ID;
 const GEMINI_API_KEY = process.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
-
-// Número oficial configurado correctamente
-const ADMIN_PHONE = '573000559196';
+const ADMIN_PHONE = process.env.ADMIN_WHATSAPP_PHONE || '573000559196';
 const BASE_URL = 'https://territorio-saludable.vercel.app';
 
 // Matriz oculta de barrios y tarifas de Bucaramanga y Área Metropolitana
@@ -37,18 +35,123 @@ const BARRIOS_TARIFAS = [
   }
 ];
 
-// Función que analiza la dirección y calcula el domicilio automáticamente
+const PRICE_CATALOG = {
+  'torta pistacho (5 porc)': 94000,
+  'torta pistacho (8 porc)': 141000,
+  'torta pistacho (12 porc)': 197000,
+  'torta pistacho (18 porc)': 274000,
+  'torta pistacho (25 porc)': 353000,
+  'torta moka (5 porc)': 84000,
+  'torta moka (8 porc)': 123000,
+  'torta moka (12 porc)': 155000,
+  'torta moka (18 porc)': 217000,
+  'luna de almendras (5 porc)': 73000,
+  'luna de almendras (8 porc)': 108000,
+  'luna de almendras (12 porc)': 142000,
+  'luna de almendras (18 porc)': 189000,
+  'luna de almendras (25 porc)': 250000,
+  'torta zanahoria (5 porc)': 73000,
+  'torta zanahoria (8 porc)': 108000,
+  'torta zanahoria (12 porc)': 145000,
+  'torta zanahoria (18 porc)': 189000,
+  'torta zanahoria (25 porc)': 249000,
+  'torta de arequipe (5 porc)': 82000,
+  'torta de arequipe (8 porc)': 118000,
+  'torta de arequipe (12 porc)': 148000,
+  'torta de arequipe (18 porc)': 195000,
+  'torta de arequipe (25 porc)': 255000,
+  'torta primavera (5 porc)': 75000,
+  'torta primavera (8 porc)': 110000,
+  'torta primavera (12 porc)': 145000,
+  'torta primavera (18 porc)': 195000
+};
+
+const userSessions = {};
+
+const MENU_PRINCIPAL = `¡Hola! Bienvenid@ a *Territorio Saludable* 🍰🌱
+
+Pastelería 100% Sin Azúcar Refinada y Libres de Gluten en Bucaramanga.
+Responde con el número de tu preferencia:
+
+1️⃣ Tortas Saludables
+2️⃣ Catalogo Detalles
+3️⃣ Pan Saludable
+4️⃣ Postres Saludables
+5️⃣ Mercadito
+6️⃣ 📖 Ver el Catálogo Completo
+7️⃣ 👩‍🍳 Hablar con un asesor
+
+Visita nuestra tienda web: ${BASE_URL}`;
+
+const MENU_RESPONSES = {
+  '1': `¡Nuestras tortas son deliciosas y sin culpa! 🍰\n\nMíralas aquí:\n${BASE_URL}/#tortas\n\n📌 *Recuerda:* En la página debes seleccionar el número de porciones que deseas.\n\nCuando sepas cuál te gusta, ¡escríbeme su nombre y porciones por aquí o selecciónala directamente desde la página! 🍰✨\n\nResponde 0 o Menu para volver al menú principal.`,
+  '2': `¡Sorprende a alguien especial con nuestros detalles saludables! 🎁\n\nConsulta el catálogo de detalles aquí:\n${BASE_URL}/#detalles\n\n¡Escríbenos el detalle que deseas encargar!\n\nResponde 0 o Menu para volver al menú principal.`,
+  '3': `¡Panes artesanos 100% sin azúcar y sin gluten! 🍞\n\nMira nuestras variedades aquí:\n${BASE_URL}/#pan\n\n¡Escríbeme el pan que deseas encargar!\n\nResponde 0 o Menu para volver al menú principal.`,
+  '4': `¡Postres saludables para disfrutar cualquier día! 🍮\n\nExplora la lista completa de postres aquí:\n${BASE_URL}/#postres\n\nEscríbenos cuál te provoca pedir hoy.\n\nResponde 0 o Menu para volver al menú principal.`,
+  '5': `¡Bienvenidos a nuestro Mercadito Saludable! 🛒\n\nProductos e insumos naturales aquí:\n${BASE_URL}/#mercadito\n\nResponde 0 o Menu para volver al menú principal.`,
+  '6': `📖 *Catálogo Completo de Territorio Saludable*\n\nPuedes explorar todos nuestros productos, fotos y precios en:\n${BASE_URL}\n\nResponde 0 o Menu para volver al menú principal.`,
+  '0': MENU_PRINCIPAL,
+  'menu': MENU_PRINCIPAL
+};
+
+const formatCOP = (n) => '$ ' + Number(n || 0).toLocaleString('es-CO');
+
+// Obtiene la fecha de HOY o MAÑANA en zona horaria de Colombia
+function getDynamicDateExample(daysToAdd = 0) {
+  const now = new Date();
+  const colombiaTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/Bogota' }));
+  colombiaTime.setDate(colombiaTime.getDate() + daysToAdd);
+  const dd = String(colombiaTime.getDate()).padStart(2, '0');
+  const mm = String(colombiaTime.getMonth() + 1).padStart(2, '0');
+  const yyyy = colombiaTime.getFullYear();
+  return `${dd}/${mm}/${yyyy}`;
+}
+
+// Evalúa si el pedido exige 1 día de anticipación
+function cartRequiresOneDayNotice(session) {
+  if (!session.fromWeb) {
+    return true;
+  }
+  return session.cart.some(item => {
+    const clean = item.toLowerCase();
+    return clean.includes('1 día anticipación') || clean.includes('1 dia anticipacion');
+  });
+}
+
+// Completa el año automáticamente si el cliente escribe solo día y mes
+function normalizeUserDate(text) {
+  const now = new Date();
+  const colombiaTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/Bogota' }));
+  const currentYear = colombiaTime.getFullYear();
+  
+  if (!text.includes(String(currentYear)) && !text.includes(String(currentYear + 1))) {
+    return `${text.trim()} de ${currentYear}`;
+  }
+  return text.trim();
+}
+
+function getCalculatedPrice(productString) {
+  const clean = productString.toLowerCase().replace(/\*/g, '').replace(/\s+/g, ' ').trim();
+  for (const [key, val] of Object.entries(PRICE_CATALOG)) {
+    if (clean.includes(key)) return val;
+  }
+  if (clean.includes('25 porc')) return 353000;
+  if (clean.includes('18 porc')) return 274000;
+  if (clean.includes('12 porc')) return 197000;
+  if (clean.includes('8 porc')) return 141000;
+  if (clean.includes('5 porc')) return 94000;
+  return 85000;
+}
+
 async function calculateShippingByAddress(addressText) {
   const clean = addressText.toLowerCase();
   
-  // 1. Buscar coincidencia directa en la tabla de barrios
   for (const group of BARRIOS_TARIFAS) {
     if (group.barrios.some(b => clean.includes(b))) {
       return { found: true, tarifa: group.tarifa, zona: group.zona };
     }
   }
 
-  // 2. Si no está en la lista manual pero tiene texto suficiente, consulta ubicación a Gemini
   if (GEMINI_API_KEY && clean.length > 10) {
     try {
       const prompt = `Eres un experto en geografía de Bucaramanga, Floridablanca, Girón y Piedecuesta (Santander, Colombia).
@@ -83,130 +186,72 @@ Si el texto SOLO tiene nomenclatura (calle/carrera/número) y NO menciona ningú
   return { found: false };
 }
 
-// Matriz completa de precios exactos por producto y porción
-const PRICE_CATALOG = {
-  // Torta Pistacho
-  'torta pistacho (5 porc)': 94000,
-  'torta pistacho (8 porc)': 141000,
-  'torta pistacho (12 porc)': 197000,
-  'torta pistacho (18 porc)': 274000,
-  'torta pistacho (25 porc)': 353000,
-  
-  // Torta Moka
-  'torta moka (5 porc)': 84000,
-  'torta moka (8 porc)': 123000,
-  'torta moka (12 porc)': 155000,
-  'torta moka (18 porc)': 217000,
+async function verifyReceiptWithAI(imageId) {
+  if (!GEMINI_API_KEY) return { valid: true };
+  try {
+    const mediaRes = await fetch(`https://graph.facebook.com/v18.0/${imageId}`, {
+      headers: { 'Authorization': `Bearer ${WHATSAPP_TOKEN}` }
+    });
+    const mediaData = await mediaRes.json();
+    if (!mediaData.url) return { valid: true };
 
-  // Torta Choco-Arequipe
-  'torta choco-arequipe (3 porc)': 60000,
-  'torta choco-arequipe (5 porc)': 84000,
-  'torta choco-arequipe (8 porc)': 123000,
-  'torta choco-arequipe (12 porc)': 155000,
+    const imgRes = await fetch(mediaData.url, {
+      headers: { 'Authorization': `Bearer ${WHATSAPP_TOKEN}` }
+    });
+    const arrayBuffer = await imgRes.arrayBuffer();
+    const base64Image = Buffer.from(arrayBuffer).toString('base64');
+    const mimeType = imgRes.headers.get('content-type') || 'image/jpeg';
 
-  // Luna de Almendras
-  'luna de almendras (5 porc)': 73000,
-  'luna de almendras (8 porc)': 108000,
-  'luna de almendras (12 porc)': 142000,
-  'luna de almendras (18 porc)': 189000,
-  'luna de almendras (25 porc)': 250000,
+    const prompt = `Analiza esta imagen. ¿Es un comprobante de transferencia bancaria o pago digital (Nequi, Bancolombia, Daviplata, PSE, etc.)?
+Responde en formato JSON estricto sin markdown:
+{"esComprobante": true/false, "montoDetectado": numero_sin_puntos_ni_simbolos, "detalle": "breve descripcion"}`;
 
-  // Torta Zanahoria
-  'torta zanahoria (5 porc)': 73000,
-  'torta zanahoria (8 porc)': 108000,
-  'torta zanahoria (12 porc)': 145000,
-  'torta zanahoria (18 porc)': 189000,
-  'torta zanahoria (25 porc)': 249000,
-
-  // Torta de Arequipe
-  'torta de arequipe (5 porc)': 82000,
-  'torta de arequipe (8 porc)': 118000,
-  'torta de arequipe (12 porc)': 148000,
-  'torta de arequipe (18 porc)': 195000,
-  'torta de arequipe (25 porc)': 255000
-};
-
-const userSessions = {};
-
-const MENU_PRINCIPAL = `¡Hola! Bienvenid@ a *Territorio Saludable* 🍰🌱
-
-Pastelería 100% Sin Azúcar Refinada y Libres de Gluten en Bucaramanga.
-Responde con el número de tu preferencia:
-
-1️⃣ Tortas Saludables
-2️⃣ Catalogo Detalles
-3️⃣ Pan Saludable
-4️⃣ Postres Saludables
-5️⃣ Mercadito
-6️⃣ 📖 Ver el Catálogo Completo
-7️⃣ 👩‍🍳 Hablar con un asesor
-
-Visita nuestra tienda web: ${BASE_URL}`;
-
-const MENU_RESPONSES = {
-  '1': `¡Nuestras tortas son deliciosas y sin culpa! 🍰\n\nMíralas aquí:\n${BASE_URL}/#tortas\n\n📌 *Recuerda:* En la página debes seleccionar el número de porciones que deseas.\n\nCuando sepas cuál te gusta, ¡escríbeme su nombre y porciones por aquí o selecciónala directamente desde la página! 🍰✨\n\nResponde 0 o Menu para volver al menú principal.`,
-  '2': `¡Sorprende a alguien especial con nuestros detalles saludables! 🎁\n\nConsulta el catálogo de detalles aquí:\n${BASE_URL}/#detalles\n\n¡Escríbenos el detalle que deseas encargar!\n\nResponde 0 o Menu para volver al menú principal.`,
-  '3': `¡Panes artesanos 100% sin azúcar y sin gluten! 🍞\n\nMira nuestras variedades aquí:\n${BASE_URL}/#pan\n\n¡Escríbeme el pan que deseas encargar!\n\nResponde 0 o Menu para volver al menú principal.`,
-  '4': `¡Postres saludables para disfrutar cualquier día! 🍮\n\nExplora la lista completa de postres aquí:\n${BASE_URL}/#postres\n\nEscríbenos cuál te provoca pedir hoy.\n\nResponde 0 o Menu para volver al menú principal.`,
-  '5': `¡Bienvenidos a nuestro Mercadito Saludable! 🛒\n\nProductos e insumos naturales aquí:\n${BASE_URL}/#mercadito\n\nResponde 0 o Menu para volver al menú principal.`,
-  '6': `📖 *Catálogo Completo de Territorio Saludable*\n\nPuedes explorar todos nuestros productos, fotos y precios en:\n${BASE_URL}\n\nResponde 0 o Menu para volver al menú principal.`,
-  '0': MENU_PRINCIPAL,
-  'menu': MENU_PRINCIPAL
-};
-
-const formatCOP = (n) => '$ ' + Number(n || 0).toLocaleString('es-CO');
-
-// Buscar precio exacto según el producto y porción elegidos
-function getCalculatedPrice(productString) {
-  const clean = productString.toLowerCase().replace(/\s+/g, ' ').trim();
-  
-  for (const [key, val] of Object.entries(PRICE_CATALOG)) {
-    if (clean.includes(key) || key.includes(clean)) {
-      return val;
+    const aiRes = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{
+            role: 'user',
+            parts: [
+              { text: prompt },
+              { inlineData: { mimeType, data: base64Image } }
+            ]
+          }]
+        })
+      }
+    );
+    const aiData = await aiRes.json();
+    const rawText = aiData?.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+    const cleanJson = JSON.parse(rawText.replace(/```json|```/g, '').trim());
+    
+    if (cleanJson.esComprobante === false) {
+      return { valid: false, reason: 'La imagen enviada no parece ser un comprobante de pago bancario.' };
     }
+    return { valid: true, info: cleanJson.detalle || 'Comprobante bancario detectado' };
+  } catch (e) {
+    console.error('Error analizando comprobante:', e);
+    return { valid: true };
   }
-
-  // Si incluye porciones específicas y no está en la lista exacta, busca coincidencia por porción
-  if (clean.includes('25 porc')) return 353000;
-  if (clean.includes('18 porc')) return 274000;
-  if (clean.includes('12 porc')) return 197000;
-  if (clean.includes('8 porc')) return 141000;
-  if (clean.includes('5 porc')) return 94000;
-
-  return 85000;
-}
-
-// Detectar zona automáticamente por el texto de la dirección
-function detectZoneFromAddress(addressText) {
-  const text = addressText.toLowerCase();
-  for (const z of ZONAS_DOMICILIO) {
-    if (z.keywords.some(kw => text.includes(kw))) {
-      return z;
-    }
-  }
-  return null;
 }
 
 async function sendWhatsAppMessage(to, text) {
   try {
-    const response = await fetch(
-      `https://graph.facebook.com/v18.0/${PHONE_NUMBER_ID}/messages`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${WHATSAPP_TOKEN}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          messaging_product: 'whatsapp',
-          recipient_type: 'individual',
-          to: to,
-          type: 'text',
-          text: { body: text }
-        })
-      }
-    );
-    return await response.json();
+    await fetch(`https://graph.facebook.com/v18.0/${PHONE_NUMBER_ID}/messages`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${WHATSAPP_TOKEN}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        messaging_product: 'whatsapp',
+        recipient_type: 'individual',
+        to: to,
+        type: 'text',
+        text: { body: text }
+      })
+    });
   } catch (error) {
     console.error('Error enviando WhatsApp:', error);
   }
@@ -244,10 +289,7 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const body = await request.json();
-    const entry = body.entry?.[0];
-    const changes = entry?.changes?.[0];
-    const value = changes?.value;
-    const message = value?.messages?.[0];
+    const message = body.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
 
     if (message) {
       const from = message.from;
@@ -255,26 +297,47 @@ export async function POST(request) {
       const incomingText = message.text?.body?.trim() || '';
       const normalizedText = incomingText.toLowerCase();
 
-      // Aprobación por parte del Administrador / Jefe
-      if (from === ADMIN_PHONE && (normalizedText.startsWith('aprobar') || normalizedText.startsWith('aprobado'))) {
-        const targetPhone = normalizedText.replace('aprobar', '').replace('aprobado', '').trim();
-        const clientTarget = targetPhone || Object.keys(userSessions).find(k => userSessions[k].state === 'AWAITING_VERIFICATION');
+      // Aprobación por parte del Administrador / Jefa
+      if (from === ADMIN_PHONE && (normalizedText.startsWith('aprobar') || normalizedText.startsWith('aprobado') || normalizedText.includes('pedido aprobado'))) {
+        const targetPhone = normalizedText.replace(/\D/g, '');
+        const clientTarget = targetPhone.length >= 10 
+          ? targetPhone 
+          : Object.keys(userSessions).find(k => userSessions[k].state === 'AWAITING_VERIFICATION');
         
         if (clientTarget && userSessions[clientTarget]) {
+          const order = userSessions[clientTarget].orderData;
+          const items = userSessions[clientTarget].cart.join(', ');
           userSessions[clientTarget].state = 'APPROVED';
-          await sendWhatsAppMessage(clientTarget, `🎉 ¡Excelente noticia! Hemos verificado tu pago correctamente.\n\n🎂 Tu pedido ha sido *APROBADO Y PROGRAMADO EN COCINA*. ¡Muchas gracias por elegir Territorio Saludable!`);
-          await sendWhatsAppMessage(ADMIN_PHONE, `✅ El pedido del cliente ${clientTarget} ha sido confirmado y agendado.`);
+
+          await sendWhatsAppMessage(clientTarget, `🎉 ¡Excelente noticia! Hemos verificado tu pago correctamente.\n\n🎂 Tu pedido (*${items}*) ha sido *APROBADO Y AGENDADO* para el *${order.deliveryDate}* a las *${order.deliveryTime}*.\n\n¡Muchas gracias por elegir Territorio Saludable! 🌱✨`);
+          await sendWhatsAppMessage(ADMIN_PHONE, `✅ *PEDIDO AGENDADO EXITOSAMENTE*\n\nCliente: ${order.clientName} (${clientTarget})\nProductos: ${items}\nEntrega: ${order.deliveryDate} - ${order.deliveryTime}\nDirección: ${order.address}`);
+        } else {
+          await sendWhatsAppMessage(ADMIN_PHONE, `⚠️ No encontré un pedido pendiente de verificación para aprobar.`);
         }
         return NextResponse.json({ status: 'ok' });
       }
 
       if (!userSessions[from]) {
-        userSessions[from] = { state: 'IDLE', cart: [], itemsDetail: [], orderData: {} };
+        userSessions[from] = { state: 'IDLE', fromWeb: false, cart: [], itemsDetail: [], orderData: {} };
       }
       const session = userSessions[from];
 
+      // Detección prioritaria de pedido desde botón Web
+      const webOrder = parseWebOrderMessage(incomingText);
+      if (webOrder) {
+        session.fromWeb = true;
+        session.cart = [webOrder.item];
+        session.itemsDetail = [{ name: webOrder.item, price: webOrder.price }];
+        session.state = 'ASK_ADD_MORE';
+        const cleanName = webOrder.item.replace(/\[.*?\]/g, '').trim();
+        await sendWhatsAppMessage(from, `¡Excelente elección! 🍰 He agregado *${cleanName}* (${formatCOP(webOrder.price)}) a tu pedido.\n\n¿Deseas agregar otro producto más?\n1️⃣ Sí\n2️⃣ No`);
+        return NextResponse.json({ status: 'ok' });
+      }
+
+      // Saludo o reinicio
       if (normalizedText === '0' || normalizedText === 'menu' || normalizedText === 'hola') {
         session.state = 'IDLE';
+        session.fromWeb = false;
         session.cart = [];
         session.itemsDetail = [];
         session.orderData = {};
@@ -282,30 +345,36 @@ export async function POST(request) {
         return NextResponse.json({ status: 'ok' });
       }
 
-      // Recepción de foto/comprobante
+      // Opción 7: Asesor Humano
+      if (normalizedText === '7' && session.state === 'IDLE') {
+        await sendWhatsAppMessage(from, `👩‍🍳 Ya uno de nuestros asesores estará respondiendo todas tus preguntas en breve.`);
+        await sendWhatsAppMessage(ADMIN_PHONE, `🚨 *SOLICITUD DE ASESOR:* El cliente ${from} necesita atención personalizada.`);
+        return NextResponse.json({ status: 'ok' });
+      }
+
+      // Recepción de comprobante
       if (messageType === 'image' || messageType === 'document') {
         if (session.state === 'AWAITING_PAYMENT' || session.state === 'CONFIRM_ORDER') {
+          const mediaId = message.image?.id || message.document?.id;
+          const verification = await verifyReceiptWithAI(mediaId);
+
+          if (!verification.valid) {
+            await sendWhatsAppMessage(from, `⚠️ ${verification.reason}\n\nPor favor envíanos la captura o foto del comprobante de transferencia por valor de *${formatCOP(session.orderData.grandTotal)}* para continuar.`);
+            return NextResponse.json({ status: 'ok' });
+          }
+
           session.state = 'AWAITING_VERIFICATION';
-          await sendWhatsAppMessage(from, `¡Muchas gracias por enviar tu comprobante de pago! 🧾\n\nEstamos verificando la transferencia con la entidad bancaria. En breve un asesor te enviará la confirmación final de tu pedido.`);
+          await sendWhatsAppMessage(from, `¡Muchas gracias por enviar tu comprobante! 🧾\n\nVamos a verificar tu pago y en breve recibirás la confirmación de agendamiento de tu pedido.`);
           
-          const adminNotice = `🚨 *COMPROBANTE RECIBIDO PARA VERIFICACIÓN* 🚨\n\n👤 *Cliente:* ${session.orderData.clientName}\n📱 *WhatsApp:* ${from}\n🎂 *Productos:* ${session.cart.join(', ')}\n📍 *Dirección:* ${session.orderData.address} (${session.orderData.zoneName})\n📅 *Entrega:* ${session.orderData.deliveryDate} - ${session.orderData.deliveryTime}\n💰 *Total a Verificar:* ${formatCOP(session.orderData.grandTotal)}\n\n👉 Para aprobar la orden responde a este chat con:\n*Aprobar ${from}*`;
+          const cleanItems = session.cart.map(i => i.replace(/\[.*?\]/g, '').trim()).join(', ');
+          const adminNotice = `🚨 *COMPROBANTE RECIBIDO - REVISAR* 🚨\n\n👤 *Cliente:* ${session.orderData.clientName}\n📱 *WhatsApp:* ${from}\n🎂 *Productos:* ${cleanItems}\n📍 *Dirección:* ${session.orderData.address}\n📅 *Entrega:* ${session.orderData.deliveryDate} - ${session.orderData.deliveryTime}\n💰 *Total a Verificar:* ${formatCOP(session.orderData.grandTotal)}\n🔍 *Lectura IA:* ${verification.info || 'Imagen recibida'}\n\n👉 Cuando verifiques el dinero en tu banco, responde:\n*Aprobar ${from}*`;
           
           await sendWhatsAppMessage(ADMIN_PHONE, adminNotice);
           return NextResponse.json({ status: 'ok' });
         }
       }
 
-      // Detección de orden web
-      const webOrder = parseWebOrderMessage(incomingText);
-     if (webOrder) {
-        session.fromWeb = true;
-        session.cart = [webOrder.item];
-        session.itemsDetail = [{ name: webOrder.item, price: webOrder.price }];
-        session.state = 'ASK_ADD_MORE';
-        await sendWhatsAppMessage(from, `¡Excelente elección! 🍰 He agregado *${webOrder.item}* a tu pedido.\n\n¿Deseas agregar otro producto más a tu pedido?\n1️⃣ Sí\n2️⃣ No`);
-        return NextResponse.json({ status: 'ok' });
-      }
-
+      // Máquina de estados secuencial
       switch (session.state) {
         case 'IDLE':
           if (MENU_RESPONSES[normalizedText]) {
@@ -317,11 +386,11 @@ export async function POST(request) {
               session.cart.push(incomingText);
               session.itemsDetail.push({ name: incomingText, price: calculatedPrice });
               session.state = 'ASK_ADD_MORE';
-              await sendWhatsAppMessage(from, `¡Anotado! 📝 Agregado: *${incomingText}*.\n\n¿Deseas agregar otro producto más a tu pedido?\n1️⃣ Sí\n2️⃣ No`);
+              await sendWhatsAppMessage(from, `¡Anotado! 📝 Agregado: *${incomingText}* (${formatCOP(calculatedPrice)}).\n\n¿Deseas agregar otro producto más?\n1️⃣ Sí\n2️⃣ No`);
             } else {
               session.tempProduct = incomingText;
               session.state = 'ASK_PORTIONS';
-              await sendWhatsAppMessage(from, `¡Qué deliciosa elección! 🎂 Recordamos que nuestras tortas deben pedirse con 1 día de anticipación.\n\nPor favor, indícanos cuántas porciones deseas para *${incomingText}* (Ejemplo: 5 porc, 8 porc, 12 porc, 18 porc, 25 porc):`);
+              await sendWhatsAppMessage(from, `¡Qué deliciosa elección! 🎂 Recuerda que los pedidos directos por chat se programan con 1 día de anticipación.\n\nPor favor, indícanos cuántas porciones o cantidad deseas para *${incomingText}* (Ejemplo: 5 porc, 8 porc, 12 porc, 18 porc, 25 porc o 1 unidad):`);
             }
           }
           break;
@@ -333,7 +402,7 @@ export async function POST(request) {
           session.itemsDetail.push({ name: fullItem, price: itemPrice });
           delete session.tempProduct;
           session.state = 'ASK_ADD_MORE';
-          await sendWhatsAppMessage(from, `¡Perfecto! Agregado *${fullItem}* a tu pedido. 🍰\n\n¿Deseas agregar otro producto más?\n1️⃣ Sí\n2️⃣ No`);
+          await sendWhatsAppMessage(from, `¡Perfecto! Agregado *${fullItem}* (${formatCOP(itemPrice)}) a tu pedido. 🍰\n\n¿Deseas agregar otro producto más?\n1️⃣ Sí\n2️⃣ No`);
           break;
 
         case 'ASK_ADD_MORE':
@@ -360,13 +429,11 @@ export async function POST(request) {
           const shippingCalc = await calculateShippingByAddress(incomingText);
           
           if (shippingCalc.found) {
-            // Detectó el barrio/municipio: guarda la tarifa y salta directo a quien recibe
             session.orderData.shippingCost = shippingCalc.tarifa;
             session.orderData.zoneName = shippingCalc.zona;
             session.state = 'ASK_RECIPIENT_NAME';
             await sendWhatsAppMessage(from, `3. ¿Cuál es el *nombre de la persona que recibe* el pedido?`);
           } else {
-            // No escribió el barrio/municipio: se lo pide de forma natural sin listas
             session.state = 'ASK_NEIGHBORHOOD';
             await sendWhatsAppMessage(
               from,
@@ -385,46 +452,13 @@ export async function POST(request) {
           await sendWhatsAppMessage(from, `3. ¿Cuál es el *nombre de la persona que recibe* el pedido?`);
           break;
 
-        case 'ASK_ADDRESS':
-          session.orderData.address = incomingText;
-          
-          // Verificar si el cliente escribió la zona o barrio en el mismo texto
-          const detectedZone = detectZoneFromAddress(incomingText);
-          
-          if (detectedZone) {
-            // Si la escribió, la asigna directamente y salta la lista de zonas
-            session.orderData.zoneName = detectedZone.name;
-            session.orderData.shippingCost = detectedZone.price;
-            session.state = 'ASK_RECIPIENT_NAME';
-            await sendWhatsAppMessage(from, `3. ¿Cuál es el *nombre de la persona que recibe* el pedido?`);
-          } else {
-            // Si no especificó el barrio/zona, le muestra el menú para seleccionar
-            session.state = 'ASK_ZONE';
-            let zonesMenu = `¿En qué zona de Bucaramanga o Área Metropolitana queda la entrega? Responde con el número:\n\n`;
-            ZONAS_DOMICILIO.forEach((z, i) => {
-              zonesMenu += `${i + 1}️⃣ ${z.name} (${formatCOP(z.price)})\n`;
-            });
-            await sendWhatsAppMessage(from, zonesMenu);
-          }
-          break;
-
-        case 'ASK_ZONE':
-          const zIdx = parseInt(incomingText) - 1;
-          const selectedZone = ZONAS_DOMICILIO[zIdx] || ZONAS_DOMICILIO[0];
-          session.orderData.zoneName = selectedZone.name;
-          session.orderData.shippingCost = selectedZone.price;
-
-          session.state = 'ASK_RECIPIENT_NAME';
-          await sendWhatsAppMessage(from, `3. ¿Cuál es el *nombre de la persona que recibe* el pedido?`);
-          break;
-
         case 'ASK_RECIPIENT_NAME':
           session.orderData.recipientName = incomingText;
           session.state = 'ASK_RECIPIENT_PHONE';
           await sendWhatsAppMessage(from, `4. ¿Cuál es el *número de teléfono/celular de la persona que recibe*?`);
           break;
 
-       case 'ASK_RECIPIENT_PHONE':
+        case 'ASK_RECIPIENT_PHONE':
           session.orderData.recipientPhone = incomingText;
           session.state = 'ASK_DELIVERY_DATE';
 
@@ -443,8 +477,9 @@ export async function POST(request) {
             );
           }
           break;
+
         case 'ASK_DELIVERY_DATE':
-          session.orderData.deliveryDate = incomingText;
+          session.orderData.deliveryDate = normalizeUserDate(incomingText);
           session.state = 'ASK_DELIVERY_TIME';
           await sendWhatsAppMessage(from, `6. ¿En qué *horario o rango de hora* prefieres la entrega? (Ejemplo: 4:00 PM):`);
           break;
@@ -454,19 +489,21 @@ export async function POST(request) {
           session.state = 'CONFIRM_ORDER';
 
           const subtotal = session.itemsDetail.reduce((acc, curr) => acc + curr.price, 0);
-          const shipping = session.orderData.shippingCost || 5000;
+          const shipping = session.orderData.shippingCost || 7000;
           const grandTotal = subtotal + shipping;
 
           session.orderData.subtotal = subtotal;
           session.orderData.grandTotal = grandTotal;
 
+          const cleanCartList = session.cart.map(i => `• ${i.replace(/\[.*?\]/g, '').trim()}`).join('\n');
+
           const summaryText = `📋 *RESUMEN DE TU PEDIDO* 🍰🌱
 
 🛒 *Producto(s):*
-${session.cart.map(i => `• ${i}`).join('\n')}
+${cleanCartList}
 
 👤 *Cliente:* ${session.orderData.clientName}
-📍 *Dirección de Entrega:* ${session.orderData.address} (${session.orderData.zoneName})
+📍 *Dirección de Entrega:* ${session.orderData.address}
 📦 *Recibe:* ${session.orderData.recipientName} (${session.orderData.recipientPhone})
 📅 *Fecha de Entrega:* ${session.orderData.deliveryDate}
 🕒 *Hora de Entrega:* ${session.orderData.deliveryTime}
@@ -498,6 +535,7 @@ Para programar tu pedido en cocina, por favor realiza la transferencia a cualqui
             await sendWhatsAppMessage(from, bankDetails);
           } else {
             session.state = 'IDLE';
+            session.fromWeb = false;
             session.cart = [];
             session.itemsDetail = [];
             session.orderData = {};
