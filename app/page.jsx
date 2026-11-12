@@ -413,11 +413,11 @@ export default function Page() {
     showToast('✓ Pedido registrado con éxito');
   };
 
-  const handleOrderWhatsApp = (product) => {
+ const handleOrderWhatsApp = (product) => {
     const selPortion = selectedSizes[product.id];
     const sizeObj = product.sizes && product.sizes.find(s => s.portions === selPortion);
     const pr = sizeObj ? sizeObj.price : product.price;
-    const txt = '¡Hola Territorio Saludable! 🍰 Quisiera pedir: *' + product.name + '*' + (sizeObj ? ' (' + sizeObj.portions + ')' : '') + ' por valor de ' + formatCOP(pr) + '. ¿Tienen disponibilidad para Bucaramanga?';
+    const txt = 'Quiero pedir: ' + product.name + (sizeObj ? ' (' + sizeObj.portions + ')' : '') + ' - ' + formatCOP(pr);
     window.open('https://wa.me/' + config.whatsappPhone + '?text=' + encodeURIComponent(txt), '_blank');
   };
 
