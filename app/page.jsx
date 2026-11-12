@@ -11,7 +11,7 @@ const FALLBACK_IMG = 'https://images.unsplash.com/photo-1578985545062-69928b1d95
 
 const DEFAULT_CONFIG = {
   businessName: 'Territorio Saludable',
-  whatsappPhone: '573000559196', // <- Asegúrate de que tenga el 57 + tu número
+  whatsappPhone: '573000559196',
   instagramUrl: 'https://instagram.com/territoriosaludable',
   facebookUrl: 'https://facebook.com/territoriosaludable',
   calendarEmbedUrl: 'https://calendar.google.com/calendar/embed?src=territoriosaludable%40gmail.com&ctz=America%2FBogota',
@@ -33,10 +33,10 @@ const CATEGORY_IDS = {
 const DIETARY_TAGS = ['Todas', 'Keto', 'Sin Gluten', 'Sin Azúcar', 'Sin Lácteos', 'Entrega Hoy', 'Con Anticipación'];
 
 const INITIAL_ZONES = [
-  { id: 'z1', name: 'Cabecera / Sotomayor / Prado', price: 5000 },
-  { id: 'z2', name: 'Centro / San Francisco', price: 7000 },
-  { id: 'z3', name: 'Floridablanca / Cañaveral', price: 10000 },
-  { id: 'z4', name: 'Girón / Piedecuesta', price: 15000 }
+  { id: 'z1', name: 'Cabecera / Sotomayor / Prado', price: 0 },
+  { id: 'z2', name: 'Centro / San Francisco', price: 0 },
+  { id: 'z3', name: 'Floridablanca / Cañaveral', price: 0 },
+  { id: 'z4', name: 'Girón / Piedecuesta', price: 0 }
 ];
 
 const formatCOP = (n) => {
@@ -392,7 +392,6 @@ export default function Page() {
     const prod = products.find(p => p.id === newOrderProdId) || products[0];
     const portionObj = prod.sizes && prod.sizes.find(s => s.portions === newOrderPortion);
     const itemPrice = portionObj ? portionObj.price : prod.price;
-    const zoneObj = zones.find(z => z.name === newZone) || zones[0];
     const newOrd = {
       id: 'ord-' + Date.now(),
       code: 'TS-' + (orders.length + 1001),
@@ -403,7 +402,7 @@ export default function Page() {
       deliveryDate: newDeliveryDate,
       deliveryTime: newDeliveryTime,
       items: [{ productName: prod.name, portion: newOrderPortion || undefined, quantity: 1, price: itemPrice }],
-      total: itemPrice + (zoneObj ? zoneObj.price : 0),
+      total: itemPrice,
       status: 'Pendiente',
       paymentMethod: newPaymentMethod,
       notes: newOrderNotes.trim()
@@ -413,7 +412,7 @@ export default function Page() {
     showToast('✓ Pedido registrado con éxito');
   };
 
- const handleOrderWhatsApp = (product) => {
+  const handleOrderWhatsApp = (product) => {
     const selPortion = selectedSizes[product.id];
     const sizeObj = product.sizes && product.sizes.find(s => s.portions === selPortion);
     const pr = sizeObj ? sizeObj.price : product.price;
@@ -558,11 +557,9 @@ export default function Page() {
         </div>
       </header>
 
-      {/* BARRA DE NAVEGACIÓN Y FILTROS AJUSTADA PARA MÓVIL (SIN DESPLAZAMIENTO LATERAL) */}
+      {/* BARRA DE NAVEGACIÓN Y FILTROS AJUSTADA PARA MÓVIL */}
       <div className="sticky top-20 z-30 bg-[#FAF7F2] backdrop-blur-md border-b border-[#EAE2D8] py-3 px-4 shadow-2xs">
         <div className="max-w-7xl mx-auto space-y-2.5">
-          
-          {/* Categorías principales: flex-wrap para que se acomoden solas en móvil */}
           <div className="flex flex-wrap justify-center sm:justify-start gap-1.5 w-full">
             {CATEGORIES.map(cat => (
               <a 
@@ -576,7 +573,6 @@ export default function Page() {
             ))}
           </div>
 
-          {/* Filtros dietéticos: flex-wrap */}
           <div className="flex flex-wrap justify-center sm:justify-start gap-1.5 w-full pt-1">
             {DIETARY_TAGS.map(tag => (
               <button 
@@ -588,7 +584,6 @@ export default function Page() {
               </button>
             ))}
           </div>
-
         </div>
       </div>
 
@@ -629,7 +624,7 @@ export default function Page() {
             </div>
           </section>
 
-          {/* LISTADO DE PRODUCTOS CON ANCLAS ASIGNADAS */}
+          {/* LISTADO DE PRODUCTOS */}
           <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
             <div id={CATEGORY_IDS[selectedCategory]} className="pb-4 scroll-mt-36">
               <div className="flex items-center justify-between">
@@ -747,7 +742,7 @@ export default function Page() {
               <button onClick={() => setAdminTab('inventario')} className={'px-3.5 py-2 rounded-xl text-xs font-bold transition ' + (adminTab === 'inventario' ? 'bg-white text-[#1C3A27]' : 'bg-emerald-900 text-emerald-100')}>Inventario (CRUD)</button>
               <button onClick={() => setAdminTab('pedidos')} className={'px-3.5 py-2 rounded-xl text-xs font-bold transition ' + (adminTab === 'pedidos' ? 'bg-white text-[#1C3A27]' : 'bg-emerald-900 text-emerald-100')}>Pedidos ({orders.length})</button>
               <button onClick={() => setAdminTab('calendario')} className={'px-3.5 py-2 rounded-xl text-xs font-bold transition ' + (adminTab === 'calendario' ? 'bg-white text-[#1C3A27]' : 'bg-emerald-900 text-emerald-100')}>Calendario de Entregas</button>
-              <button onClick={() => setAdminTab('configuracion')} className={'px-3.5 py-2 rounded-xl text-xs font-bold transition ' + (adminTab === 'configuracion' ? 'bg-white text-[#1C3A27]' : 'bg-emerald-900 text-emerald-100')}>Configuración & Tarifas</button>
+              <button onClick={() => setAdminTab('configuracion')} className={'px-3.5 py-2 rounded-xl text-xs font-bold transition ' + (adminTab === 'configuracion' ? 'bg-white text-[#1C3A27]' : 'bg-emerald-900 text-emerald-100')}>Configuración & Zonas</button>
             </div>
           </div>
 
@@ -1224,7 +1219,8 @@ export default function Page() {
                   </div>
                 </div>
 
-             <div className="bg-white rounded-3xl border border-stone-200 p-6 space-y-4 shadow-xs">
+                {/* ZONAS DE COBERTURA SIN PRECIOS FIJOS */}
+                <div className="bg-white rounded-3xl border border-stone-200 p-6 space-y-4 shadow-xs">
                   <h3 className="font-serif font-bold text-base text-stone-900 flex items-center gap-2">
                     <MapPin size={16} className="text-[#2D5A27]" />
                     <span>Zonas de Cobertura de Envío</span>
@@ -1238,7 +1234,7 @@ export default function Page() {
                         <div className="flex items-center gap-2">
                           <button 
                             onClick={() => {
-                              const newName = prompt(`Editar nombre de zona:`, z.name);
+                              const newName = prompt('Editar nombre de zona:', z.name);
                               if (newName && newName.trim()) {
                                 setZones(zones.map(item => item.name === z.name ? { ...item, name: newName.trim() } : item));
                                 showToast('Zona actualizada');
@@ -1277,6 +1273,11 @@ export default function Page() {
                     + Agregar Nueva Zona de Cobertura
                   </button>
                 </div>
+              </div>
+            </div>
+          )}
+        </main>
+      )}
 
       {/* FOOTER */}
       <footer className="bg-[#1C1815] text-[#D8D0C5] border-t border-stone-800 mt-auto">
@@ -1509,7 +1510,7 @@ export default function Page() {
               <div><label className="font-bold block mb-1">Dirección Entrega:</label><input type="text" value={newAddress} onChange={(e) => setNewAddress(e.target.value)} required className="w-full p-2.5 rounded-xl border border-stone-300" /></div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="font-bold block mb-1">Zona Domicilio:</label>
+                  <label className="font-bold block mb-1">Zona Cobertura:</label>
                   <select value={newZone} onChange={(e) => setNewZone(e.target.value)} className="w-full p-2.5 rounded-xl border border-stone-300">
                     {zones.map(z => <option key={z.name} value={z.name}>{z.name}</option>)}
                   </select>
