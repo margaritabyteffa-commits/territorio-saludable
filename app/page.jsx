@@ -17,7 +17,8 @@ const DEFAULT_CONFIG = {
   calendarEmbedUrl: 'https://calendar.google.com/calendar/embed?src=territoriosaludable%40gmail.com&ctz=America%2FBogota',
   hoursMonFri: 'Lunes a Viernes: 8:00 AM – 6:00 PM',
   hoursSat: 'Sábados: 8:00 AM – 5:00 PM',
-  hoursSun: 'Domingos y Festivos: 9:00 AM – 2:00 PM (Entregas)'
+  hoursSun: 'Domingos y Festivos: 9:00 AM – 2:00 PM (Entregas)',
+  datosPago: '💳 Nequi / Daviplata: 3000559196\n🏦 Bancolombia Ahorros: (pendiente cuenta real)'
 };
 
 const CATEGORIES = ['Tortas Saludables', 'Catalogo Detalles', 'Pan Saludable', 'Postres Saludables', 'Mercadito'];
@@ -159,8 +160,6 @@ export default function Page() {
   const [authRole, setAuthRole] = useState(null);
   const [adminTab, setAdminTab] = useState('inventario');
 
-  const [adminPassword, setAdminPassword] = useState('1234');
-  const [panaderoPassword, setPanaderoPassword] = useState('5678');
   const [config, setConfig] = useState(DEFAULT_CONFIG);
   const [products, setProducts] = useState(initialProducts);
   const [orders, setOrders] = useState(initialOrders);
@@ -184,6 +183,9 @@ export default function Page() {
   const [formPrice, setFormPrice] = useState(80000);
   const [formDescription, setFormDescription] = useState('');
   const [formImageUrl, setFormImageUrl] = useState('/torta-moka.png');
+  const [subiendoFoto, setSubiendoFoto] = useState(false);
+  const [catalogoEnServidor, setCatalogoEnServidor] = useState(false);
+  const [verificandoClave, setVerificandoClave] = useState(false);
   const [formAvailable, setFormAvailable] = useState(true);
   const [formRequiresNotice, setFormRequiresNotice] = useState(true);
   const [formSizes, setFormSizes] = useState([]);
@@ -207,6 +209,7 @@ export default function Page() {
   const [cfgSat, setCfgSat] = useState(DEFAULT_CONFIG.hoursSat);
   const [cfgSun, setCfgSun] = useState(DEFAULT_CONFIG.hoursSun);
   const [cfgEmbedUrl, setCfgEmbedUrl] = useState(DEFAULT_CONFIG.calendarEmbedUrl);
+  const [cfgDatosPago, setCfgDatosPago] = useState(DEFAULT_CONFIG.datosPago);
 
   const [newAdminPwd, setNewAdminPwd] = useState('');
   const [newPanaderoPwd, setNewPanaderoPwd] = useState('');
@@ -221,83 +224,224 @@ export default function Page() {
     }
   };
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const role = sessionStorage.getItem('ts_auth_role');
-        if (role) setAuthRole(role);
-        const ap = localStorage.getItem('ts_admin_pwd');
-        if (ap) setAdminPassword(ap);
-        const pp = localStorage.getItem('ts_panadero_pwd');
-        if (pp) setPanaderoPassword(pp);
-        const cfg = localStorage.getItem('ts_config_v2');
-        if (cfg) {
-          const parsed = JSON.parse(cfg);
-          setConfig(prev => ({ ...prev, ...parsed }));
-          setCfgName(parsed.businessName || DEFAULT_CONFIG.businessName);
-          setCfgPhone(parsed.whatsappPhone || DEFAULT_CONFIG.whatsappPhone);
-          setCfgInsta(parsed.instagramUrl || DEFAULT_CONFIG.instagramUrl);
-          setCfgFace(parsed.facebookUrl || DEFAULT_CONFIG.facebookUrl);
-          setCfgMonFri(parsed.hoursMonFri || DEFAULT_CONFIG.hoursMonFri);
-          setCfgSat(parsed.hoursSat || DEFAULT_CONFIG.hoursSat);
-          setCfgSun(parsed.hoursSun || DEFAULT_CONFIG.hoursSun);
-          setCfgEmbedUrl(parsed.calendarEmbedUrl || DEFAULT_CONFIG.calendarEmbedUrl);
-        }
-        const prd = localStorage.getItem('ts_products_catalog_v8');
-        if (prd) {
-          const parsed = JSON.parse(prd);
-          if (Array.isArray(parsed) && parsed.length >= 75) setProducts(parsed);
-        }
-        const ord = localStorage.getItem('ts_orders_v3');
-        if (ord) {
-          const parsed = JSON.parse(ord);
-          if (Array.isArray(parsed)) setOrders(parsed);
-        }
-        const zn = localStorage.getItem('ts_zones_v1');
-        if (zn) {
-          const parsed = JSON.parse(zn);
-          if (Array.isArray(parsed)) setZones(parsed);
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    }
-  }, []);
+  const aplicarConfig = (parsed) => {
+    if (!parsed) return;
+    setConfig(prev => ({ ...prev, ...parsed }));
+    setCfgName(parsed.businessName || DEFAULT_CONFIG.businessName);
+    setCfgPhone(parsed.whatsappPhone || DEFAULT_CONFIG.whatsappPhone);
+    setCfgInsta(parsed.instagramUrl || DEFAULT_CONFIG.instagramUrl);
+    setCfgFace(parsed.facebookUrl || DEFAULT_CONFIG.facebookUrl);
+    setCfgMonFri(parsed.hoursMonFri || DEFAULT_CONFIG.hoursMonFri);
+    setCfgSat(parsed.hoursSat || DEFAULT_CONFIG.hoursSat);
+    setCfgSun(parsed.hoursSun || DEFAULT_CONFIG.hoursSun);
+    setCfgEmbedUrl(parsed.calendarEmbedUrl || DEFAULT_CONFIG.calendarEmbedUrl);
+    setCfgDatosPago(parsed.datosPago || DEFAULT_CONFIG.datosPago);
+  };
 
   useEffect(() => {
-    if (typeof window !== 'undefined') localStorage.setItem('ts_products_catalog_v8', JSON.stringify(products));
-  }, [products]);
+    if (typeof window === 'undefined') return;
+    try {
+      const role = sessionStorage.getItem('ts_auth_role');
+      const token = sessionStorage.getItem('ts_token');
+      if (role && token) setAuthRole(role);
+      const ord = localStorage.getItem('ts_orders_v3');
+      if (ord) {
+        const parsed = JSON.parse(ord);
+        if (Array.isArray(parsed)) setOrders(parsed);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
+    // Catálogo oficial: viene de la base de datos para que todos vean lo mismo.
+    fetch('/api/catalogo', { cache: 'no-store' })
+      .then(r => r.json())
+      .then(data => {
+        if (data.productos && data.productos.length) {
+          setProducts(data.productos);
+          setCatalogoEnServidor(true);
+        } else {
+          // Aún no hay nada en la base de datos: usamos lo que haya en este navegador.
+          try {
+            const prd = localStorage.getItem('ts_products_catalog_v8');
+            if (prd) {
+              const parsed = JSON.parse(prd);
+              if (Array.isArray(parsed) && parsed.length >= 75) setProducts(parsed);
+            }
+          } catch (e) { console.error(e); }
+        }
+        if (data.config) aplicarConfig(data.config);
+        else {
+          try { const cfg = localStorage.getItem('ts_config_v2'); if (cfg) aplicarConfig(JSON.parse(cfg)); } catch (e) { console.error(e); }
+        }
+        if (Array.isArray(data.zonas)) setZones(data.zonas);
+        else {
+          try { const zn = localStorage.getItem('ts_zones_v1'); if (zn) { const parsed = JSON.parse(zn); if (Array.isArray(parsed)) setZones(parsed); } } catch (e) { console.error(e); }
+        }
+      })
+      .catch(e => console.error('No se pudo cargar el catálogo:', e));
+  }, []);
 
   useEffect(() => {
     if (typeof window !== 'undefined') localStorage.setItem('ts_orders_v3', JSON.stringify(orders));
   }, [orders]);
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') localStorage.setItem('ts_zones_v1', JSON.stringify(zones));
-  }, [zones]);
+  // ---------- Conexión con el servidor (solo administrador) ----------
+  const cerrarSesionLocal = () => {
+    setAuthRole(null);
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('ts_auth_role');
+      sessionStorage.removeItem('ts_token');
+    }
+    setCurrentView('public');
+  };
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') localStorage.setItem('ts_config_v2', JSON.stringify(config));
-  }, [config]);
+  const apiAdmin = async (url, opciones = {}) => {
+    const token = typeof window !== 'undefined' ? sessionStorage.getItem('ts_token') : '';
+    const res = await fetch(url, {
+      ...opciones,
+      headers: { ...(opciones.headers || {}), Authorization: 'Bearer ' + (token || '') }
+    });
+    const data = await res.json().catch(() => ({}));
+    if (res.status === 401) {
+      cerrarSesionLocal();
+      throw new Error(data.error || 'Tu sesión venció. Vuelve a ingresar la clave.');
+    }
+    if (!res.ok) throw new Error(data.error || 'No se pudo guardar.');
+    return data;
+  };
 
-  const handleVerifyPassword = (e) => {
+  const guardarProductosServidor = async (lista) => {
+    setProducts(lista);
+    try {
+      await apiAdmin('/api/admin/productos', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productos: lista })
+      });
+      setCatalogoEnServidor(true);
+      return true;
+    } catch (e) {
+      showToast('⚠️ ' + e.message);
+      return false;
+    }
+  };
+
+  const guardarAjustesServidor = async (cambios) => {
+    try {
+      await apiAdmin('/api/admin/ajustes', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(cambios)
+      });
+      return true;
+    } catch (e) {
+      showToast('⚠️ ' + e.message);
+      return false;
+    }
+  };
+
+  const guardarZonas = (lista) => {
+    setZones(lista);
+    guardarAjustesServidor({ zonas: lista });
+  };
+
+  const cambiarClaveServidor = async (rol, nueva, limpiar) => {
+    try {
+      await apiAdmin('/api/admin/clave', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rol, nueva })
+      });
+      limpiar();
+      showToast(rol === 'admin' ? '✓ Clave Admin cambiada' : '✓ Clave Panadero cambiada');
+    } catch (e) {
+      showToast('⚠️ ' + e.message);
+    }
+  };
+
+  // Achica la foto en el celular/computador antes de subirla (más rápida y liviana).
+  const comprimirImagen = (file) => new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const max = 1200;
+      let w = img.naturalWidth, h = img.naturalHeight;
+      if (w > max || h > max) {
+        const r = Math.min(max / w, max / h);
+        w = Math.round(w * r); h = Math.round(h * r);
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, w, h);
+      ctx.drawImage(img, 0, 0, w, h);
+      URL.revokeObjectURL(url);
+      canvas.toBlob(b => b ? resolve(b) : reject(new Error('No se pudo procesar la foto.')), 'image/jpeg', 0.85);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('No se pudo leer la foto. Prueba con otra en formato JPG o PNG.')); };
+    img.src = url;
+  });
+
+  const handleSubirFoto = async (e) => {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if (!file) return;
+    setSubiendoFoto(true);
+    try {
+      const comprimida = await comprimirImagen(file);
+      const data = await apiAdmin('/api/admin/foto', {
+        method: 'POST',
+        headers: { 'Content-Type': 'image/jpeg' },
+        body: comprimida
+      });
+      setFormImageUrl(data.url);
+      showToast('✓ Foto subida');
+    } catch (err) {
+      showToast('⚠️ ' + err.message);
+    } finally {
+      setSubiendoFoto(false);
+    }
+  };
+
+  const handleVerifyPassword = async (e) => {
     e.preventDefault();
-    const pass = passwordInput.trim();
-    if (pass === adminPassword) {
+    const clave = passwordInput.trim();
+    if (!clave) return;
+    setVerificandoClave(true);
+    setPasswordError('');
+    try {
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clave })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.rol !== 'admin') {
+        setPasswordError(data.error || 'Clave incorrecta');
+        return;
+      }
+      sessionStorage.setItem('ts_token', data.token);
+      sessionStorage.setItem('ts_auth_role', 'admin');
       setAuthRole('admin');
-      if (typeof window !== 'undefined') sessionStorage.setItem('ts_auth_role', 'admin');
       setCurrentView('admin');
       setPasswordModalTarget(null);
       showToast('✓ Bienvenido Administrador');
-    } else {
-      setPasswordError('Clave incorrecta');
+      // Primera vez: copia el catálogo actual a la base de datos.
+      if (!catalogoEnServidor) {
+        const ok = await guardarProductosServidor(products);
+        if (ok) await guardarAjustesServidor({ config, zonas: zones });
+      }
+    } catch (err) {
+      setPasswordError('No se pudo verificar la clave. Revisa tu conexión.');
+    } finally {
+      setVerificandoClave(false);
     }
   };
 
   const handleLogout = () => {
-    setAuthRole(null);
-    if (typeof window !== 'undefined') sessionStorage.removeItem('ts_auth_role');
-    setCurrentView('public');
+    cerrarSesionLocal();
     showToast('Sesión cerrada');
   };
 
@@ -320,10 +464,11 @@ export default function Page() {
       hoursMonFri: cfgMonFri.trim(),
       hoursSat: cfgSat.trim(),
       hoursSun: cfgSun.trim(),
-      calendarEmbedUrl: cfgEmbedUrl.trim()
+      calendarEmbedUrl: cfgEmbedUrl.trim(),
+      datosPago: cfgDatosPago.trim()
     };
     setConfig(updated);
-    showToast('✓ Configuración General Guardada');
+    guardarAjustesServidor({ config: updated }).then(ok => { if (ok) showToast('✓ Configuración General Guardada'); });
   };
 
   const handleMoveProduct = (id, dir) => {
@@ -334,12 +479,12 @@ export default function Page() {
     const updated = [...products];
     const [moved] = updated.splice(idx, 1);
     updated.splice(target, 0, moved);
-    setProducts(updated);
+    guardarProductosServidor(updated);
     showToast('Producto movido ' + (dir === 'up' ? 'arriba ⬆️' : 'abajo ⬇️'));
   };
 
   const handleToggleProduct = (id) => {
-    setProducts(prev => prev.map(p => p.id === id ? { ...p, available: !p.available } : p));
+    guardarProductosServidor(products.map(p => p.id === id ? { ...p, available: !p.available } : p));
   };
 
   const handleOpenEditProduct = (prod) => {
@@ -371,10 +516,10 @@ export default function Page() {
     if (!formName.trim()) return;
     const sizes = formSizes.map(s => ({ portions: s.portions, price: Number(s.price), label: s.portions + ' (' + formatCOP(Number(s.price)) + ')' }));
     if (editingProduct && editingProduct.id && editingProduct.id !== 'NEW_PRODUCT') {
-      setProducts(prev => prev.map(p => p.id === editingProduct.id ? { ...p, name: formName.trim(), category: formCategory, price: Number(formPrice), description: formDescription.trim(), imageUrl: ensureSlash(formImageUrl), available: formAvailable, requiresNotice: formRequiresNotice, sizes } : p));
+      guardarProductosServidor(products.map(p => p.id === editingProduct.id ? { ...p, name: formName.trim(), category: formCategory, price: Number(formPrice), description: formDescription.trim(), imageUrl: ensureSlash(formImageUrl), available: formAvailable, requiresNotice: formRequiresNotice, sizes } : p));
       showToast('✓ Producto actualizado');
     } else {
-      setProducts(prev => [{ id: 'prod-' + Date.now(), name: formName.trim(), category: formCategory, price: Number(formPrice), description: formDescription.trim(), imageUrl: ensureSlash(formImageUrl), available: formAvailable, requiresNotice: formRequiresNotice, features: ['Sin Azúcar', 'Sin Gluten'], sizes }, ...prev]);
+      guardarProductosServidor([{ id: 'prod-' + Date.now(), name: formName.trim(), category: formCategory, price: Number(formPrice), description: formDescription.trim(), imageUrl: ensureSlash(formImageUrl), available: formAvailable, requiresNotice: formRequiresNotice, features: ['Sin Azúcar', 'Sin Gluten'], sizes }, ...products]);
       showToast('✓ Nuevo producto agregado');
     }
     setEditingProduct(null);
@@ -382,7 +527,7 @@ export default function Page() {
 
   const handleDeleteProduct = (id) => {
     if (confirm('¿Eliminar este producto?')) {
-      setProducts(prev => prev.filter(p => p.id !== id));
+      guardarProductosServidor(products.filter(p => p.id !== id));
       showToast('Producto eliminado');
     }
   };
@@ -1133,6 +1278,16 @@ export default function Page() {
                     </div>
                   </div>
 
+                  <div className="space-y-2 pt-4 border-t border-stone-100 text-xs">
+                    <label className="font-bold text-stone-700 block">Datos de pago (los envía el bot de WhatsApp al confirmar un pedido)</label>
+                    <textarea
+                      value={cfgDatosPago}
+                      onChange={(e) => setCfgDatosPago(e.target.value)}
+                      rows={3}
+                      className="w-full p-3 rounded-2xl bg-stone-50 border border-stone-200 text-stone-800"
+                    />
+                  </div>
+
                   <div className="space-y-4 pt-4 border-t border-stone-100">
                     <h4 className="font-serif font-bold text-base text-stone-900 flex items-center gap-2">
                       <Calendar size={16} className="text-[#2D5A27]" />
@@ -1173,7 +1328,7 @@ export default function Page() {
                         className="w-full px-4 py-3 rounded-2xl border border-stone-200 bg-stone-50/50" 
                       />
                       <button 
-                        onClick={() => { if (!newAdminPwd.trim()) return; setAdminPassword(newAdminPwd.trim()); if (typeof window !== 'undefined') localStorage.setItem('ts_admin_pwd', newAdminPwd.trim()); setNewAdminPwd(''); showToast('✓ Clave Admin guardada'); }} 
+                        onClick={() => { if (!newAdminPwd.trim()) return; cambiarClaveServidor('admin', newAdminPwd.trim(), () => setNewAdminPwd('')); }} 
                         className="mt-2.5 px-5 py-2.5 rounded-xl bg-[#2D5A27] text-white font-bold hover:bg-[#23481E] transition"
                       >
                         Guardar Clave Admin
@@ -1189,7 +1344,7 @@ export default function Page() {
                         className="w-full px-4 py-3 rounded-2xl border border-stone-200 bg-stone-50/50" 
                       />
                       <button 
-                        onClick={() => { if (!newPanaderoPwd.trim()) return; setPanaderoPassword(newPanaderoPwd.trim()); if (typeof window !== 'undefined') localStorage.setItem('ts_panadero_pwd', newPanaderoPwd.trim()); setNewPanaderoPwd(''); showToast('✓ Clave Panadero guardada'); }} 
+                        onClick={() => { if (!newPanaderoPwd.trim()) return; cambiarClaveServidor('panadero', newPanaderoPwd.trim(), () => setNewPanaderoPwd('')); }} 
                         className="mt-2.5 px-5 py-2.5 rounded-xl bg-amber-800 text-white font-bold hover:bg-amber-900 transition"
                       >
                         Guardar Clave Panadero
@@ -1215,7 +1370,7 @@ export default function Page() {
                             onClick={() => {
                               const newName = prompt('Editar nombre de zona:', z.name);
                               if (newName && newName.trim()) {
-                                setZones(zones.map(item => item.name === z.name ? { ...item, name: newName.trim() } : item));
+                                guardarZonas(zones.map(item => item.name === z.name ? { ...item, name: newName.trim() } : item));
                                 showToast('Zona actualizada');
                               }
                             }}
@@ -1226,7 +1381,7 @@ export default function Page() {
                           </button>
                           <button 
                             onClick={() => {
-                              setZones(zones.filter(item => item.name !== z.name));
+                              guardarZonas(zones.filter(item => item.name !== z.name));
                               showToast('Zona eliminada');
                             }}
                             className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg font-bold transition"
@@ -1243,7 +1398,7 @@ export default function Page() {
                     onClick={() => {
                       const name = prompt('Nombre de la nueva zona o sector (ej. Piedecuesta / Ruitoque):');
                       if (name && name.trim()) {
-                        setZones([...zones, { id: 'z-' + Date.now(), name: name.trim(), price: 0 }]);
+                        guardarZonas([...zones, { id: 'z-' + Date.now(), name: name.trim(), price: 0 }]);
                         showToast('Nueva zona agregada');
                       }
                     }}
@@ -1323,7 +1478,7 @@ export default function Page() {
               {passwordError && <p className="text-xs text-red-600 font-semibold text-center">{passwordError}</p>}
               <div className="flex gap-2">
                 <button type="button" onClick={() => setPasswordModalTarget(null)} className="flex-1 py-2 rounded-xl border border-stone-300 text-xs font-bold text-stone-600">Cancelar</button>
-                <button type="submit" className="flex-1 py-2 rounded-xl bg-[#2D5A27] text-white text-xs font-bold hover:bg-[#23481E]">Ingresar</button>
+                <button type="submit" className="flex-1 py-2 rounded-xl bg-[#2D5A27] text-white text-xs font-bold hover:bg-[#23481E] disabled:opacity-60" disabled={verificandoClave}>{verificandoClave ? 'Verificando...' : 'Ingresar'}</button>
               </div>
             </form>
           </div>
@@ -1369,24 +1524,20 @@ export default function Page() {
               </div>
               
               <div>
-                <label className="font-bold block mb-1">Ruta Imagen (/public):</label>
-                <select 
-                  value={formImageUrl} 
-                  onChange={(e) => setFormImageUrl(e.target.value)} 
-                  className="w-full p-2.5 rounded-xl border border-stone-300 bg-stone-50 font-mono text-xs mb-1"
-                >
-                  <option value="/copa-saludable.png">/copa-saludable.png (Copa Saludable)</option>
-                  <option value="/postre-ilusion.png">/postre-ilusion.png (Postre Ilusión)</option>
-                  <option value="/mini-marquesa.png">/mini-marquesa.png (Mini Marquesa)</option>
-                  <option value="/postre-con-helado.png">/postre-con-helado.png (Postre con Helado)</option>
-                  <option value="/mini-brownies.png">/mini-brownies.png (Mini Brownies)</option>
-                  <option value="/blondie.png">/blondie.png (Blondie)</option>
-                  <option value="/torta-moka.png">/torta-moka.png (Torta Moka)</option>
-                  <option value="/box-duo.png">/box-duo.png (Box Dúo)</option>
-                  <option value="/guacal-amor.jpeg">/guacal-amor.jpeg (Guacal Amor)</option>
-                  <option value="/baguette.jpeg">/baguette.jpeg (Baguette)</option>
-                </select>
-                <input type="text" value={formImageUrl} onChange={(e) => setFormImageUrl(e.target.value)} placeholder="O escribe la ruta exacta..." className="w-full p-2.5 rounded-xl border border-stone-300 font-mono text-xs" />
+                <label className="font-bold block mb-1">Foto del producto:</label>
+                <div className="flex items-center gap-3">
+                  <img
+                    src={formImageUrl || FALLBACK_IMG}
+                    alt="Vista previa"
+                    onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = FALLBACK_IMG; }}
+                    className="w-20 h-20 rounded-xl object-cover border border-stone-200 bg-stone-50"
+                  />
+                  <label className={'flex-1 text-center px-3 py-3 rounded-xl border-2 border-dashed font-bold text-xs cursor-pointer transition ' + (subiendoFoto ? 'border-stone-300 text-stone-400' : 'border-[#2D5A27] text-[#2D5A27] hover:bg-emerald-50')}>
+                    {subiendoFoto ? 'Subiendo foto...' : '📷 Subir o cambiar foto'}
+                    <input type="file" accept="image/*" onChange={handleSubirFoto} disabled={subiendoFoto} className="hidden" />
+                  </label>
+                </div>
+                <p className="text-[10px] text-stone-400 mt-1">Puedes tomarla con la cámara o elegirla de la galería.</p>
               </div>
 
               <div className="pt-2 border-t border-stone-100">
@@ -1415,7 +1566,7 @@ export default function Page() {
               </div>
               <div className="pt-3 flex gap-2">
                 <button type="button" onClick={() => setEditingProduct(null)} className="flex-1 py-2.5 rounded-xl border border-stone-300 font-bold text-stone-600">Cancelar</button>
-                <button type="submit" className="flex-1 py-2.5 rounded-xl bg-[#2D5A27] text-white font-bold hover:bg-[#23481E]">Guardar</button>
+                <button type="submit" disabled={subiendoFoto} className="flex-1 py-2.5 rounded-xl bg-[#2D5A27] text-white font-bold hover:bg-[#23481E] disabled:opacity-60">{subiendoFoto ? 'Esperando foto...' : 'Guardar'}</button>
               </div>
             </form>
           </div>
