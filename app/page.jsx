@@ -1366,20 +1366,21 @@ export default function Page() {
                     <MapPin size={16} className="text-[#2D5A27]" />
                     <span>Zonas de Cobertura de Envío</span>
                   </h3>
-                  <p className="text-xs text-stone-500">Administra los sectores y municipios activos para entregas a domicilio.</p>
+                  <p className="text-xs text-stone-500">Sectores para domicilio y su valor. El bot de WhatsApp usa esta lista para calcular el domicilio (si el valor es $0, le dice al cliente que se lo confirman).</p>
 
                   <div className="space-y-2 text-xs">
                     {zones.map(z => (
                       <div key={z.id || z.name} className="flex items-center justify-between p-3 bg-stone-50 rounded-2xl border border-stone-200/80">
-                        <span className="font-medium text-stone-800">{z.name}</span>
+                        <span className="font-medium text-stone-800">{z.name} <span className="text-[#2D5A27] font-bold">· {z.price ? formatCOP(Number(z.price)) : 'por confirmar'}</span></span>
                         <div className="flex items-center gap-2">
                           <button 
                             onClick={() => {
-                              const newName = prompt('Editar nombre de zona:', z.name);
-                              if (newName && newName.trim()) {
-                                guardarZonas(zones.map(item => item.name === z.name ? { ...item, name: newName.trim() } : item));
-                                showToast('Zona actualizada');
-                              }
+                              const newName = prompt('Nombre de la zona:', z.name);
+                              if (newName === null) return;
+                              const newPrice = prompt('Valor del domicilio (solo números, 0 = por confirmar):', String(z.price || 0));
+                              if (newPrice === null) return;
+                              guardarZonas(zones.map(item => item.name === z.name ? { ...item, name: (newName.trim() || z.name), price: Number(String(newPrice).replace(/\D/g, '')) || 0 } : item));
+                              showToast('Zona actualizada');
                             }}
                             className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition"
                             title="Editar Zona"
@@ -1405,7 +1406,8 @@ export default function Page() {
                     onClick={() => {
                       const name = prompt('Nombre de la nueva zona o sector (ej. Piedecuesta / Ruitoque):');
                       if (name && name.trim()) {
-                        guardarZonas([...zones, { id: 'z-' + Date.now(), name: name.trim(), price: 0 }]);
+                        const price = prompt('Valor del domicilio para esta zona (solo números):', '0');
+                        guardarZonas([...zones, { id: 'z-' + Date.now(), name: name.trim(), price: Number(String(price || '').replace(/\D/g, '')) || 0 }]);
                         showToast('Nueva zona agregada');
                       }
                     }}
