@@ -184,6 +184,7 @@ export default function Page() {
   const [formDescription, setFormDescription] = useState('');
   const [formImageUrl, setFormImageUrl] = useState('/torta-moka.png');
   const [subiendoFoto, setSubiendoFoto] = useState(false);
+  const [confirmarBorrarId, setConfirmarBorrarId] = useState(null);
   const [catalogoEnServidor, setCatalogoEnServidor] = useState(false);
   const [verificandoClave, setVerificandoClave] = useState(false);
   const [formAvailable, setFormAvailable] = useState(true);
@@ -525,11 +526,17 @@ export default function Page() {
     setEditingProduct(null);
   };
 
+  // Borrar en dos toques (sin ventanas emergentes del navegador, que algunos bloquean).
   const handleDeleteProduct = (id) => {
-    if (confirm('¿Eliminar este producto?')) {
-      guardarProductosServidor(products.filter(p => p.id !== id));
-      showToast('Producto eliminado');
+    if (confirmarBorrarId !== id) {
+      setConfirmarBorrarId(id);
+      showToast('Toca otra vez 🗑 para confirmar');
+      setTimeout(() => setConfirmarBorrarId(actual => (actual === id ? null : actual)), 4000);
+      return;
     }
+    setConfirmarBorrarId(null);
+    guardarProductosServidor(products.filter(p => p.id !== id));
+    showToast('Producto eliminado');
   };
 
   const handleSaveNewOrder = (e) => {
@@ -921,7 +928,7 @@ export default function Page() {
                         </td>
                         <td className="p-3 flex items-center gap-2">
                           <button onClick={() => handleOpenEditProduct(prod)} className="p-1.5 rounded-lg bg-stone-100 hover:bg-stone-200" title="Editar Producto"><Edit2 size={13} /></button>
-                          <button onClick={() => handleDeleteProduct(prod.id)} className="p-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600" title="Eliminar"><Trash2 size={13} /></button>
+                          <button onClick={() => handleDeleteProduct(prod.id)} className={'p-1.5 rounded-lg text-xs font-bold flex items-center gap-1 ' + (confirmarBorrarId === prod.id ? 'bg-red-600 text-white' : 'bg-red-50 hover:bg-red-100 text-red-600')} title="Eliminar"><Trash2 size={13} />{confirmarBorrarId === prod.id && <span>¿Borrar?</span>}</button>
                         </td>
                       </tr>
                     ))}
