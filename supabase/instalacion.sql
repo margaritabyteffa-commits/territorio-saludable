@@ -21,6 +21,13 @@ create table if not exists public.ajustes (
 alter table public.productos enable row level security;
 alter table public.ajustes enable row level security;
 
+-- Permisos: solo el servidor de la página (rol service_role) puede usar las tablas
+grant usage on schema public to service_role;
+grant select, insert, update, delete on public.productos to service_role;
+grant select, insert, update, delete on public.ajustes to service_role;
+revoke all on public.productos from anon, authenticated;
+revoke all on public.ajustes from anon, authenticated;
+
 -- Carpeta pública para las fotos de los productos
 insert into storage.buckets (id, name, public)
 values ('productos', 'productos', true)
