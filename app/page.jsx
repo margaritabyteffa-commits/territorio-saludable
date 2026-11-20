@@ -283,7 +283,7 @@ export default function Page() {
   const handleVerifyPassword = (e) => {
     e.preventDefault();
     const pass = passwordInput.trim();
-    if (pass === adminPassword || pass === 'ts2026' || pass === 'admin123') {
+    if (pass === adminPassword) {
       setAuthRole('admin');
       if (typeof window !== 'undefined') sessionStorage.setItem('ts_auth_role', 'admin');
       setCurrentView('admin');
@@ -538,16 +538,6 @@ export default function Page() {
               <span className="font-semibold">{config.whatsappPhone.replace('57', '')}</span>
             </a>
 
-            {currentView !== 'admin' && (
-              <button 
-                onClick={() => navigateTo('admin')} 
-                className="hidden sm:flex px-4 py-2 rounded-full bg-[#1C3A27] hover:bg-black text-white text-xs font-bold items-center gap-1.5 transition cursor-pointer shadow-xs"
-              >
-                <ShieldCheck size={14} className="text-amber-400" />
-                <span>Acceso Admin</span>
-              </button>
-            )}
-
             {authRole && (
               <button onClick={handleLogout} className="p-2 rounded-xl text-stone-500 hover:text-red-600 transition" title="Cerrar Sesión">
                 <LogOut size={16} />
@@ -573,17 +563,6 @@ export default function Page() {
             ))}
           </div>
 
-          <div className="flex flex-wrap justify-center sm:justify-start gap-1.5 w-full pt-1">
-            {DIETARY_TAGS.map(tag => (
-              <button 
-                key={tag} 
-                onClick={() => setSelectedTag(tag)} 
-                className={'px-2.5 py-1 rounded-lg text-[11px] font-semibold cursor-pointer ' + (selectedTag === tag ? 'bg-stone-900 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200')}
-              >
-                {tag}
-              </button>
-            ))}
-          </div>
         </div>
       </div>
 
@@ -1312,7 +1291,7 @@ export default function Page() {
               <span className="px-2.5 py-1 rounded bg-emerald-900 text-white font-bold text-[10px]">EFECTIVO</span>
             </div>
             <div className="pt-2">
-              <button onClick={() => navigateTo('admin')} className="text-stone-500 hover:text-white underline text-[11px] cursor-pointer">Acceso Administrativo (Jefe & Cocina)</button>
+              <button onClick={() => navigateTo('admin')} className="text-stone-600 hover:text-stone-400 text-[10px] cursor-pointer">Acceso interno</button>
             </div>
           </div>
         </div>
