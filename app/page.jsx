@@ -17,7 +17,8 @@ const DEFAULT_CONFIG = {
   calendarEmbedUrl: 'https://calendar.google.com/calendar/embed?src=territoriosaludable%40gmail.com&ctz=America%2FBogota',
   hoursMonFri: 'Lunes a Viernes: 8:00 AM – 6:00 PM',
   hoursSat: 'Sábados: 8:00 AM – 5:00 PM',
-  hoursSun: 'Domingos y Festivos: 9:00 AM – 2:00 PM (Entregas)',
+  hoursSun: 'Domingos y festivos: no hay entregas',
+  recargoTortas: 3000,
   datosPago: '💳 Nequi / Daviplata: 3000559196\n🏦 Bancolombia Ahorros: (pendiente cuenta real)'
 };
 
@@ -196,10 +197,12 @@ export default function Page() {
   const [subiendoFoto, setSubiendoFoto] = useState(false);
   const [confirmarBorrarId, setConfirmarBorrarId] = useState(null);
   const [buscarInventario, setBuscarInventario] = useState('');
+  const [buscarZona, setBuscarZona] = useState('');
   const [catalogoEnServidor, setCatalogoEnServidor] = useState(false);
   const [verificandoClave, setVerificandoClave] = useState(false);
   const [formAvailable, setFormAvailable] = useState(true);
   const [formRequiresNotice, setFormRequiresNotice] = useState(true);
+  const [formDias, setFormDias] = useState(1);
   const [formSizes, setFormSizes] = useState([]);
   const [formSabores, setFormSabores] = useState([]);
   const [formTarjeta, setFormTarjeta] = useState(false);
@@ -225,6 +228,7 @@ export default function Page() {
   const [cfgSun, setCfgSun] = useState(DEFAULT_CONFIG.hoursSun);
   const [cfgEmbedUrl, setCfgEmbedUrl] = useState(DEFAULT_CONFIG.calendarEmbedUrl);
   const [cfgDatosPago, setCfgDatosPago] = useState(DEFAULT_CONFIG.datosPago);
+  const [cfgRecargo, setCfgRecargo] = useState(String(DEFAULT_CONFIG.recargoTortas));
 
   const [newAdminPwd, setNewAdminPwd] = useState('');
   const [privado, setPrivado] = useState({ aprobadores: '', produccion: '', calendarioUrl: '', calendarioCorreos: '', recordatorios: '1440,120' });
@@ -253,6 +257,7 @@ export default function Page() {
     setCfgSun(parsed.hoursSun || DEFAULT_CONFIG.hoursSun);
     setCfgEmbedUrl(parsed.calendarEmbedUrl || DEFAULT_CONFIG.calendarEmbedUrl);
     setCfgDatosPago(parsed.datosPago || DEFAULT_CONFIG.datosPago);
+    setCfgRecargo(String(parsed.recargoTortas ?? DEFAULT_CONFIG.recargoTortas));
   };
 
   useEffect(() => {
@@ -482,7 +487,8 @@ export default function Page() {
       hoursSat: cfgSat.trim(),
       hoursSun: cfgSun.trim(),
       calendarEmbedUrl: cfgEmbedUrl.trim(),
-      datosPago: cfgDatosPago.trim()
+      datosPago: cfgDatosPago.trim(),
+      recargoTortas: Number(String(cfgRecargo).replace(/\D/g, '')) || 0
     };
     setConfig(updated);
     guardarAjustesServidor({ config: updated }).then(ok => { if (ok) showToast('✓ Configuración General Guardada'); });
@@ -514,6 +520,7 @@ export default function Page() {
       setFormImageUrl(prod.imageUrl || '/torta-moka.png');
       setFormAvailable(prod.available ?? true);
       setFormRequiresNotice(prod.requiresNotice ?? true);
+      setFormDias(Number(prod.diasAnticipacion) > 0 ? Number(prod.diasAnticipacion) : ((prod.requiresNotice ?? true) ? 1 : 0));
       setFormSizes(prod.sizes ? prod.sizes.map(s => ({ portions: s.portions, price: s.price })) : []);
       setFormSabores(Array.isArray(prod.sabores) ? prod.sabores.map(x => ({ ...x })) : []);
       setFormTarjeta(llevaTarjeta(prod));
@@ -526,6 +533,7 @@ export default function Page() {
       setFormImageUrl('/torta-moka.png');
       setFormAvailable(true);
       setFormRequiresNotice(false);
+      setFormDias(0);
       setFormSizes([]);
       setFormSabores([]);
       setFormTarjeta(false);
@@ -538,10 +546,10 @@ export default function Page() {
     const sizes = formSizes.map(s => ({ portions: s.portions, price: Number(s.price), label: s.portions + ' (' + formatCOP(Number(s.price)) + ')' }));
     const sabores = formSabores.filter(x => x.nombre && x.nombre.trim()).map(x => ({ nombre: x.nombre.trim(), disponible: x.disponible !== false }));
     if (editingProduct && editingProduct.id && editingProduct.id !== 'NEW_PRODUCT') {
-      guardarProductosServidor(products.map(p => p.id === editingProduct.id ? { ...p, name: formName.trim(), category: formCategory, price: Number(formPrice), description: formDescription.trim(), imageUrl: ensureSlash(formImageUrl), available: formAvailable, requiresNotice: formRequiresNotice, sizes, sabores, tarjeta: formTarjeta } : p));
+      guardarProductosServidor(products.map(p => p.id === editingProduct.id ? { ...p, name: formName.trim(), category: formCategory, price: Number(formPrice), description: formDescription.trim(), imageUrl: ensureSlash(formImageUrl), available: formAvailable, requiresNotice: formDias > 0, diasAnticipacion: formDias, sizes, sabores, tarjeta: formTarjeta } : p));
       showToast('✓ Producto actualizado');
     } else {
-      guardarProductosServidor([{ id: 'prod-' + Date.now(), name: formName.trim(), category: formCategory, price: Number(formPrice), description: formDescription.trim(), imageUrl: ensureSlash(formImageUrl), available: formAvailable, requiresNotice: formRequiresNotice, features: ['Sin Azúcar', 'Sin Gluten'], sizes, sabores, tarjeta: formTarjeta }, ...products]);
+      guardarProductosServidor([{ id: 'prod-' + Date.now(), name: formName.trim(), category: formCategory, price: Number(formPrice), description: formDescription.trim(), imageUrl: ensureSlash(formImageUrl), available: formAvailable, requiresNotice: formDias > 0, diasAnticipacion: formDias, features: ['Sin Azúcar', 'Sin Gluten'], sizes, sabores, tarjeta: formTarjeta }, ...products]);
       showToast('✓ Nuevo producto agregado');
     }
     setEditingProduct(null);
@@ -873,7 +881,7 @@ export default function Page() {
                         )}
                         <div className="absolute top-3 left-3 flex flex-wrap gap-1">
                           <span className={'px-2.5 py-1 rounded-full text-white text-[10px] font-bold shadow-xs ' + (prod.requiresNotice ? 'bg-amber-600' : 'bg-emerald-600')}>
-                            {prod.requiresNotice ? '1 Día Anticipación' : 'Entrega Hoy'}
+                            {prod.requiresNotice ? ((Number(prod.diasAnticipacion) || 1) > 1 ? (Number(prod.diasAnticipacion) + ' Días Anticipación') : '1 Día Anticipación') : 'Entrega Hoy'}
                           </span>
                         </div>
                       </div>
@@ -1541,12 +1549,20 @@ export default function Page() {
                     <MapPin size={16} className="text-[#2D5A27]" />
                     <span>Zonas de Cobertura de Envío</span>
                   </h3>
-                  <p className="text-xs text-stone-500">Sectores para domicilio y su valor. El bot de WhatsApp usa esta lista para calcular el domicilio (si el valor es $0, le dice al cliente que se lo confirman).</p>
+                  <p className="text-xs text-stone-500">Barrios y valor del domicilio. El bot busca el barrio en la dirección del cliente. Si el valor es $0 o el barrio no está en la lista, el bot te pide el valor por WhatsApp.</p>
 
-                  <div className="space-y-2 text-xs">
-                    {zones.map(z => (
+                  <div className="flex items-center gap-2 text-xs">
+                    <label className="font-bold text-stone-700">🚗 Recargo si lleva tortas (van en carro):</label>
+                    <input value={cfgRecargo} onChange={(e) => setCfgRecargo(e.target.value)} className="w-24 p-2 rounded-xl bg-stone-50 border border-stone-200" />
+                    <button type="button" onClick={() => { const updated = { ...config, recargoTortas: Number(String(cfgRecargo).replace(/\D/g, '')) || 0 }; setConfig(updated); guardarAjustesServidor({ config: updated }).then(ok => { if (ok) showToast('✓ Recargo guardado'); }); }} className="px-3 py-2 rounded-xl bg-[#E5ECE3] text-[#2D5A27] font-bold">Guardar</button>
+                  </div>
+
+                  <input type="search" value={buscarZona} onChange={(e) => setBuscarZona(e.target.value)} placeholder="🔍 Buscar barrio..." className="w-full px-3 py-2 rounded-xl border border-stone-300 text-xs" />
+
+                  <div className="space-y-2 text-xs max-h-96 overflow-y-auto pr-1">
+                    {zones.filter(z => !buscarZona.trim() || (z.name + ' ' + (z.grupo || '')).toLowerCase().includes(buscarZona.trim().toLowerCase())).map(z => (
                       <div key={z.id || z.name} className="flex items-center justify-between p-3 bg-stone-50 rounded-2xl border border-stone-200/80">
-                        <span className="font-medium text-stone-800">{z.name} <span className="text-[#2D5A27] font-bold">· {z.price ? formatCOP(Number(z.price)) : 'por confirmar'}</span></span>
+                        <span className="font-medium text-stone-800">{z.name} <span className="text-[#2D5A27] font-bold">· {z.price ? formatCOP(Number(z.price)) : 'por confirmar'}</span>{z.grupo && <span className="block text-[10px] text-stone-400">{z.grupo}</span>}</span>
                         <div className="flex items-center gap-2">
                           <button 
                             onClick={() => {
@@ -1612,9 +1628,9 @@ export default function Page() {
           </div>
           <div className="space-y-2">
             <span className="font-bold text-white uppercase tracking-wider block text-[11px]">Zonas de Cobertura</span>
-            {zones.map(z => (
-              <p key={z.name} className="text-stone-400">
-                • {z.name}
+            {[...new Set(zones.map(z => z.grupo || z.name))].map(g => (
+              <p key={g} className="text-stone-400">
+                • {g}
               </p>
             ))}
             <p className="text-[10px] text-amber-400/90 pt-1 italic">
@@ -1769,7 +1785,14 @@ export default function Page() {
 
               <div className="flex items-center gap-4 pt-2">
                 <label className="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" checked={formAvailable} onChange={(e) => setFormAvailable(e.target.checked)} /><span>Disponible</span></label>
-                <label className="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" checked={formRequiresNotice} onChange={(e) => setFormRequiresNotice(e.target.checked)} /><span>1 Día Anticipación</span></label>
+                <label className="flex items-center gap-1.5"><span>Anticipación:</span>
+                  <select value={formDias} onChange={(e) => setFormDias(Number(e.target.value))} className="p-1.5 rounded-lg border border-stone-300 bg-white">
+                    <option value={0}>Entrega el mismo día</option>
+                    <option value={1}>1 día</option>
+                    <option value={2}>2 días</option>
+                    <option value={3}>3 días</option>
+                  </select>
+                </label>
                 <label className="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" checked={formTarjeta} onChange={(e) => setFormTarjeta(e.target.checked)} /><span>💌 Lleva tarjeta</span></label>
               </div>
               <div className="pt-3 flex gap-2">
