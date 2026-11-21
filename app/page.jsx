@@ -198,6 +198,8 @@ export default function Page() {
   const [formAvailable, setFormAvailable] = useState(true);
   const [formRequiresNotice, setFormRequiresNotice] = useState(true);
   const [formSizes, setFormSizes] = useState([]);
+  const [formSabores, setFormSabores] = useState([]);
+  const [selectedSabores, setSelectedSabores] = useState({});
 
   const [newClientName, setNewClientName] = useState('');
   const [newClientPhone, setNewClientPhone] = useState(DEFAULT_CONFIG.whatsappPhone);
@@ -507,6 +509,7 @@ export default function Page() {
       setFormAvailable(prod.available ?? true);
       setFormRequiresNotice(prod.requiresNotice ?? true);
       setFormSizes(prod.sizes ? prod.sizes.map(s => ({ portions: s.portions, price: s.price })) : []);
+      setFormSabores(Array.isArray(prod.sabores) ? prod.sabores.map(x => ({ ...x })) : []);
     } else {
       setEditingProduct({ id: 'NEW_PRODUCT' });
       setFormName('');
@@ -517,6 +520,7 @@ export default function Page() {
       setFormAvailable(true);
       setFormRequiresNotice(false);
       setFormSizes([]);
+      setFormSabores([]);
     }
   };
 
@@ -524,15 +528,40 @@ export default function Page() {
     e.preventDefault();
     if (!formName.trim()) return;
     const sizes = formSizes.map(s => ({ portions: s.portions, price: Number(s.price), label: s.portions + ' (' + formatCOP(Number(s.price)) + ')' }));
+    const sabores = formSabores.filter(x => x.nombre && x.nombre.trim()).map(x => ({ nombre: x.nombre.trim(), disponible: x.disponible !== false }));
     if (editingProduct && editingProduct.id && editingProduct.id !== 'NEW_PRODUCT') {
-      guardarProductosServidor(products.map(p => p.id === editingProduct.id ? { ...p, name: formName.trim(), category: formCategory, price: Number(formPrice), description: formDescription.trim(), imageUrl: ensureSlash(formImageUrl), available: formAvailable, requiresNotice: formRequiresNotice, sizes } : p));
+      guardarProductosServidor(products.map(p => p.id === editingProduct.id ? { ...p, name: formName.trim(), category: formCategory, price: Number(formPrice), description: formDescription.trim(), imageUrl: ensureSlash(formImageUrl), available: formAvailable, requiresNotice: formRequiresNotice, sizes, sabores } : p));
       showToast('✓ Producto actualizado');
     } else {
-      guardarProductosServidor([{ id: 'prod-' + Date.now(), name: formName.trim(), category: formCategory, price: Number(formPrice), description: formDescription.trim(), imageUrl: ensureSlash(formImageUrl), available: formAvailable, requiresNotice: formRequiresNotice, features: ['Sin Azúcar', 'Sin Gluten'], sizes }, ...products]);
+      guardarProductosServidor([{ id: 'prod-' + Date.now(), name: formName.trim(), category: formCategory, price: Number(formPrice), description: formDescription.trim(), imageUrl: ensureSlash(formImageUrl), available: formAvailable, requiresNotice: formRequiresNotice, features: ['Sin Azúcar', 'Sin Gluten'], sizes, sabores }, ...products]);
       showToast('✓ Nuevo producto agregado');
     }
     setEditingProduct(null);
   };
+
+  // Activa o agota un sabor sin abrir el formulario.
+  const handleToggleSabor = (prodId, idx) => {
+    guardarProductosServidor(products.map(p => {
+      if (p.id !== prodId) return p;
+      const sabores = (p.sabores || []).map((x, i) => i === idx ? { ...x, disponible: x.disponible === false } : x);
+      return { ...p, sabores };
+    }));
+  };
+
+  const ChipsSabores = ({ prod }) => (!prod.sabores || prod.sabores.length === 0) ? null : (
+    <div className="flex flex-wrap gap-1 mt-1.5">
+      {prod.sabores.map((x, i) => (
+        <button
+          key={x.nombre + i}
+          onClick={() => handleToggleSabor(prod.id, i)}
+          className={'px-2 py-0.5 rounded-full text-[10px] font-bold border ' + (x.disponible !== false ? 'bg-emerald-50 border-emerald-300 text-emerald-800' : 'bg-stone-100 border-stone-200 text-stone-400 line-through')}
+          title={x.disponible !== false ? 'Toca para marcar agotado' : 'Toca para marcar disponible'}
+        >
+          {x.nombre}
+        </button>
+      ))}
+    </div>
+  );
 
   // Borrar en dos toques (sin ventanas emergentes del navegador, que algunos bloquean).
   const handleDeleteProduct = (id) => {
@@ -572,11 +601,16 @@ export default function Page() {
     showToast('✓ Pedido registrado con éxito');
   };
 
+  const saboresDisponibles = (product) => (product.sabores || []).filter(x => x.disponible !== false);
+
   const handleOrderWhatsApp = (product) => {
-    const selPortion = selectedSizes[product.id];
+    const selPortion = selectedSizes[product.id] || (product.sizes && product.sizes[0] && product.sizes[0].portions);
     const sizeObj = product.sizes && product.sizes.find(s => s.portions === selPortion);
     const pr = sizeObj ? sizeObj.price : product.price;
-    const txt = 'Quiero pedir: ' + product.name + (sizeObj ? ' (' + sizeObj.portions + ')' : '') + ' - ' + formatCOP(pr);
+    const disponibles = saboresDisponibles(product);
+    const sabor = disponibles.length ? (selectedSabores[product.id] && disponibles.some(x => x.nombre === selectedSabores[product.id]) ? selectedSabores[product.id] : disponibles[0].nombre) : null;
+    const detalles = [sizeObj ? sizeObj.portions : null, sabor ? 'Sabor: ' + sabor : null].filter(Boolean);
+    const txt = 'Quiero pedir: ' + product.name + (detalles.length ? ' (' + detalles.join(', ') + ')' : '') + ' - ' + formatCOP(pr);
     window.open('https://wa.me/' + config.whatsappPhone + '?text=' + encodeURIComponent(txt), '_blank');
   };
 
@@ -833,14 +867,31 @@ export default function Page() {
 
                         {prod.sizes && prod.sizes.length > 0 && (
                           <div className="space-y-1 pt-1">
-                            <label className="text-[10px] font-bold uppercase text-stone-400 block">PORCIÓN / TAMAÑO:</label>
+                            <label className="text-[10px] font-bold uppercase text-stone-400 block">{new Set(prod.sizes.map(s => s.price)).size === 1 && prod.sizes.length > 1 ? 'ELIGE TU OPCIÓN:' : 'PORCIÓN / TAMAÑO:'}</label>
                             <select 
                               value={selSize} 
                               onChange={(e) => setSelectedSizes({ ...selectedSizes, [prod.id]: e.target.value })} 
                               className="w-full py-1.5 px-2 rounded-xl bg-stone-50 border border-stone-200 text-xs font-semibold text-stone-800 focus:outline-none focus:border-[#2D5A27]"
                             >
-                              {prod.sizes.map(s => <option key={s.portions} value={s.portions}>{s.portions} - {formatCOP(s.price)}</option>)}
+                              {prod.sizes.map(s => <option key={s.portions} value={s.portions}>{new Set(prod.sizes.map(x => x.price)).size === 1 && prod.sizes.length > 1 ? s.portions : s.portions + ' - ' + formatCOP(s.price)}</option>)}
                             </select>
+                          </div>
+                        )}
+
+                        {prod.sabores && prod.sabores.length > 0 && (
+                          <div className="space-y-1 pt-1">
+                            <label className="text-[10px] font-bold uppercase text-stone-400 block">SABOR:</label>
+                            {saboresDisponibles(prod).length === 0 ? (
+                              <p className="text-xs font-semibold text-amber-700 bg-amber-50 rounded-xl px-2 py-1.5">Hoy no hay sabores disponibles 😔</p>
+                            ) : (
+                              <select
+                                value={selectedSabores[prod.id] && saboresDisponibles(prod).some(x => x.nombre === selectedSabores[prod.id]) ? selectedSabores[prod.id] : saboresDisponibles(prod)[0].nombre}
+                                onChange={(e) => setSelectedSabores({ ...selectedSabores, [prod.id]: e.target.value })}
+                                className="w-full py-1.5 px-2 rounded-xl bg-stone-50 border border-stone-200 text-xs font-semibold text-stone-800 focus:outline-none focus:border-[#2D5A27]"
+                              >
+                                {saboresDisponibles(prod).map(x => <option key={x.nombre} value={x.nombre}>{x.nombre}</option>)}
+                              </select>
+                            )}
                           </div>
                         )}
                       </div>
@@ -853,7 +904,7 @@ export default function Page() {
                       </div>
                       <button 
                         onClick={() => handleOrderWhatsApp(prod)} 
-                        disabled={!prod.available} 
+                        disabled={!prod.available || (prod.sabores && prod.sabores.length > 0 && saboresDisponibles(prod).length === 0)} 
                         className="px-4 py-2 rounded-xl bg-[#2D5A27] hover:bg-[#23481E] disabled:bg-stone-300 text-white text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-xs"
                       >
                         <WhatsAppIcon size={14} />
@@ -918,6 +969,7 @@ export default function Page() {
                     <div className="flex-1 min-w-0">
                       <p className="font-bold text-sm text-stone-900 leading-tight">{prod.name}</p>
                       <p className="text-[11px] text-stone-500">{prod.category} · <span className="font-semibold text-[#2D5A27]">{formatCOP(prod.price)}</span></p>
+                      <ChipsSabores prod={prod} />
                       <button onClick={() => handleToggleProduct(prod.id)} className={'mt-1 px-2 py-0.5 rounded-full text-[10px] font-bold ' + (prod.available ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800')}>
                         {prod.available ? 'Disponible' : 'Agotado'}
                       </button>
@@ -970,6 +1022,7 @@ export default function Page() {
                         <td className="p-3">
                           <span className="font-bold text-stone-900 block">{prod.name}</span>
                           <span className="text-[10px] text-stone-500">{prod.category}</span>
+                          <ChipsSabores prod={prod} />
                         </td>
                         <td className="p-3 font-semibold text-[#2D5A27]">{formatCOP(prod.price)}</td>
                         <td className="p-3 text-[11px] text-stone-600">{prod.sizes && prod.sizes.length > 0 ? prod.sizes.map(s => s.portions).join(', ') : 'Precio único'}</td>
@@ -1615,6 +1668,29 @@ export default function Page() {
                         <input type="text" value={sz.portions} onChange={(e) => { const u = [...formSizes]; u[i].portions = e.target.value; setFormSizes(u); }} placeholder="Ej: 5 porc" className="flex-1 p-2 rounded-xl border border-stone-300" />
                         <input type="number" value={sz.price} onChange={(e) => { const u = [...formSizes]; u[i].price = e.target.value; setFormSizes(u); }} placeholder="Precio" className="w-24 p-2 rounded-xl border border-stone-300" />
                         <button type="button" onClick={() => setFormSizes(formSizes.filter((_, idx) => idx !== i))} className="p-1.5 rounded-lg text-red-500 hover:bg-red-50"><Trash2 size={13} /></button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="pt-2 border-t border-stone-100">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="font-bold text-stone-800">Sabores del día (opcional):</span>
+                  <button type="button" onClick={() => setFormSabores([...formSabores, { nombre: '', disponible: true }])} className="px-2 py-1 rounded bg-[#E5ECE3] text-[#2D5A27] font-bold text-[10px] flex items-center gap-1">
+                    <Plus size={12} /><span>Agregar Sabor</span>
+                  </button>
+                </div>
+                <p className="text-[10px] text-stone-400 mb-2">Para productos que cambian según producción (ej. helados). Marca "Agotado" lo que no haya; queda así hasta que lo cambies.</p>
+                {formSabores.length === 0 ? <p className="text-[11px] text-stone-400 italic">Sin sabores.</p> : (
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {formSabores.map((sb, i) => (
+                      <div key={i} className="flex items-center gap-2">
+                        <input type="text" value={sb.nombre} onChange={(e) => { const u = [...formSabores]; u[i] = { ...u[i], nombre: e.target.value }; setFormSabores(u); }} placeholder="Ej: Mora" className="flex-1 p-2 rounded-xl border border-stone-300" />
+                        <button type="button" onClick={() => { const u = [...formSabores]; u[i] = { ...u[i], disponible: u[i].disponible === false }; setFormSabores(u); }} className={'px-2.5 py-2 rounded-xl text-[10px] font-bold w-24 ' + (sb.disponible !== false ? 'bg-emerald-100 text-emerald-800' : 'bg-stone-200 text-stone-500')}>
+                          {sb.disponible !== false ? 'Disponible' : 'Agotado'}
+                        </button>
+                        <button type="button" onClick={() => setFormSabores(formSabores.filter((_, idx) => idx !== i))} className="p-1.5 rounded-lg text-red-500 hover:bg-red-50"><Trash2 size={13} /></button>
                       </div>
                     ))}
                   </div>

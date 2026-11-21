@@ -166,7 +166,8 @@ function candidatosProducto(texto, productos) {
 
   const buscadas = palabrasClave(texto);
   if (!buscadas.length) return [];
-  const nombres = disponibles.map(p => palabrasClave(p.name));
+  // Los sabores también cuentan para buscar ("helado de mora" → Helados).
+  const nombres = disponibles.map(p => [...palabrasClave(p.name), ...(p.sabores || []).flatMap(x => palabrasClave(x.nombre))]);
   // Las palabras que salen en muchos productos ("pan", "torta") pesan menos que las raras ("ajo").
   const peso = Object.fromEntries(buscadas.map(w => [w, 1 / Math.max(1, nombres.filter(n => n.some(x => coincide(w, x))).length)]));
   const puntuados = [];
@@ -175,8 +176,9 @@ function candidatosProducto(texto, productos) {
     if (!delNombre.length) return;
     const halladas = buscadas.filter(w => delNombre.some(n => coincide(w, n)));
     if (!halladas.length) return;
-    const cubiertas = delNombre.filter(n => buscadas.some(w => coincide(w, n))).length;
-    puntuados.push({ p, puntaje: halladas.reduce((a, w) => a + peso[w], 0), fraccion: halladas.length / buscadas.length, ajuste: cubiertas / delNombre.length });
+    const soloNombre = palabrasClave(p.name);
+    const cubiertas = soloNombre.filter(n => buscadas.some(w => coincide(w, n))).length;
+    puntuados.push({ p, puntaje: halladas.reduce((a, w) => a + peso[w], 0), fraccion: halladas.length / buscadas.length, ajuste: soloNombre.length ? cubiertas / soloNombre.length : 0 });
   });
   if (!puntuados.length) return [];
   const maximo = Math.max(...puntuados.map(x => x.puntaje));
@@ -206,17 +208,30 @@ function buscarTamano(texto, producto) {
   return null;
 }
 
-function itemDesde(producto, tamano) {
+function itemDesde(producto, tamano, sabor = null) {
   return {
     id: producto.id,
     nombre: producto.name,
     porcion: tamano ? tamano.portions : null,
+    sabor,
     precio: Number(tamano ? tamano.price : producto.price) || 0,
     anticipacion: Boolean(producto.requiresNotice)
   };
 }
 
-const nombreItem = (i) => i.porcion ? `${i.nombre} (${i.porcion})` : i.nombre;
+const nombreItem = (i) => {
+  const extra = [i.porcion, i.sabor ? `sabor ${i.sabor}` : null].filter(Boolean).join(', ');
+  return extra ? `${i.nombre} (${extra})` : i.nombre;
+};
+
+// Tamaños con el mismo precio en realidad son opciones (sabores, rellenos...)
+const sonOpciones = (producto) => (producto.sizes || []).length > 1 && new Set(producto.sizes.map(x => Number(x.price))).size === 1;
+const saboresDisponibles = (producto) => (producto.sabores || []).filter(x => x.disponible !== false);
+
+function buscarSabor(texto, producto) {
+  const t = normalizar(texto);
+  return saboresDisponibles(producto).find(x => normalizar(x.nombre) && t.includes(normalizar(x.nombre))) || null;
+}
 
 // ---------------------------------------------------------------------------
 // Envío de mensajes
@@ -292,16 +307,42 @@ async function agregarAlCarrito(tel, s, item) {
 async function preguntarTamano(tel, s, producto) {
   s.paso = 'ELEGIR_TAMANO';
   s.productoId = producto.id;
+  if (sonOpciones(producto)) {
+    const lista = producto.sizes.map((x, i) => `${i + 1}. ${x.portions}`).join('\n');
+    return enviarTexto(tel, `¿Cuál prefieres de *${producto.name}* (${formatCOP(producto.sizes[0].price)})? Responde con el número:\n\n${lista}`);
+  }
   const lista = producto.sizes.map((x, i) => `${i + 1}. ${x.portions} — ${formatCOP(x.price)}`).join('\n');
-  await enviarTexto(tel, `¿De qué tamaño quieres la *${producto.name}*? Responde con el número:\n\n${lista}`);
+  await enviarTexto(tel, `¿De qué tamaño quieres *${producto.name}*? Responde con el número:\n\n${lista}`);
 }
 
 async function procesarProducto(tel, s, producto, textoTamano) {
-  if (!producto.sizes || producto.sizes.length === 0) return agregarAlCarrito(tel, s, itemDesde(producto, null));
+  if (!producto.sizes || producto.sizes.length === 0) return pasoSabor(tel, s, producto, null, textoTamano);
   const tamano = textoTamano ? buscarTamano(textoTamano, producto) : null;
-  if (tamano) return agregarAlCarrito(tel, s, itemDesde(producto, tamano));
-  if (producto.sizes.length === 1) return agregarAlCarrito(tel, s, itemDesde(producto, producto.sizes[0]));
+  if (tamano) return pasoSabor(tel, s, producto, tamano, textoTamano);
+  if (producto.sizes.length === 1) return pasoSabor(tel, s, producto, producto.sizes[0], textoTamano);
   return preguntarTamano(tel, s, producto);
+}
+
+// Productos con sabores del día (ej. helados): solo se ofrecen los disponibles.
+async function pasoSabor(tel, s, producto, tamano, texto) {
+  if (!producto.sabores || producto.sabores.length === 0) return agregarAlCarrito(tel, s, itemDesde(producto, tamano));
+  const disponibles = saboresDisponibles(producto);
+  if (!disponibles.length) {
+    s.paso = s.carrito.length ? 'AGREGAR_MAS' : 'MENU';
+    s.productoId = null;
+    return enviarTexto(tel, `😔 Hoy no tenemos sabores disponibles de *${producto.name}*. Escríbeme otro producto o escribe *0* para ver el menú.`);
+  }
+  const sabor = texto ? buscarSabor(texto, producto) : null;
+  if (sabor) return agregarAlCarrito(tel, s, itemDesde(producto, tamano, sabor.nombre));
+  const t = normalizar(texto);
+  const agotado = texto ? (producto.sabores || []).find(x => x.disponible === false && normalizar(x.nombre) && t.includes(normalizar(x.nombre))) : null;
+  const avisoAgotado = agotado ? `😔 Hoy no tenemos *${agotado.nombre}*.\n\n` : '';
+  if (disponibles.length === 1 && !agotado) return agregarAlCarrito(tel, s, itemDesde(producto, tamano, disponibles[0].nombre));
+  s.paso = 'ELEGIR_SABOR';
+  s.productoId = producto.id;
+  s.tamanoPendiente = tamano ? tamano.portions : null;
+  const lista = disponibles.map((x, i) => `${i + 1}. ${x.nombre}`).join('\n');
+  return enviarTexto(tel, `${avisoAgotado}¿De qué sabor quieres *${producto.name}*? Hoy tenemos:\n\n${lista}\n\nResponde con el número.`);
 }
 
 const necesitaAnticipacion = (s) => s.carrito.some(i => i.anticipacion);
@@ -655,7 +696,8 @@ async function manejarMensaje(msg) {
     const nombreWeb = normalizar(web[1]);
     const producto = productos.find(p => normalizar(p.name) === nombreWeb) || candidatosProducto(web[1], productos)[0];
     if (producto) {
-      await procesarProducto(tel, s, producto, web[2] || '');
+      const detalle = web[2] || '';
+      await procesarProducto(tel, s, producto, detalle);
     } else {
       await enviarTexto(tel, `No encontré *${web[1]}* en el catálogo actual. 🤔 Una persona del equipo te ayudará.`);
       await avisarAdmin(`⚠️ Cliente +${tel} quiso pedir "${web[1]}" pero no está en el catálogo.`);
@@ -725,7 +767,23 @@ async function manejarMensaje(msg) {
       const idx = parseInt(t, 10) - 1;
       const tamano = (/^\d+$/.test(t) && producto.sizes[idx]) || buscarTamano(texto, producto);
       if (!tamano) return preguntarTamano(tel, s, producto);
-      await agregarAlCarrito(tel, s, itemDesde(producto, tamano));
+      await pasoSabor(tel, s, producto, tamano, texto);
+      return guardarSesion();
+    }
+
+    case 'ELEGIR_SABOR': {
+      const producto = productos.find(p => p.id === s.productoId);
+      if (!producto) { Object.assign(s, sesionNueva()); await guardarSesion(); return enviarTexto(tel, MENU_PRINCIPAL); }
+      const disponibles = saboresDisponibles(producto);
+      const idx = parseInt(t, 10) - 1;
+      const sabor = (/^\d+$/.test(t) && disponibles[idx]) || buscarSabor(texto, producto);
+      if (!sabor) {
+        const lista = disponibles.map((x, i) => `${i + 1}. ${x.nombre}`).join('\n');
+        return enviarTexto(tel, `Elige uno de los sabores disponibles hoy:\n\n${lista}`);
+      }
+      const tamano = (producto.sizes || []).find(x => x.portions === s.tamanoPendiente) || null;
+      s.tamanoPendiente = null;
+      await agregarAlCarrito(tel, s, itemDesde(producto, tamano, sabor.nombre));
       return guardarSesion();
     }
 
