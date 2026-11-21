@@ -611,7 +611,7 @@ export default function Page() {
   }, [orders]);
 
   return (
-    <div className="min-h-screen bg-[#FAF7F2] text-[#241E19] flex flex-col font-sans selection:bg-[#2D5A27] selection:text-white">
+    <div className="min-h-screen overflow-x-clip bg-[#FAF7F2] text-[#241E19] flex flex-col font-sans selection:bg-[#2D5A27] selection:text-white">
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 bg-[#241E19] text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-2 border border-stone-700">
           <Sparkles className="text-amber-400" size={16} />
@@ -637,7 +637,7 @@ export default function Page() {
       <header className="sticky top-0 z-40 bg-[#FAF7F2]/95 backdrop-blur-md border-b border-[#EAE2D8]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between gap-3">
           
-          <button onClick={() => navigateTo('public')} className="flex items-center gap-3 text-left cursor-pointer group">
+          <button onClick={() => navigateTo('public')} className="flex items-center gap-3 text-left cursor-pointer group min-w-0">
             <div className="w-11 h-11 rounded-2xl bg-[#2D5A27] flex items-center justify-center text-white shadow-xs shrink-0 overflow-hidden relative group-hover:scale-105 transition-transform">
               <img 
                 src="/logo.jpg" 
@@ -650,7 +650,7 @@ export default function Page() {
               />
               <Sprout className="w-6 h-6 text-emerald-200 absolute" />
             </div>
-            <div>
+            <div className="min-w-0">
               <span className="font-serif text-xl sm:text-2xl font-bold text-[#2D5A27] block tracking-tight leading-none">
                 {config.businessName}
               </span>
@@ -660,12 +660,12 @@ export default function Page() {
             </div>
           </button>
 
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <a 
               href={config.instagramUrl} 
               target="_blank" 
               rel="noreferrer" 
-              className="w-9 h-9 rounded-full bg-[#EFE8DC] hover:bg-[#E3D9C6] flex items-center justify-center text-[#5C4033] transition shadow-2xs"
+              className={(authRole ? 'hidden sm:flex ' : 'flex ') + 'w-9 h-9 rounded-full bg-[#EFE8DC] hover:bg-[#E3D9C6] items-center justify-center text-[#5C4033] transition shadow-2xs'}
               title="Instagram Oficial"
             >
               <Instagram size={17} />
@@ -675,7 +675,7 @@ export default function Page() {
               href={config.facebookUrl} 
               target="_blank" 
               rel="noreferrer" 
-              className="w-9 h-9 rounded-full bg-[#EFE8DC] hover:bg-[#E3D9C6] flex items-center justify-center text-[#5C4033] transition shadow-2xs"
+              className={(authRole ? 'hidden sm:flex ' : 'flex ') + 'w-9 h-9 rounded-full bg-[#EFE8DC] hover:bg-[#E3D9C6] items-center justify-center text-[#5C4033] transition shadow-2xs'}
               title="Facebook Oficial"
             >
               <Facebook size={17} />
@@ -688,12 +688,13 @@ export default function Page() {
               className="px-3.5 py-2 rounded-full bg-[#EFE8DC] hover:bg-[#E3D9C6] text-[#241E19] text-xs font-bold flex items-center gap-1.5 transition"
             >
               <Phone size={14} className="text-[#2D5A27]" />
-              <span className="font-semibold">{config.whatsappPhone.replace('57', '')}</span>
+              <span className="font-semibold hidden sm:inline">{config.whatsappPhone.replace(/^57/, '')}</span>
             </a>
 
             {authRole && (
-              <button onClick={handleLogout} className="p-2 rounded-xl text-stone-500 hover:text-red-600 transition" title="Cerrar Sesión">
-                <LogOut size={16} />
+              <button onClick={handleLogout} className="px-3 py-2 rounded-full bg-red-50 text-red-700 hover:bg-red-100 text-xs font-bold flex items-center gap-1.5 transition" title="Cerrar Sesión">
+                <LogOut size={15} />
+                <span>Salir</span>
               </button>
             )}
           </div>
