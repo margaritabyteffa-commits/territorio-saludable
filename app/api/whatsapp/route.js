@@ -708,9 +708,19 @@ async function manejarMensaje(msg) {
     return;
   }
 
+  // --- Si ya envió el comprobante, puede escribir y hacer otro pedido sin quedar atascado ---
+  if (s.paso === 'ESPERA_VERIFICACION' && tipo !== 'image' && tipo !== 'document') {
+    const codigoAnterior = s.codigo;
+    Object.assign(s, sesionNueva());
+    await guardarSesion();
+    if (!t || ES_SALUDO.test(t)) {
+      return enviarTexto(tel, `Tu pedido *${codigoAnterior}* sigue en verificación ✅ Te avisamos apenas esté confirmado.\n\n${MENU_PRINCIPAL}`);
+    }
+  }
+
   // --- Pedido desde el botón "Pedir" de la página ---
   const web = texto.match(/quiero pedir:\s*(.+?)(?:\s*\(([^)]*)\))?\s*(?:-\s*\$.*)?$/i);
-  if (web && !['ESPERA_PAGO', 'ESPERA_VERIFICACION'].includes(s.paso)) {
+  if (web && s.paso !== 'ESPERA_PAGO') {
     const nombreWeb = normalizar(web[1]);
     const producto = productos.find(p => normalizar(p.name) === nombreWeb) || candidatosProducto(web[1], productos)[0];
     if (producto) {
@@ -857,7 +867,7 @@ async function manejarMensaje(msg) {
     }
 
     case 'ESPERA_PAGO':
-      return enviarTexto(tel, `Estamos esperando la *foto del comprobante* de tu pedido ${s.codigo} por ${formatCOP(s.datos.total)}. 🧾\n\nSi tienes una duda, escribe *asesor*.`);
+      return enviarTexto(tel, `Estamos esperando la *foto del comprobante* de tu pedido ${s.codigo} por ${formatCOP(s.datos.total)}. 🧾\n\n• Si tienes una duda, escribe *asesor*.\n• Para cancelarlo y empezar otro pedido, escribe *cancelar*.`);
 
     case 'ESPERA_VERIFICACION':
       return enviarTexto(tel, `Ya recibimos tu comprobante del pedido ${s.codigo}. ✅ Estamos verificando el pago y te confirmamos muy pronto.`);
