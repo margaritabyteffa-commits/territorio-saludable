@@ -185,6 +185,7 @@ export default function Page() {
   const [formImageUrl, setFormImageUrl] = useState('/torta-moka.png');
   const [subiendoFoto, setSubiendoFoto] = useState(false);
   const [confirmarBorrarId, setConfirmarBorrarId] = useState(null);
+  const [buscarInventario, setBuscarInventario] = useState('');
   const [catalogoEnServidor, setCatalogoEnServidor] = useState(false);
   const [verificandoClave, setVerificandoClave] = useState(false);
   const [formAvailable, setFormAvailable] = useState(true);
@@ -890,7 +891,47 @@ export default function Page() {
                 </button>
               </div>
 
-              <div className="overflow-x-auto">
+              <input
+                type="search"
+                value={buscarInventario}
+                onChange={(e) => setBuscarInventario(e.target.value)}
+                placeholder="🔍 Buscar producto..."
+                className="w-full px-4 py-2.5 rounded-xl border border-stone-300 text-sm focus:outline-none focus:border-[#2D5A27]"
+              />
+
+              {/* Celular: tarjetas con los botones siempre visibles */}
+              <div className="md:hidden space-y-2">
+                {products
+                  .map((prod, idx) => ({ prod, idx }))
+                  .filter(({ prod }) => !buscarInventario.trim() || prod.name.toLowerCase().includes(buscarInventario.trim().toLowerCase()))
+                  .map(({ prod, idx }) => (
+                  <div key={prod.id} className="flex items-center gap-3 p-3 rounded-2xl border border-stone-200">
+                    <img src={prod.imageUrl} alt={prod.name} onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = FALLBACK_IMG; }} className="w-14 h-14 rounded-xl object-cover shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-sm text-stone-900 leading-tight">{prod.name}</p>
+                      <p className="text-[11px] text-stone-500">{prod.category} · <span className="font-semibold text-[#2D5A27]">{formatCOP(prod.price)}</span></p>
+                      <button onClick={() => handleToggleProduct(prod.id)} className={'mt-1 px-2 py-0.5 rounded-full text-[10px] font-bold ' + (prod.available ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800')}>
+                        {prod.available ? 'Disponible' : 'Agotado'}
+                      </button>
+                    </div>
+                    <div className="flex flex-col gap-1.5 shrink-0">
+                      <div className="flex gap-1.5">
+                        <button onClick={() => handleOpenEditProduct(prod)} className="p-2.5 rounded-xl bg-stone-100 active:bg-stone-200" title="Editar"><Edit2 size={16} /></button>
+                        <button onClick={() => handleDeleteProduct(prod.id)} className={'p-2.5 rounded-xl text-xs font-bold flex items-center gap-1 ' + (confirmarBorrarId === prod.id ? 'bg-red-600 text-white' : 'bg-red-50 text-red-600')} title="Eliminar"><Trash2 size={16} />{confirmarBorrarId === prod.id && <span>¿Borrar?</span>}</button>
+                      </div>
+                      {!buscarInventario.trim() && (
+                        <div className="flex gap-1.5 justify-end">
+                          <button onClick={() => handleMoveProduct(prod.id, 'up')} disabled={idx === 0} className="p-1.5 rounded-lg bg-stone-100 disabled:opacity-30" title="Subir"><ArrowUp size={14} /></button>
+                          <button onClick={() => handleMoveProduct(prod.id, 'down')} disabled={idx === products.length - 1} className="p-1.5 rounded-lg bg-stone-100 disabled:opacity-30" title="Bajar"><ArrowDown size={14} /></button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Computador: tabla */}
+              <div className="hidden md:block overflow-x-auto">
                 <table className="w-full text-left text-xs">
                   <thead className="bg-stone-50 border-b border-stone-200 text-stone-500 uppercase">
                     <tr>
@@ -904,7 +945,10 @@ export default function Page() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-stone-100">
-                    {products.map((prod, idx) => (
+                    {products
+                      .map((prod, idx) => ({ prod, idx }))
+                      .filter(({ prod }) => !buscarInventario.trim() || prod.name.toLowerCase().includes(buscarInventario.trim().toLowerCase()))
+                      .map(({ prod, idx }) => (
                       <tr key={prod.id} className="hover:bg-stone-50/50">
                         <td className="p-3">
                           <div className="flex items-center gap-1">
