@@ -227,6 +227,8 @@ export default function Page() {
   const [cfgDatosPago, setCfgDatosPago] = useState(DEFAULT_CONFIG.datosPago);
 
   const [newAdminPwd, setNewAdminPwd] = useState('');
+  const [privado, setPrivado] = useState({ aprobadores: '', produccion: '', calendarioUrl: '', calendarioCorreos: '', recordatorios: '1440,120' });
+  const [privadoCargado, setPrivadoCargado] = useState(false);
   const [newPanaderoPwd, setNewPanaderoPwd] = useState('');
   const [selectedCalDateStr, setSelectedCalDateStr] = useState('2026-11-09');
 
@@ -543,6 +545,26 @@ export default function Page() {
       showToast('✓ Nuevo producto agregado');
     }
     setEditingProduct(null);
+  };
+
+  useEffect(() => {
+    if (authRole !== 'admin' || adminTab !== 'configuracion' || privadoCargado) return;
+    apiAdmin('/api/admin/privado')
+      .then(d => { setPrivado(prev => ({ ...prev, ...(d.privado || {}) })); setPrivadoCargado(true); })
+      .catch(() => {});
+  }, [authRole, adminTab, privadoCargado]);
+
+  const guardarPrivado = async () => {
+    try {
+      await apiAdmin('/api/admin/privado', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ privado })
+      });
+      showToast('✓ Avisos y calendario guardados');
+    } catch (e) {
+      showToast('⚠️ ' + e.message);
+    }
   };
 
   // Activa o agota un sabor sin abrir el formulario.
@@ -1431,6 +1453,44 @@ export default function Page() {
                     Guardar Configuración General
                   </button>
                 </form>
+              </div>
+
+              <div className="bg-white rounded-3xl border border-stone-200 p-6 space-y-4 shadow-xs text-xs">
+                <h3 className="font-serif font-bold text-base text-stone-900 flex items-center gap-2">
+                  <Calendar size={16} className="text-[#2D5A27]" />
+                  <span>Avisos de pedidos y calendario</span>
+                </h3>
+                <p className="text-stone-500">Esto no se muestra en la página pública. Escribe los celulares de 10 dígitos; si son varios, sepáralos con coma.</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="font-bold text-stone-700 block mb-1">✅ WhatsApp que aprueba los pagos</label>
+                    <input value={privado.aprobadores} onChange={(e) => setPrivado({ ...privado, aprobadores: e.target.value })} placeholder="Ej: 3001234567" className="w-full p-3 rounded-2xl bg-stone-50 border border-stone-200" />
+                    <p className="text-[10px] text-stone-400 mt-1">Recibe el comprobante y es el único que puede escribir "Aprobar".</p>
+                  </div>
+                  <div>
+                    <label className="font-bold text-stone-700 block mb-1">🧁 WhatsApp de producción</label>
+                    <input value={privado.produccion} onChange={(e) => setPrivado({ ...privado, produccion: e.target.value })} placeholder="Ej: 3109876543" className="w-full p-3 rounded-2xl bg-stone-50 border border-stone-200" />
+                    <p className="text-[10px] text-stone-400 mt-1">Recibe el pedido para preparar cuando se aprueba el pago.</p>
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="font-bold text-stone-700 block mb-1">📅 Enlace del calendario (script de Google)</label>
+                    <input value={privado.calendarioUrl} onChange={(e) => setPrivado({ ...privado, calendarioUrl: e.target.value })} placeholder="https://script.google.com/macros/s/.../exec" className="w-full p-3 rounded-2xl bg-stone-50 border border-stone-200 font-mono text-[11px]" />
+                  </div>
+                  <div>
+                    <label className="font-bold text-stone-700 block mb-1">📧 Correos que reciben la invitación</label>
+                    <input value={privado.calendarioCorreos} onChange={(e) => setPrivado({ ...privado, calendarioCorreos: e.target.value })} placeholder="marta@gmail.com" className="w-full p-3 rounded-2xl bg-stone-50 border border-stone-200" />
+                  </div>
+                  <div>
+                    <label className="font-bold text-stone-700 block mb-1">⏰ Recordatorios</label>
+                    <select value={privado.recordatorios} onChange={(e) => setPrivado({ ...privado, recordatorios: e.target.value })} className="w-full p-3 rounded-2xl bg-stone-50 border border-stone-200">
+                      <option value="1440,120">1 día antes y 2 horas antes</option>
+                      <option value="1440,60">1 día antes y 1 hora antes</option>
+                      <option value="2880,1440,120">2 días antes, 1 día antes y 2 horas antes</option>
+                      <option value="120">Solo 2 horas antes</option>
+                    </select>
+                  </div>
+                </div>
+                <button type="button" onClick={guardarPrivado} className="px-5 py-2.5 rounded-xl bg-[#2D5A27] text-white font-bold hover:bg-[#23481E]">Guardar avisos y calendario</button>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

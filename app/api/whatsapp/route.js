@@ -151,14 +151,14 @@ function interpretarFecha(texto) {
 // Catálogo (desde la base de datos, con caché de 1 minuto)
 // ---------------------------------------------------------------------------
 
-let cache = { hasta: 0, productos: [], zonas: [], config: {} };
+let cache = { hasta: 0, productos: [], zonas: [], config: {}, privado: {} };
 
 async function catalogo() {
   if (Date.now() < cache.hasta) return cache;
   if (!supabaseConfigurado()) return cache;
   try {
-    const [productos, zonas, config] = await Promise.all([leerProductos(), leerAjuste('zonas'), leerAjuste('config')]);
-    cache = { hasta: Date.now() + 60_000, productos: productos || [], zonas: zonas || [], config: config || {} };
+    const [productos, zonas, config, privado] = await Promise.all([leerProductos(), leerAjuste('zonas'), leerAjuste('config'), leerAjuste('privado')]);
+    cache = { hasta: Date.now() + 60_000, productos: productos || [], zonas: zonas || [], config: config || {}, privado: privado || {} };
   } catch (e) {
     console.error('No se pudo leer el catálogo:', e);
   }
@@ -280,9 +280,93 @@ const enviarBotones = (para, texto, botones) => enviar(para, {
   }
 });
 
+// Números en formato WhatsApp (57 + celular)
+function listaNumeros(texto) {
+  return String(texto || '').split(/[,;\n]/)
+    .map(x => x.replace(/\D/g, ''))
+    .map(d => (d.length === 10 && d.startsWith('3') ? '57' + d : d))
+    .filter(d => d.length >= 11);
+}
+
+async function aprobadores() {
+  const { privado } = await catalogo();
+  const lista = listaNumeros(privado.aprobadores);
+  if (ADMIN_PHONE && !lista.includes(ADMIN_PHONE)) lista.push(ADMIN_PHONE);
+  return lista;
+}
+
 async function avisarAdmin(texto) {
-  if (!ADMIN_PHONE) { console.warn('Falta ADMIN_WHATSAPP_PHONE para avisos:', texto); return; }
-  await enviarTexto(ADMIN_PHONE, texto);
+  const lista = await aprobadores();
+  if (!lista.length) { console.warn('No hay números para avisos de pago:', texto); return; }
+  for (const n of lista) await enviarTexto(n, texto);
+}
+
+// ---------- Aviso a producción (Marta) ----------
+async function avisarProduccion(pedido) {
+  const { privado } = await catalogo();
+  const lista = listaNumeros(privado.produccion);
+  if (!lista.length) return 'sin número de producción';
+  const productos = (pedido.carrito || []).map(i => `• ${nombreItem(i)}`).join('\n');
+  const texto = `🧁 *Nuevo pedido para preparar — ${pedido.codigo}*\n\n📅 *Entrega:* ${fechaBonita(pedido.fecha)}, ${pedido.hora}\n\n🛒 *Productos:*\n${productos}` +
+    (pedido.mensajeTarjeta ? `\n\n💌 *Tarjeta:* ${pedido.mensajeTarjeta}` : '') +
+    (pedido.notas ? `\n📝 *Notas:* ${pedido.notas}` : '') +
+    `\n\n📍 ${pedido.sectorNombre || pedido.direccion}`;
+  let ok = true;
+  for (const n of lista) ok = (await enviarTexto(n, texto)) && ok;
+  return ok ? 'avisado' : 'no se pudo avisar (revisa que haya escrito al bot en las últimas 24 h)';
+}
+
+// ---------- Google Calendar (por medio de un script de Google del correo de Territorio) ----------
+function horaYMinutos(texto) {
+  const h = horaDelDia(texto);
+  if (h === null) return null;
+  const m = normalizar(texto).match(/\d{1,2}[ :.h](\d{2})/);
+  return { h, m: m ? Math.min(59, Number(m[1])) : 0 };
+}
+
+async function crearEventoCalendario(pedido) {
+  const { privado } = await catalogo();
+  if (!privado.calendarioUrl) return 'calendario sin configurar';
+  const hm = horaYMinutos(pedido.hora || '');
+  const dos = (n) => String(n).padStart(2, '0');
+  const inicio = hm ? `${pedido.fecha}T${dos(hm.h)}:${dos(hm.m)}:00-05:00` : `${pedido.fecha}T00:00:00-05:00`;
+  const fin = hm ? `${pedido.fecha}T${dos(Math.min(23, hm.h + 1))}:${dos(hm.m)}:00-05:00` : inicio;
+  const items = pedido.carrito || [];
+  const titulo = `🍰 ${pedido.codigo} · ${items.length ? nombreItem(items[0]) : 'Pedido'}${items.length > 1 ? ` + ${items.length - 1} más` : ''}`;
+  const descripcion = [
+    `Pedido ${pedido.codigo} (pago verificado)`,
+    '',
+    'Productos:',
+    ...items.map(i => `• ${nombreItem(i)}`),
+    pedido.mensajeTarjeta ? `\nTarjeta: ${pedido.mensajeTarjeta}` : '',
+    pedido.notas ? `Notas: ${pedido.notas}` : '',
+    '',
+    `Hora acordada: ${pedido.hora}`,
+    `Pide: ${pedido.nombre} (+${pedido.telefono})`,
+    `Recibe: ${pedido.recibeNombre} — ${pedido.recibeTelefono}`,
+    `Dirección: ${pedido.direccion}${pedido.sectorNombre ? ' (' + pedido.sectorNombre + ')' : ''}`,
+    `Total: ${formatCOP(pedido.total)}${pedido.domicilioPorConfirmar ? ' + domicilio por confirmar' : ''}`
+  ].filter(x => x !== '').join('\n');
+  const recordatorios = String(privado.recordatorios || '1440,120').split(',').map(x => Number(x.trim())).filter(x => x > 0 && x <= 40320).slice(0, 5);
+  try {
+    const res = await fetch(privado.calendarioUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        titulo, descripcion, inicio, fin, todoElDia: !hm,
+        ubicacion: `${pedido.direccion}, Bucaramanga`,
+        invitados: String(privado.calendarioCorreos || '').split(/[,;\s]+/).filter(x => x.includes('@')).join(','),
+        recordatoriosMinutos: recordatorios.length ? recordatorios : [1440, 120]
+      }),
+      redirect: 'follow'
+    });
+    const txt = await res.text();
+    if (!res.ok || !/"ok"\s*:\s*true/.test(txt)) { console.error('Calendario respondió', res.status, txt.slice(0, 300)); return 'error al crear el evento'; }
+    return 'evento creado';
+  } catch (e) {
+    console.error('Error con el calendario:', e);
+    return 'error al crear el evento';
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -655,7 +739,8 @@ async function leerComprobante(mediaId) {
 // Mensajes de la dueña (aprobar pedidos)
 // ---------------------------------------------------------------------------
 
-async function manejarAdmin(texto) {
+async function manejarAdmin(texto, desde) {
+  const responder = (msg) => enviarTexto(desde, msg);
   const t = normalizar(texto);
   const m = t.match(/^(aprobar|aprobado|aprobada)\s*(ts\s*\d{4})?/);
   if (!m) return false;
@@ -663,17 +748,19 @@ async function manejarAdmin(texto) {
   if (!codigo) codigo = await leer('wa:ultimo_por_verificar');
   const pedido = codigo ? await leer(`wa:pedido:${codigo}`) : null;
   if (!pedido) {
-    await avisarAdmin('⚠️ No encontré ese pedido. Escribe por ejemplo: *Aprobar TS-1234*');
+    await responder('⚠️ No encontré ese pedido. Escribe por ejemplo: *Aprobar TS-1234*');
     return true;
   }
   if (pedido.estado === 'APROBADO') {
-    await avisarAdmin(`El pedido ${pedido.codigo} ya estaba aprobado ✅`);
+    await responder(`El pedido ${pedido.codigo} ya estaba aprobado ✅`);
     return true;
   }
   pedido.estado = 'APROBADO';
   await guardarPedido(pedido);
   await enviarTexto(pedido.telefono, `🎉 ¡Pago verificado!\n\nTu pedido *${pedido.codigo}* quedó *agendado* para el *${fechaBonita(pedido.fecha)}*, ${pedido.hora}.\n\n¡Gracias por elegir Territorio Saludable! 🌱✨`);
-  await avisarAdmin(`✅ Pedido ${pedido.codigo} aprobado y notificado al cliente.`);
+  const produccion = await avisarProduccion(pedido);
+  const calendario = await crearEventoCalendario(pedido);
+  await responder(`✅ Pedido ${pedido.codigo} aprobado.\n\n👤 Cliente: notificado\n🧁 Producción: ${produccion}\n📅 Calendario: ${calendario}`);
   const s = await leer(claveSesion(pedido.telefono));
   if (s && s.codigo === pedido.codigo) await borrar(claveSesion(pedido.telefono));
   return true;
@@ -689,7 +776,7 @@ async function manejarMensaje(msg) {
   const texto = (msg.text?.body || msg.interactive?.button_reply?.title || '').trim();
   const t = normalizar(texto);
 
-  if (ADMIN_PHONE && tel === ADMIN_PHONE && tipo === 'text' && await manejarAdmin(texto)) return;
+  if (tipo === 'text' && /^\s*aprob/i.test(texto) && (await aprobadores()).includes(tel) && await manejarAdmin(texto, tel)) return;
 
   const s = (await leer(claveSesion(tel))) || sesionNueva();
   const guardarSesion = () => guardar(claveSesion(tel), s);

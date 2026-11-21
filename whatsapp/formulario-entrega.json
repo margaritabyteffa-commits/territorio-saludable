@@ -1,0 +1,131 @@
+{
+  "version": "6.0",
+  "screens": [
+    {
+      "id": "DATOS_ENTREGA",
+      "title": "Datos de entrega",
+      "terminal": true,
+      "success": true,
+      "data": {
+        "sectores": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "title": { "type": "string" }
+            }
+          },
+          "__example__": [
+            { "id": "z1", "title": "Cabecera / Sotomayor / Prado" },
+            { "id": "otro", "title": "Otro (te confirmamos)" }
+          ]
+        },
+        "horas": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "title": { "type": "string" }
+            }
+          },
+          "__example__": [
+            { "id": "h1", "title": "8:00 a 10:00 AM" },
+            { "id": "h2", "title": "10:00 AM a 12:00 M" }
+          ]
+        },
+        "fecha_minima": {
+          "type": "string",
+          "__example__": "2026-11-21"
+        },
+        "aviso_fecha": {
+          "type": "string",
+          "__example__": "Este pedido se prepara con 1 día de anticipación."
+        }
+      },
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          {
+            "type": "TextInput",
+            "name": "nombre",
+            "label": "Tu nombre completo",
+            "input-type": "text",
+            "required": true
+          },
+          {
+            "type": "TextInput",
+            "name": "direccion",
+            "label": "Dirección",
+            "input-type": "text",
+            "required": true,
+            "helper-text": "Ej: Cra 27 #45-12, Apto 301"
+          },
+          {
+            "type": "Dropdown",
+            "name": "sector",
+            "label": "Barrio o sector",
+            "required": true,
+            "data-source": "${data.sectores}"
+          },
+          {
+            "type": "TextInput",
+            "name": "recibe_nombre",
+            "label": "Quién recibe",
+            "input-type": "text",
+            "required": true
+          },
+          {
+            "type": "TextInput",
+            "name": "recibe_telefono",
+            "label": "Celular quien recibe",
+            "input-type": "phone",
+            "required": true
+          },
+          {
+            "type": "TextBody",
+            "text": "${data.aviso_fecha}"
+          },
+          {
+            "type": "DatePicker",
+            "name": "fecha",
+            "label": "Fecha de entrega",
+            "required": true,
+            "min-date": "${data.fecha_minima}"
+          },
+          {
+            "type": "Dropdown",
+            "name": "hora",
+            "label": "Horario de entrega",
+            "required": true,
+            "data-source": "${data.horas}"
+          },
+          {
+            "type": "TextArea",
+            "name": "notas",
+            "label": "Notas (opcional)",
+            "required": false
+          },
+          {
+            "type": "Footer",
+            "label": "Enviar datos",
+            "on-click-action": {
+              "name": "complete",
+              "payload": {
+                "nombre": "${form.nombre}",
+                "direccion": "${form.direccion}",
+                "sector": "${form.sector}",
+                "recibe_nombre": "${form.recibe_nombre}",
+                "recibe_telefono": "${form.recibe_telefono}",
+                "fecha": "${form.fecha}",
+                "hora": "${form.hora}",
+                "notas": "${form.notas}"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
