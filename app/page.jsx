@@ -1496,7 +1496,7 @@ export default function Page() {
 
       {/* MODAL EDITAR PRODUCTO */}
       {editingProduct !== null && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-start justify-center p-4 bg-black/60 backdrop-blur-xs overflow-y-auto">
           <div className="bg-white rounded-3xl border border-stone-200 shadow-2xl max-w-md w-full p-6 space-y-4 my-8">
             <div className="flex items-center justify-between pb-2 border-b border-stone-100">
               <h3 className="font-bold text-base text-stone-900">{editingProduct.id && editingProduct.id !== 'NEW_PRODUCT' ? 'Editar Producto' : 'Nuevo Producto'}</h3>
@@ -1635,7 +1635,7 @@ export default function Page() {
 
       {/* MODAL ORDEN MANUAL */}
       {newOrderModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-start justify-center p-4 bg-black/60 backdrop-blur-xs overflow-y-auto">
           <div className="bg-white rounded-3xl border border-stone-200 shadow-2xl max-w-md w-full p-6 space-y-4 my-8">
             <div className="flex items-center justify-between pb-2 border-b border-stone-100">
               <h3 className="font-bold text-base text-stone-900">+ Registrar Orden Manual</h3>

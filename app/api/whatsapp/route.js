@@ -2,7 +2,7 @@
 //
 // Flujo:
 //   Menú → producto (escrito o desde el botón "Pedir" de la página) → porciones
-//   → ¿agregar otro? → datos de entrega (formulario de WhatsApp o preguntas)
+//   → ¿agregar otro? → datos de entrega (todos en un solo mensaje)
 //   → resumen → confirmar → datos de pago → comprobante → la dueña aprueba.
 //
 // Productos, precios, zonas de domicilio y datos de pago se leen de la base de
@@ -16,7 +16,6 @@ export const maxDuration = 30;
 
 const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN;
 const PHONE_NUMBER_ID = process.env.WHATSAPP_PHONE_ID;
-const FLOW_ID = process.env.WHATSAPP_FLOW_ID || '';
 const ADMIN_PHONE = (process.env.ADMIN_WHATSAPP_PHONE || '').replace(/\D/g, '');
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
@@ -53,14 +52,22 @@ const SECCIONES = {
   '5': { emoji: '🛒', titulo: '¡Bienvenid@ a nuestro Mercadito Saludable!', ancla: 'mercadito' }
 };
 
-const HORARIOS_ENTREGA = [
-  { id: 'h1', title: '8:00 a 10:00 AM' },
-  { id: 'h2', title: '10:00 AM a 12:00 M' },
-  { id: 'h3', title: '12:00 M a 2:00 PM' },
-  { id: 'h4', title: '2:00 a 4:00 PM' },
-  { id: 'h5', title: '4:00 a 6:00 PM' }
-];
-const HORARIOS_DOMINGO = ['h1', 'h2', 'h3']; // domingos y festivos solo hasta las 2 PM
+const PLANTILLA_DATOS = `Nombre:
+Dirección y barrio:
+Quién recibe:
+Celular de quien recibe:
+Fecha de entrega:
+Hora de entrega:
+Notas (opcional):`;
+
+const NOMBRES_CAMPOS = {
+  nombre: 'Nombre',
+  direccion: 'Dirección y barrio',
+  recibeNombre: 'Quién recibe',
+  recibeTelefono: 'Celular de quien recibe',
+  fecha: 'Fecha de entrega',
+  hora: 'Hora de entrega'
+};
 
 const DATOS_PAGO_POR_DEFECTO = '💳 Nequi / Daviplata: 3000559196';
 
@@ -143,6 +150,12 @@ async function catalogo() {
   return cache;
 }
 
+function palabrasClave(texto) {
+  return normalizar(texto).split(' ').filter(w => w.length > 2 && !PALABRAS_VACIAS.has(w) && !/^\d+$/.test(w));
+}
+
+const coincide = (a, b) => a === b || (a.length > 3 && b.startsWith(a)) || (b.length > 3 && a.startsWith(b));
+
 function candidatosProducto(texto, productos) {
   const t = normalizar(texto);
   const disponibles = productos.filter(p => p.available !== false);
@@ -151,21 +164,28 @@ function candidatosProducto(texto, productos) {
     .sort((a, b) => normalizar(b.name).length - normalizar(a.name).length);
   if (exactos.length) return [exactos[0]];
 
+  const buscadas = palabrasClave(texto);
+  if (!buscadas.length) return [];
+  const nombres = disponibles.map(p => palabrasClave(p.name));
+  // Las palabras que salen en muchos productos ("pan", "torta") pesan menos que las raras ("ajo").
+  const peso = Object.fromEntries(buscadas.map(w => [w, 1 / Math.max(1, nombres.filter(n => n.some(x => coincide(w, x))).length)]));
   const puntuados = [];
-  for (const p of disponibles) {
-    const palabras = normalizar(p.name).split(' ').filter(w => w.length > 2 && !PALABRAS_VACIAS.has(w));
-    if (!palabras.length) continue;
-    const coinciden = palabras.filter(w => new RegExp(`\\b${w}`).test(t)).length;
-    if (coinciden > 0) puntuados.push({ p, puntaje: coinciden / palabras.length + coinciden * 0.01 });
-  }
-  puntuados.sort((a, b) => b.puntaje - a.puntaje);
+  disponibles.forEach((p, i) => {
+    const delNombre = nombres[i];
+    if (!delNombre.length) return;
+    const halladas = buscadas.filter(w => delNombre.some(n => coincide(w, n)));
+    if (!halladas.length) return;
+    const cubiertas = delNombre.filter(n => buscadas.some(w => coincide(w, n))).length;
+    puntuados.push({ p, puntaje: halladas.reduce((a, w) => a + peso[w], 0), fraccion: halladas.length / buscadas.length, ajuste: cubiertas / delNombre.length });
+  });
   if (!puntuados.length) return [];
-  const mejor = puntuados[0].puntaje;
-  if (mejor >= 0.99) {
-    const empatados = puntuados.filter(x => x.puntaje >= mejor - 0.001);
-    return empatados.slice(0, 5).map(x => x.p);
-  }
-  return puntuados.filter(x => x.puntaje >= 0.5).slice(0, 5).map(x => x.p);
+  const maximo = Math.max(...puntuados.map(x => x.puntaje));
+  const mejores = puntuados
+    .filter(x => x.puntaje >= maximo - 1e-9 && x.fraccion >= 0.5)
+    .sort((a, b) => b.ajuste - a.ajuste);
+  if (!mejores.length) return [];
+  if (mejores.length > 1 && mejores[0].ajuste === 1 && mejores[1].ajuste < 1) return [mejores[0].p];
+  return mejores.slice(0, 5).map(x => x.p);
 }
 
 function buscarTamano(texto, producto) {
@@ -287,59 +307,193 @@ async function procesarProducto(tel, s, producto, textoTamano) {
 const necesitaAnticipacion = (s) => s.carrito.some(i => i.anticipacion);
 
 async function pedirDatosEntrega(tel, s) {
-  const { zonas } = await catalogo();
-  const anticipacion = necesitaAnticipacion(s);
   s.paso = 'DATOS';
   s.datos = {};
+  const minimo = aISO(hoyColombia(necesitaAnticipacion(s) ? 1 : 0));
+  const aviso = necesitaAnticipacion(s)
+    ? `\n⏰ Tu pedido se prepara con *1 día de anticipación* (entrega desde el ${fechaBonita(minimo)}).`
+    : '';
+  await enviarTexto(tel, `¡Perfecto! 📝 Para programar la entrega, *copia este mensaje, complétalo y envíalo* en un solo mensaje:${aviso}\n\n${PLANTILLA_DATOS}`);
+}
 
-  if (FLOW_ID) {
-    const sectores = (zonas.length ? zonas : [{ id: 'otro', name: 'Otro sector' }])
-      .map(z => ({ id: String(z.id || z.name), title: String(z.name).slice(0, 30) }));
-    sectores.push({ id: 'otro', title: 'Otro (te confirmamos)' });
-    const ok = await enviar(tel, {
-      type: 'interactive',
-      interactive: {
-        type: 'flow',
-        body: { text: `¡Perfecto! 📝 Toca el botón para completar los datos de entrega.${anticipacion ? '\n\n⏰ Tu pedido se prepara con *1 día de anticipación*.' : ''}` },
-        action: {
-          name: 'flow',
-          parameters: {
-            flow_message_version: '3',
-            flow_token: `pedido-${tel}-${Date.now()}`,
-            flow_id: FLOW_ID,
-            flow_cta: 'Completar datos',
-            flow_action: 'navigate',
-            flow_action_payload: {
-              screen: 'DATOS_ENTREGA',
-              data: {
-                sectores,
-                horas: HORARIOS_ENTREGA,
-                fecha_minima: aISO(hoyColombia(anticipacion ? 1 : 0)),
-                aviso_fecha: anticipacion
-                  ? 'Este pedido se prepara con 1 día de anticipación.'
-                  : 'Domingos y festivos entregamos hasta las 2:00 PM.'
-              }
-            }
-          }
-        }
-      }
+// ---------- Lectura de los datos de entrega ----------
+
+function campoDeEtiqueta(etiqueta) {
+  const e = normalizar(etiqueta);
+  if (!e) return null;
+  if (/recibe/.test(e) && /(celular|telefono|cel|numero|whatsapp)/.test(e)) return 'recibeTelefono';
+  if (/recibe/.test(e)) return 'recibeNombre';
+  if (/(celular|telefono|whatsapp)/.test(e)) return 'recibeTelefono';
+  if (/^(tu )?nombre/.test(e)) return 'nombre';
+  if (/(direccion|barrio)/.test(e)) return 'direccion';
+  if (/fecha|dia de entrega/.test(e)) return 'fecha';
+  if (/hora/.test(e)) return 'hora';
+  if (/nota/.test(e)) return 'notas';
+  return null;
+}
+
+// Lee las líneas "Etiqueta: valor" de la plantilla.
+function leerPlantilla(texto) {
+  const datos = {};
+  for (const linea of texto.split('\n')) {
+    const i = linea.indexOf(':');
+    if (i === -1) continue;
+    const campo = campoDeEtiqueta(linea.slice(0, i).replace(/^[\s\d.)*_-]+/, ''));
+    const valor = linea.slice(i + 1).replace(/[*_]/g, '').trim();
+    if (!campo || !valor) continue;
+    datos[campo] = campo === 'direccion' && datos.direccion ? `${datos.direccion}, ${valor}` : valor;
+  }
+  return datos;
+}
+
+async function preguntarGemini(prompt) {
+  if (!GEMINI_API_KEY) return null;
+  try {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': GEMINI_API_KEY },
+      body: JSON.stringify({
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        generationConfig: { responseMimeType: 'application/json', temperature: 0 }
+      })
     });
-    if (ok) return;
-    console.error('No se pudo enviar el formulario; se usan preguntas.');
+    const data = await res.json();
+    const texto = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    return JSON.parse(texto.replace(/```json|```/g, '').trim());
+  } catch (e) {
+    console.error('Gemini no respondió:', e);
+    return null;
+  }
+}
+
+// Si el cliente escribió todo de corrido (sin la plantilla), la IA separa los datos.
+async function leerTextoLibre(texto) {
+  const hoy = aISO(hoyColombia(0));
+  const r = await preguntarGemini(`Hoy es ${hoy} (${fechaBonita(hoy)}), en Bucaramanga, Colombia.
+Un cliente de una pastelería envió sus datos de entrega:
+«${texto}»
+Extrae los datos y responde SOLO este JSON (usa null si un dato no aparece; no inventes nada):
+{"nombre": string|null, "direccion": string|null (incluye el barrio), "recibeNombre": string|null, "recibeTelefono": string|null, "fecha": "AAAA-MM-DD"|null, "hora": string|null (tal como la escribió), "notas": string|null}`);
+  if (!r || typeof r !== 'object') return {};
+  const datos = {};
+  for (const k of ['nombre', 'direccion', 'recibeNombre', 'recibeTelefono', 'fecha', 'hora', 'notas']) {
+    if (r[k] && String(r[k]).trim() && String(r[k]).toLowerCase() !== 'null') datos[k] = String(r[k]).trim();
+  }
+  return datos;
+}
+
+function limpiarCelular(texto) {
+  const m = String(texto || '').match(/(\+?57[\s-]*)?(3\d{2})[\s.-]?(\d{3})[\s.-]?(\d{4})/);
+  return m ? `${m[2]}${m[3]}${m[4]}` : null;
+}
+
+// Hora escrita libre ("3 pm", "a las 10", "mediodía") → hora del día 0-23, o null.
+function horaDelDia(texto) {
+  const t = normalizar(texto);
+  if (/medio ?dia/.test(t)) return 12;
+  const m = t.match(/(\d{1,2})(?:[ :.h](\d{2}))?\s*(am|a m|pm|p m|de la manana|de la tarde|de la noche|m)?\b/);
+  if (!m) return null;
+  let h = Number(m[1]);
+  const sufijo = m[3] || '';
+  if (/(pm|p m|tarde|noche)/.test(sufijo) && h < 12) h += 12;
+  if (!sufijo && h >= 1 && h <= 6) h += 12; // "a las 3" = 3 de la tarde
+  return h <= 23 ? h : null;
+}
+
+// Busca la zona de domicilio según el barrio escrito en la dirección.
+async function zonaDesdeDireccion(direccion, zonas) {
+  const t = normalizar(direccion);
+  for (const z of zonas) {
+    const claves = [...String(z.name || '').split('/'), ...String(z.barrios || '').split(',')]
+      .map(normalizar).filter(c => c.length > 2);
+    if (claves.some(c => new RegExp(`\\b${c}\\b`).test(t))) return z;
+  }
+  if (!zonas.length) return null;
+  const lista = zonas.map((z, i) => `${i + 1}. ${z.name}${z.barrios ? ' (barrios: ' + z.barrios + ')' : ''}`).join('\n');
+  const r = await preguntarGemini(`Zonas de domicilio de una pastelería en Bucaramanga, Colombia:
+${lista}
+Dirección del cliente: «${direccion}»
+¿En qué zona queda? Responde SOLO este JSON: {"zona": numero_de_la_zona | null}. Si no estás seguro, responde null.`);
+  const idx = Number(r?.zona) - 1;
+  return zonas[idx] || null;
+}
+
+const PARECE_HORA = /(\d{1,2}\s*(:\s*\d{2})?\s*(am|pm|a\.?\s?m|p\.?\s?m|de la (manana|tarde|noche)|m\b|h\b))|a las \d|medio ?dia|\b\d{1,2}:\d{2}\b/;
+
+// Reconoce un celular, una fecha o una hora escritos solos (sin "Etiqueta:").
+function datosSueltos(texto, faltaban) {
+  const datos = {};
+  const t = normalizar(texto);
+  if (faltaban.includes('recibeTelefono')) {
+    const cel = limpiarCelular(texto);
+    if (cel) datos.recibeTelefono = cel;
+  }
+  if (faltaban.includes('fecha')) {
+    const f = interpretarFecha(texto.replace(/(\+?57)?\s*3\d{2}[\s.-]?\d{3}[\s.-]?\d{4}/, ''));
+    if (f) datos.fecha = f;
+  }
+  if (faltaban.includes('hora') && (PARECE_HORA.test(t) || (faltaban.length === 1 && horaDelDia(texto) !== null))) {
+    datos.hora = texto.trim();
+  }
+  return datos;
+}
+
+// Junta lo que el cliente ya mandó con lo nuevo y revisa qué falta.
+async function procesarDatos(tel, s, texto) {
+  const faltaban = Object.keys(NOMBRES_CAMPOS).filter(k => !s.datos[k]);
+  let nuevos = leerPlantilla(texto);
+  if (Object.keys(nuevos).length === 0) nuevos = datosSueltos(texto, faltaban);
+  if (Object.keys(nuevos).length === 0 && faltaban.length === 1 && !['hora', 'fecha', 'recibeTelefono'].includes(faltaban[0])) {
+    nuevos = { [faltaban[0]]: texto.trim() };
+  }
+  if (Object.keys(nuevos).length === 0) nuevos = await leerTextoLibre(texto);
+  if (Object.keys(nuevos).length === 0) {
+    if (faltaban.length < Object.keys(NOMBRES_CAMPOS).length) {
+      const lista = faltaban.map(k => `${NOMBRES_CAMPOS[k]}:`).join('\n');
+      const ejemplo = faltaban.includes('hora') ? '\n\n_Ejemplo de hora: 3 pm o 10:30 am_' : '';
+      return enviarTexto(tel, `No logré entenderlo. 🙈 Me falta${faltaban.length > 1 ? 'n estos datos' : ' este dato'}:\n\n${lista}${ejemplo}`);
+    }
+    return enviarTexto(tel, `No logré leer los datos. 🙈 Copia este mensaje, complétalo y envíalo:\n\n${PLANTILLA_DATOS}`);
   }
 
-  // Sin formulario: preguntas cortas
-  s.paso = 'PIDE_NOMBRE';
-  await enviarTexto(tel, '¡Perfecto! 📝 Vamos con los datos de entrega.\n\n1. ¿Cuál es tu *nombre completo*?');
-}
+  for (const [k, v] of Object.entries(nuevos)) s.datos[k] = v;
 
-async function preguntarSector(tel, zonas) {
-  const lista = zonas.map((z, i) => `${i + 1}. ${z.name}`).join('\n');
-  await enviarTexto(tel, `3. ¿En qué *sector* queda? Responde con el número:\n\n${lista}\n${zonas.length + 1}. Otro (te confirmamos el valor)`);
-}
+  const avisos = [];
+  if (s.datos.recibeTelefono) {
+    const cel = limpiarCelular(s.datos.recibeTelefono);
+    if (cel) s.datos.recibeTelefono = cel;
+    else { avisos.push('📱 El celular debe tener 10 dígitos (ej: 3001234567).'); delete s.datos.recibeTelefono; }
+  }
+  if (s.datos.fecha && !/^\d{4}-\d{2}-\d{2}$/.test(s.datos.fecha)) {
+    const iso = interpretarFecha(s.datos.fecha) || (await leerTextoLibre(`Fecha de entrega: ${s.datos.fecha}`)).fecha;
+    if (iso && /^\d{4}-\d{2}-\d{2}$/.test(iso)) s.datos.fecha = iso;
+    else { avisos.push('📅 No entendí la fecha. Escríbela así: *28/11* o *28 de noviembre*.'); delete s.datos.fecha; }
+  }
+  if (s.datos.fecha) {
+    const error = validarFecha(s, s.datos.fecha);
+    if (error) { avisos.push(error); delete s.datos.fecha; }
+  }
+  if (s.datos.hora && horaDelDia(s.datos.hora) === null && !/(manana|tarde|noche|medio ?dia|temprano)/.test(normalizar(s.datos.hora))) {
+    avisos.push('⏰ No entendí la hora. Escríbela así: *3 pm* o *10:30 am*.');
+    delete s.datos.hora;
+  }
+  if (s.datos.fecha && s.datos.hora && esDomingo(s.datos.fecha)) {
+    const h = horaDelDia(s.datos.hora);
+    if (h !== null && h >= 14) { avisos.push('⏰ Los domingos entregamos solo hasta las *2:00 PM*. Escribe otra hora.'); delete s.datos.hora; }
+  }
 
-function horariosTexto() {
-  return HORARIOS_ENTREGA.map((h, i) => `${i + 1}. ${h.title}`).join('\n');
+  const faltan = Object.keys(NOMBRES_CAMPOS).filter(k => !s.datos[k]);
+  if (faltan.length) {
+    const varios = faltan.length > 1;
+    const lista = faltan.map(k => `${NOMBRES_CAMPOS[k]}:`).join('\n');
+    const encabezado = avisos.length ? avisos.join('\n') + '\n\n' : 'Gracias 🙌 ';
+    return enviarTexto(tel, `${encabezado}Solo me falta${varios ? 'n estos datos' : ' este dato'}. Complétalo${varios ? 's' : ''} y envíalo${varios ? 's' : ''}:\n\n${lista}`);
+  }
+
+  const { zonas } = await catalogo();
+  const zona = await zonaDesdeDireccion(s.datos.direccion, zonas);
+  s.datos.sectorId = zona ? String(zona.id || zona.name) : 'otro';
+  return mostrarResumen(tel, s);
 }
 
 function validarFecha(s, iso) {
@@ -347,7 +501,7 @@ function validarFecha(s, iso) {
   if (iso < minimo) {
     return necesitaAnticipacion(s)
       ? `⏰ Este pedido se prepara con *1 día de anticipación*. La fecha más cercana es el *${fechaBonita(minimo)}*.`
-      : 'Esa fecha ya pasó. 🙈 Escribe una fecha de hoy en adelante.';
+      : '📅 Esa fecha ya pasó. Escribe una fecha de hoy en adelante.';
   }
   return null;
 }
@@ -361,7 +515,7 @@ async function mostrarResumen(tel, s) {
   const domicilioPorConfirmar = !zona || !domicilio;
   const subtotal = s.carrito.reduce((a, i) => a + i.precio, 0);
   const precioPendiente = s.carrito.some(i => !i.precio);
-  s.datos.sectorNombre = zona ? zona.name : (s.datos.sectorNombre || 'Otro sector');
+  s.datos.sectorNombre = zona ? zona.name : null;
   s.datos.domicilio = domicilio;
   s.datos.domicilioPorConfirmar = domicilioPorConfirmar;
   s.datos.subtotal = subtotal;
@@ -381,13 +535,13 @@ async function mostrarResumen(tel, s) {
 ${productos}
 
 👤 *Pide:* ${s.datos.nombre}
-📍 *Dirección:* ${s.datos.direccion} (${s.datos.sectorNombre})
+📍 *Dirección:* ${s.datos.direccion}${s.datos.sectorNombre ? ` _(zona ${s.datos.sectorNombre})_` : ''}
 📦 *Recibe:* ${s.datos.recibeNombre} — ${s.datos.recibeTelefono}
 📅 *Entrega:* ${fechaBonita(s.datos.fecha)}, ${s.datos.hora}${notas}
 
 💰 *Subtotal:* ${formatCOP(subtotal)}
 🛵 *Domicilio:* ${lineaDomicilio}
-💳 *TOTAL:* ${total}
+💳 *TOTAL:* ${total}${domicilioPorConfirmar ? '\n\n_El valor del domicilio te lo confirmamos en breve._' : ''}
 
 ¿Todo está correcto?`, [
     { id: 'confirmar', title: 'Sí, confirmar' },
@@ -529,48 +683,6 @@ async function manejarMensaje(msg) {
     return enviarTexto(tel, 'Recibí tu imagen 📷. Si quieres hacer un pedido, escribe *0* para ver el menú.');
   }
 
-  // --- Respuesta del formulario de WhatsApp ---
-  if (tipo === 'interactive' && msg.interactive?.type === 'nfm_reply') {
-    if (s.paso !== 'DATOS') return;
-    let r = {};
-    try { r = JSON.parse(msg.interactive.nfm_reply.response_json || '{}'); } catch (e) { /* vacío */ }
-    let fecha = String(r.fecha || '');
-    if (/^\d{10,}$/.test(fecha)) fecha = aISO(new Date(new Date(Number(fecha)).toLocaleString('en-US', { timeZone: 'America/Bogota' })));
-    const horario = HORARIOS_ENTREGA.find(h => h.id === r.hora);
-    const zona = zonas.find(z => String(z.id || z.name) === r.sector);
-    s.datos = {
-      nombre: r.nombre, direccion: r.direccion,
-      sectorId: r.sector, sectorNombre: zona ? zona.name : 'Otro sector',
-      recibeNombre: r.recibe_nombre, recibeTelefono: r.recibe_telefono,
-      fecha, hora: horario ? horario.title : (r.hora || ''), notas: r.notas || ''
-    };
-    const error = fecha ? validarFecha(s, fecha) : 'No recibí la fecha.';
-    if (error) {
-      await enviarTexto(tel, error + '\n\nTe envío de nuevo el formulario. 👇');
-      await pedirDatosEntrega(tel, s);
-      return guardarSesion();
-    }
-    if (esDomingo(fecha) && !HORARIOS_DOMINGO.includes(r.hora)) {
-      await enviarTexto(tel, 'Los domingos entregamos solo hasta las *2:00 PM*. 🙏 Te envío de nuevo el formulario para elegir otro horario.');
-      await pedirDatosEntrega(tel, s);
-      return guardarSesion();
-    }
-    await mostrarResumen(tel, s);
-    return guardarSesion();
-  }
-
-  // --- Si saluda a mitad de los datos, repetimos la pregunta en vez de tomar "hola" como respuesta ---
-  const PREGUNTAS = {
-    PIDE_NOMBRE: '1. ¿Cuál es tu *nombre completo*?',
-    PIDE_DIRECCION: '2. ¿Cuál es la *dirección de entrega*? (calle/carrera, número, apto o casa)',
-    PIDE_RECIBE: '4. ¿*Quién recibe* el pedido? Escribe su *nombre y celular*.',
-    PIDE_FECHA: '5. ¿Para qué *fecha* lo quieres? _Ejemplo: mañana, 28/11 o 28 de noviembre_',
-    PIDE_HORA: `6. ¿En qué *horario*? Responde con el número:\n\n${horariosTexto()}`
-  };
-  if (PREGUNTAS[s.paso] && /^(hola+|holi|buen[oa]s?( dias| tardes| noches)?|buenas|hey|ola)$/.test(t)) {
-    return enviarTexto(tel, `¡Hola! 👋 Sigamos con tu pedido:\n\n${PREGUNTAS[s.paso]}\n\n_Escribe *cancelar* si quieres empezar de nuevo._`);
-  }
-
   // --- Paso a paso ---
   switch (s.paso) {
     case 'MENU': {
@@ -638,67 +750,11 @@ async function manejarMensaje(msg) {
     }
 
     case 'DATOS':
-      // Esperando el formulario. Si escribe en vez de llenarlo, se lo reenviamos.
-      if (t === 'datos') { await pedirDatosEntrega(tel, s); return guardarSesion(); }
-      return enviarTexto(tel, 'Para continuar toca el botón *Completar datos* del mensaje anterior. 👆\n\n_Si no lo ves, escribe *datos* y te lo envío de nuevo._');
-
-    case 'PIDE_NOMBRE':
-      s.datos.nombre = texto;
-      s.paso = 'PIDE_DIRECCION';
-      await guardarSesion();
-      return enviarTexto(tel, '2. ¿Cuál es la *dirección de entrega*? (calle/carrera, número, apto o casa)');
-
-    case 'PIDE_DIRECCION':
-      s.datos.direccion = texto;
-      s.paso = 'PIDE_SECTOR';
-      await guardarSesion();
-      return preguntarSector(tel, zonas);
-
-    case 'PIDE_SECTOR': {
-      const idx = parseInt(t, 10) - 1;
-      if (!(idx >= 0 && idx <= zonas.length)) return preguntarSector(tel, zonas);
-      const zona = zonas[idx];
-      s.datos.sectorId = zona ? String(zona.id || zona.name) : 'otro';
-      s.datos.sectorNombre = zona ? zona.name : 'Otro sector';
-      s.paso = 'PIDE_RECIBE';
-      await guardarSesion();
-      return enviarTexto(tel, '4. ¿*Quién recibe* el pedido? Escribe su *nombre y celular*.\n_Ejemplo: Ana Gómez 3001234567_');
-    }
-
-    case 'PIDE_RECIBE': {
-      const celular = (texto.match(/(\+?57\s*)?3\d{2}[\s.-]?\d{3}[\s.-]?\d{4}/) || [])[0];
-      if (!celular) return enviarTexto(tel, 'Me falta el *celular* de quien recibe. 📱 Escribe nombre y celular, por ejemplo: _Ana Gómez 3001234567_');
-      s.datos.recibeTelefono = celular.replace(/\D/g, '').replace(/^57(?=3\d{9}$)/, '');
-      s.datos.recibeNombre = texto.replace(celular, '').replace(/[,;:-]+/g, ' ').trim() || s.datos.nombre;
-      s.paso = 'PIDE_FECHA';
-      await guardarSesion();
-      const minimo = aISO(hoyColombia(necesitaAnticipacion(s) ? 1 : 0));
-      const aviso = necesitaAnticipacion(s) ? `\n⏰ Este pedido se prepara con *1 día de anticipación* (desde el ${fechaBonita(minimo)}).` : '';
-      return enviarTexto(tel, `5. ¿Para qué *fecha* lo quieres?${aviso}\n_Ejemplo: mañana, 28/11 o 28 de noviembre_`);
-    }
-
-    case 'PIDE_FECHA': {
-      const fecha = interpretarFecha(texto);
-      if (!fecha) return enviarTexto(tel, 'No entendí la fecha. 🙈 Escríbela así: *28/11* o *28 de noviembre*.');
-      const error = validarFecha(s, fecha);
-      if (error) return enviarTexto(tel, error);
-      s.datos.fecha = fecha;
-      s.paso = 'PIDE_HORA';
-      await guardarSesion();
-      const nota = esDomingo(fecha) ? '\n_Domingos y festivos: solo hasta las 2:00 PM._' : '';
-      return enviarTexto(tel, `6. ¿En qué *horario*? Responde con el número:${nota}\n\n${horariosTexto()}`);
-    }
-
-    case 'PIDE_HORA': {
-      const horario = HORARIOS_ENTREGA[parseInt(t, 10) - 1];
-      if (!horario) return enviarTexto(tel, `Responde con el número del horario:\n\n${horariosTexto()}`);
-      if (esDomingo(s.datos.fecha) && !HORARIOS_DOMINGO.includes(horario.id)) {
-        return enviarTexto(tel, 'Los domingos entregamos solo hasta las *2:00 PM*. Elige 1, 2 o 3.');
+      if (!t || /^(hola+|holi|buen[oa]s?( dias| tardes| noches)?|buenas|hey|ola)$/.test(t)) {
+        return enviarTexto(tel, `¡Hola! 👋 Sigamos con tu pedido. Copia este mensaje, complétalo y envíalo:\n\n${PLANTILLA_DATOS}\n\n_Escribe *cancelar* si quieres empezar de nuevo._`);
       }
-      s.datos.hora = horario.title;
-      await mostrarResumen(tel, s);
+      await procesarDatos(tel, s, texto);
       return guardarSesion();
-    }
 
     case 'CONFIRMAR': {
       const r = respuestaSiNo(msg, texto);
@@ -713,7 +769,7 @@ async function manejarMensaje(msg) {
         const datosPago = config.datosPago || DATOS_PAGO_POR_DEFECTO;
         const domicilio = s.datos.domicilioPorConfirmar ? '\n_(El valor del domicilio te lo confirmamos antes de pagar.)_' : '';
         await enviarTexto(tel, `🎉 *¡Pedido ${s.codigo} confirmado!*\n\nPara programarlo en cocina, realiza el pago de *${formatCOP(s.datos.total)}* a:\n\n${datosPago}${domicilio}\n\n📌 *Último paso:* envíanos por aquí la *foto o captura del comprobante*. 🧾`);
-        await avisarAdmin(`🆕 *Nuevo pedido ${s.codigo}* (esperando pago)\n👤 ${s.datos.nombre} (+${tel})\n🛒 ${s.carrito.map(nombreItem).join(', ')}\n📍 ${s.datos.direccion} (${s.datos.sectorNombre})\n📅 ${fechaBonita(s.datos.fecha)}, ${s.datos.hora}\n💰 ${formatCOP(s.datos.total)}${s.datos.domicilioPorConfirmar ? ' + domicilio por confirmar' : ''}`);
+        await avisarAdmin(`🆕 *Nuevo pedido ${s.codigo}* (esperando pago)\n👤 ${s.datos.nombre} (+${tel})\n🛒 ${s.carrito.map(nombreItem).join(', ')}\n📍 ${s.datos.direccion}${s.datos.sectorNombre ? ' (' + s.datos.sectorNombre + ')' : ''}\n📅 ${fechaBonita(s.datos.fecha)}, ${s.datos.hora}\n💰 ${formatCOP(s.datos.total)}${s.datos.domicilioPorConfirmar ? ' + domicilio por confirmar' : ''}`);
         return;
       }
       if (r === 'no') {
