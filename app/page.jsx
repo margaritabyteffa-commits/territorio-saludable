@@ -854,7 +854,7 @@ export default function Page() {
                         <h3 className="font-serif font-bold text-base text-[#241E19] group-hover:text-[#2D5A27] transition">{prod.name}</h3>
                         
                         {prod.description && (
-                          <p className="text-stone-500 text-xs leading-relaxed line-clamp-3">
+                          <p className="text-stone-500 text-xs leading-relaxed">
                             {prod.description}
                           </p>
                         )}
