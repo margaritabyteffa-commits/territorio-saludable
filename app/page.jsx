@@ -40,6 +40,9 @@ const WhatsAppIcon = ({ size = 16, className = '' }) => (
   </svg>
 );
 
+// Producto con tarjeta personalizada (marcado en el panel o mencionado en la descripción)
+const llevaTarjeta = (p) => (typeof p.tarjeta === 'boolean' ? p.tarjeta : /tarjeta/i.test(p.description || ''));
+
 const INITIAL_ZONES = [
   { id: 'z1', name: 'Cabecera / Sotomayor / Prado', price: 0 },
   { id: 'z2', name: 'Centro / San Francisco', price: 0 },
@@ -199,6 +202,7 @@ export default function Page() {
   const [formRequiresNotice, setFormRequiresNotice] = useState(true);
   const [formSizes, setFormSizes] = useState([]);
   const [formSabores, setFormSabores] = useState([]);
+  const [formTarjeta, setFormTarjeta] = useState(false);
   const [selectedSabores, setSelectedSabores] = useState({});
 
   const [newClientName, setNewClientName] = useState('');
@@ -510,6 +514,7 @@ export default function Page() {
       setFormRequiresNotice(prod.requiresNotice ?? true);
       setFormSizes(prod.sizes ? prod.sizes.map(s => ({ portions: s.portions, price: s.price })) : []);
       setFormSabores(Array.isArray(prod.sabores) ? prod.sabores.map(x => ({ ...x })) : []);
+      setFormTarjeta(llevaTarjeta(prod));
     } else {
       setEditingProduct({ id: 'NEW_PRODUCT' });
       setFormName('');
@@ -521,6 +526,7 @@ export default function Page() {
       setFormRequiresNotice(false);
       setFormSizes([]);
       setFormSabores([]);
+      setFormTarjeta(false);
     }
   };
 
@@ -530,10 +536,10 @@ export default function Page() {
     const sizes = formSizes.map(s => ({ portions: s.portions, price: Number(s.price), label: s.portions + ' (' + formatCOP(Number(s.price)) + ')' }));
     const sabores = formSabores.filter(x => x.nombre && x.nombre.trim()).map(x => ({ nombre: x.nombre.trim(), disponible: x.disponible !== false }));
     if (editingProduct && editingProduct.id && editingProduct.id !== 'NEW_PRODUCT') {
-      guardarProductosServidor(products.map(p => p.id === editingProduct.id ? { ...p, name: formName.trim(), category: formCategory, price: Number(formPrice), description: formDescription.trim(), imageUrl: ensureSlash(formImageUrl), available: formAvailable, requiresNotice: formRequiresNotice, sizes, sabores } : p));
+      guardarProductosServidor(products.map(p => p.id === editingProduct.id ? { ...p, name: formName.trim(), category: formCategory, price: Number(formPrice), description: formDescription.trim(), imageUrl: ensureSlash(formImageUrl), available: formAvailable, requiresNotice: formRequiresNotice, sizes, sabores, tarjeta: formTarjeta } : p));
       showToast('✓ Producto actualizado');
     } else {
-      guardarProductosServidor([{ id: 'prod-' + Date.now(), name: formName.trim(), category: formCategory, price: Number(formPrice), description: formDescription.trim(), imageUrl: ensureSlash(formImageUrl), available: formAvailable, requiresNotice: formRequiresNotice, features: ['Sin Azúcar', 'Sin Gluten'], sizes, sabores }, ...products]);
+      guardarProductosServidor([{ id: 'prod-' + Date.now(), name: formName.trim(), category: formCategory, price: Number(formPrice), description: formDescription.trim(), imageUrl: ensureSlash(formImageUrl), available: formAvailable, requiresNotice: formRequiresNotice, features: ['Sin Azúcar', 'Sin Gluten'], sizes, sabores, tarjeta: formTarjeta }, ...products]);
       showToast('✓ Nuevo producto agregado');
     }
     setEditingProduct(null);
@@ -853,6 +859,10 @@ export default function Page() {
                       <div className="p-4 space-y-2">
                         <h3 className="font-serif font-bold text-base text-[#241E19] group-hover:text-[#2D5A27] transition">{prod.name}</h3>
                         
+                        {llevaTarjeta(prod) && (
+                          <p className="text-[11px] font-semibold text-[#8C533C] bg-[#F6EEE6] rounded-lg px-2 py-1">💌 Incluye tarjeta: te pedimos el mensaje por WhatsApp</p>
+                        )}
+
                         {prod.description && (
                           <p className="text-stone-500 text-xs leading-relaxed">
                             {prod.description}
@@ -1700,6 +1710,7 @@ export default function Page() {
               <div className="flex items-center gap-4 pt-2">
                 <label className="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" checked={formAvailable} onChange={(e) => setFormAvailable(e.target.checked)} /><span>Disponible</span></label>
                 <label className="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" checked={formRequiresNotice} onChange={(e) => setFormRequiresNotice(e.target.checked)} /><span>1 Día Anticipación</span></label>
+                <label className="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" checked={formTarjeta} onChange={(e) => setFormTarjeta(e.target.checked)} /><span>💌 Lleva tarjeta</span></label>
               </div>
               <div className="pt-3 flex gap-2">
                 <button type="button" onClick={() => setEditingProduct(null)} className="flex-1 py-2.5 rounded-xl border border-stone-300 font-bold text-stone-600">Cancelar</button>

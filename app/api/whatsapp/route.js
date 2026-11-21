@@ -60,6 +60,21 @@ Fecha de entrega:
 Hora de entrega:
 Notas (opcional):`;
 
+// Productos que llevan tarjeta con mensaje (marcados en el panel, o que lo dicen en la descripción)
+const llevaTarjeta = (p) => (typeof p.tarjeta === 'boolean' ? p.tarjeta : /tarjeta/i.test(p.description || ''));
+const pedidoConTarjeta = (s) => s.carrito.some(i => i.tarjeta);
+
+function plantillaDatos(s) {
+  if (!pedidoConTarjeta(s)) return PLANTILLA_DATOS;
+  return PLANTILLA_DATOS.replace('Notas (opcional):', 'Mensaje para la tarjeta:\nNotas (opcional):');
+}
+
+function camposRequeridos(s) {
+  const campos = { ...NOMBRES_CAMPOS };
+  if (pedidoConTarjeta(s)) campos.mensajeTarjeta = 'Mensaje para la tarjeta';
+  return campos;
+}
+
 const NOMBRES_CAMPOS = {
   nombre: 'Nombre',
   direccion: 'Dirección y barrio',
@@ -214,6 +229,7 @@ function itemDesde(producto, tamano, sabor = null) {
     nombre: producto.name,
     porcion: tamano ? tamano.portions : null,
     sabor,
+    tarjeta: llevaTarjeta(producto),
     precio: Number(tamano ? tamano.price : producto.price) || 0,
     anticipacion: Boolean(producto.requiresNotice)
   };
@@ -354,7 +370,7 @@ async function pedirDatosEntrega(tel, s) {
   const aviso = necesitaAnticipacion(s)
     ? `\n⏰ Tu pedido se prepara con *1 día de anticipación* (entrega desde el ${fechaBonita(minimo)}).`
     : '';
-  await enviarTexto(tel, `¡Perfecto! 📝 Para programar la entrega, *copia este mensaje, complétalo y envíalo* en un solo mensaje:${aviso}\n\n${PLANTILLA_DATOS}`);
+  await enviarTexto(tel, `¡Perfecto! 📝 Para programar la entrega, *copia este mensaje, complétalo y envíalo* en un solo mensaje:${aviso}${pedidoConTarjeta(s) ? '\n💌 Incluye *tarjeta*: escribe el mensaje que quieres que lleve (o "sin mensaje").' : ''}\n\n${plantillaDatos(s)}`);
 }
 
 // ---------- Lectura de los datos de entrega ----------
@@ -369,6 +385,7 @@ function campoDeEtiqueta(etiqueta) {
   if (/(direccion|barrio)/.test(e)) return 'direccion';
   if (/fecha|dia de entrega/.test(e)) return 'fecha';
   if (/hora/.test(e)) return 'hora';
+  if (/(tarjeta|dedicatoria|mensaje)/.test(e)) return 'mensajeTarjeta';
   if (/nota/.test(e)) return 'notas';
   return null;
 }
@@ -414,10 +431,10 @@ async function leerTextoLibre(texto) {
 Un cliente de una pastelería envió sus datos de entrega:
 «${texto}»
 Extrae los datos y responde SOLO este JSON (usa null si un dato no aparece; no inventes nada):
-{"nombre": string|null, "direccion": string|null (incluye el barrio), "recibeNombre": string|null, "recibeTelefono": string|null, "fecha": "AAAA-MM-DD"|null, "hora": string|null (tal como la escribió), "notas": string|null}`);
+{"nombre": string|null, "direccion": string|null (incluye el barrio), "recibeNombre": string|null, "recibeTelefono": string|null, "fecha": "AAAA-MM-DD"|null, "hora": string|null (tal como la escribió), "notas": string|null, "mensajeTarjeta": string|null (mensaje o dedicatoria para la tarjeta, tal como lo escribió)}`);
   if (!r || typeof r !== 'object') return {};
   const datos = {};
-  for (const k of ['nombre', 'direccion', 'recibeNombre', 'recibeTelefono', 'fecha', 'hora', 'notas']) {
+  for (const k of ['nombre', 'direccion', 'recibeNombre', 'recibeTelefono', 'fecha', 'hora', 'notas', 'mensajeTarjeta']) {
     if (r[k] && String(r[k]).trim() && String(r[k]).toLowerCase() !== 'null') datos[k] = String(r[k]).trim();
   }
   return datos;
@@ -481,7 +498,8 @@ function datosSueltos(texto, faltaban) {
 
 // Junta lo que el cliente ya mandó con lo nuevo y revisa qué falta.
 async function procesarDatos(tel, s, texto) {
-  const faltaban = Object.keys(NOMBRES_CAMPOS).filter(k => !s.datos[k]);
+  const CAMPOS = camposRequeridos(s);
+  const faltaban = Object.keys(CAMPOS).filter(k => !s.datos[k]);
   let nuevos = leerPlantilla(texto);
   if (Object.keys(nuevos).length === 0) nuevos = datosSueltos(texto, faltaban);
   if (Object.keys(nuevos).length === 0 && faltaban.length === 1 && !['hora', 'fecha', 'recibeTelefono'].includes(faltaban[0])) {
@@ -489,12 +507,12 @@ async function procesarDatos(tel, s, texto) {
   }
   if (Object.keys(nuevos).length === 0) nuevos = await leerTextoLibre(texto);
   if (Object.keys(nuevos).length === 0) {
-    if (faltaban.length < Object.keys(NOMBRES_CAMPOS).length) {
-      const lista = faltaban.map(k => `${NOMBRES_CAMPOS[k]}:`).join('\n');
+    if (faltaban.length < Object.keys(CAMPOS).length) {
+      const lista = faltaban.map(k => `${CAMPOS[k]}:`).join('\n');
       const ejemplo = faltaban.includes('hora') ? '\n\n_Ejemplo de hora: 3 pm o 10:30 am_' : '';
       return enviarTexto(tel, `No logré entenderlo. 🙈 Me falta${faltaban.length > 1 ? 'n estos datos' : ' este dato'}:\n\n${lista}${ejemplo}`);
     }
-    return enviarTexto(tel, `No logré leer los datos. 🙈 Copia este mensaje, complétalo y envíalo:\n\n${PLANTILLA_DATOS}`);
+    return enviarTexto(tel, `No logré leer los datos. 🙈 Copia este mensaje, complétalo y envíalo:\n\n${plantillaDatos(s)}`);
   }
 
   for (const [k, v] of Object.entries(nuevos)) s.datos[k] = v;
@@ -523,10 +541,10 @@ async function procesarDatos(tel, s, texto) {
     if (h !== null && h >= 14) { avisos.push('⏰ Los domingos entregamos solo hasta las *2:00 PM*. Escribe otra hora.'); delete s.datos.hora; }
   }
 
-  const faltan = Object.keys(NOMBRES_CAMPOS).filter(k => !s.datos[k]);
+  const faltan = Object.keys(CAMPOS).filter(k => !s.datos[k]);
   if (faltan.length) {
     const varios = faltan.length > 1;
-    const lista = faltan.map(k => `${NOMBRES_CAMPOS[k]}:`).join('\n');
+    const lista = faltan.map(k => `${CAMPOS[k]}:`).join('\n') + (faltan.includes('mensajeTarjeta') ? '\n_(Si no quieres mensaje, escribe "sin mensaje")_' : '');
     const encabezado = avisos.length ? avisos.join('\n') + '\n\n' : 'Gracias 🙌 ';
     return enviarTexto(tel, `${encabezado}Solo me falta${varios ? 'n estos datos' : ' este dato'}. Complétalo${varios ? 's' : ''} y envíalo${varios ? 's' : ''}:\n\n${lista}`);
   }
@@ -564,7 +582,7 @@ async function mostrarResumen(tel, s) {
   s.paso = 'CONFIRMAR';
 
   const productos = s.carrito.map(i => `• ${nombreItem(i)} — ${i.precio ? formatCOP(i.precio) : 'precio por confirmar'}`).join('\n');
-  const notas = s.datos.notas ? `\n📝 *Notas:* ${s.datos.notas}` : '';
+  const notas = (s.datos.mensajeTarjeta ? `\n💌 *Tarjeta:* ${s.datos.mensajeTarjeta}` : '') + (s.datos.notas ? `\n📝 *Notas:* ${s.datos.notas}` : '');
   const lineaDomicilio = domicilioPorConfirmar ? 'por confirmar' : formatCOP(domicilio);
   const total = (domicilioPorConfirmar || precioPendiente)
     ? `${formatCOP(s.datos.total)} + valores por confirmar`
@@ -809,7 +827,7 @@ async function manejarMensaje(msg) {
 
     case 'DATOS':
       if (!t || /^(hola+|holi|buen[oa]s?( dias| tardes| noches)?|buenas|hey|ola)$/.test(t)) {
-        return enviarTexto(tel, `¡Hola! 👋 Sigamos con tu pedido. Copia este mensaje, complétalo y envíalo:\n\n${PLANTILLA_DATOS}\n\n_Escribe *cancelar* si quieres empezar de nuevo._`);
+        return enviarTexto(tel, `¡Hola! 👋 Sigamos con tu pedido. Copia este mensaje, complétalo y envíalo:\n\n${plantillaDatos(s)}\n\n_Escribe *cancelar* si quieres empezar de nuevo._`);
       }
       await procesarDatos(tel, s, texto);
       return guardarSesion();
@@ -827,7 +845,7 @@ async function manejarMensaje(msg) {
         const datosPago = config.datosPago || DATOS_PAGO_POR_DEFECTO;
         const domicilio = s.datos.domicilioPorConfirmar ? '\n_(El valor del domicilio te lo confirmamos antes de pagar.)_' : '';
         await enviarTexto(tel, `🎉 *¡Pedido ${s.codigo} confirmado!*\n\nPara programarlo en cocina, realiza el pago de *${formatCOP(s.datos.total)}* a:\n\n${datosPago}${domicilio}\n\n📌 *Último paso:* envíanos por aquí la *foto o captura del comprobante*. 🧾`);
-        await avisarAdmin(`🆕 *Nuevo pedido ${s.codigo}* (esperando pago)\n👤 ${s.datos.nombre} (+${tel})\n🛒 ${s.carrito.map(nombreItem).join(', ')}\n📍 ${s.datos.direccion}${s.datos.sectorNombre ? ' (' + s.datos.sectorNombre + ')' : ''}\n📅 ${fechaBonita(s.datos.fecha)}, ${s.datos.hora}\n💰 ${formatCOP(s.datos.total)}${s.datos.domicilioPorConfirmar ? ' + domicilio por confirmar' : ''}`);
+        await avisarAdmin(`🆕 *Nuevo pedido ${s.codigo}* (esperando pago)\n👤 ${s.datos.nombre} (+${tel})\n🛒 ${s.carrito.map(nombreItem).join(', ')}\n📍 ${s.datos.direccion}${s.datos.sectorNombre ? ' (' + s.datos.sectorNombre + ')' : ''}\n📅 ${fechaBonita(s.datos.fecha)}, ${s.datos.hora}\n💰 ${formatCOP(s.datos.total)}${s.datos.domicilioPorConfirmar ? ' + domicilio por confirmar' : ''}${s.datos.mensajeTarjeta ? '\n💌 Tarjeta: ' + s.datos.mensajeTarjeta : ''}${s.datos.notas ? '\n📝 ' + s.datos.notas : ''}`);
         return;
       }
       if (r === 'no') {
