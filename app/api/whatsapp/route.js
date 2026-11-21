@@ -591,6 +591,9 @@ function horaDelDia(texto) {
   return h <= 23 ? h : null;
 }
 
+// Nombres de ciudad: casi toda dirección los trae, así que no sirven para saber el barrio
+const CIUDADES = new Set(['bucaramanga', 'floridablanca', 'giron', 'piedecuesta', 'lebrija', 'santander', 'colombia']);
+
 // Busca la zona de domicilio según el barrio escrito en la dirección.
 async function zonaDesdeDireccion(direccion, zonas) {
   const t = normalizar(direccion);
@@ -598,7 +601,7 @@ async function zonaDesdeDireccion(direccion, zonas) {
   let mejor = null, largo = 0;
   for (const z of zonas) {
     const claves = [...String(z.name || '').split('/'), ...String(z.barrios || '').split(',')]
-      .map(normalizar).filter(c => c.length > 2);
+      .map(normalizar).filter(c => c.length > 2 && !CIUDADES.has(c));
     for (const c of claves) {
       if (c.length > largo && new RegExp(`\\b${c}\\b`).test(t)) { mejor = z; largo = c.length; }
     }

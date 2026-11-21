@@ -598,6 +598,21 @@ export default function Page() {
       .catch(() => {});
   }, [authRole, adminTab, privadoCargado]);
 
+  // Al entrar al panel o cambiar de pestaña, se recarga lo último guardado
+  // (así nadie edita una copia vieja y la guarda encima de lo nuevo).
+  const recargarCatalogo = async () => {
+    try {
+      const data = await (await fetch('/api/catalogo', { cache: 'no-store' })).json();
+      if (data.productos && data.productos.length) setProducts(data.productos);
+      if (data.config) aplicarConfig(data.config);
+      if (Array.isArray(data.zonas)) setZones(data.zonas);
+    } catch (e) { console.error(e); }
+  };
+
+  useEffect(() => {
+    if (authRole === 'admin' && currentView === 'admin') recargarCatalogo();
+  }, [authRole, currentView, adminTab]);
+
   useEffect(() => {
     if (adminTab !== 'configuracion') return;
     const b = {};
