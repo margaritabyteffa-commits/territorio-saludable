@@ -1676,12 +1676,12 @@ export default function Page() {
 
               <div className="pt-2 border-t border-stone-100">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="font-bold text-stone-800">Sabores del día (opcional):</span>
+                  <span className="font-bold text-stone-800">Sabores / variedades (opcional):</span>
                   <button type="button" onClick={() => setFormSabores([...formSabores, { nombre: '', disponible: true }])} className="px-2 py-1 rounded bg-[#E5ECE3] text-[#2D5A27] font-bold text-[10px] flex items-center gap-1">
                     <Plus size={12} /><span>Agregar Sabor</span>
                   </button>
                 </div>
-                <p className="text-[10px] text-stone-400 mb-2">Para productos que cambian según producción (ej. helados). Marca "Agotado" lo que no haya; queda así hasta que lo cambies.</p>
+                <p className="text-[10px] text-stone-400 mb-2">Ej: frutos rojos / amarillos, o los sabores de helado. Marca "Agotado" lo que no haya; queda así hasta que lo cambies.</p>
                 {formSabores.length === 0 ? <p className="text-[11px] text-stone-400 italic">Sin sabores.</p> : (
                   <div className="space-y-2 max-h-48 overflow-y-auto">
                     {formSabores.map((sb, i) => (
