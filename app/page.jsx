@@ -17,7 +17,20 @@ const DEFAULT_CONFIG = {
   calendarEmbedUrl: 'https://calendar.google.com/calendar/embed?src=territoriosaludable%40gmail.com&ctz=America%2FBogota',
   hoursMonFri: 'Lunes a Viernes: 8:00 AM – 6:00 PM',
   hoursSat: 'Sábados: 8:00 AM – 5:00 PM',
-  hoursSun: 'Domingos y festivos: no hay entregas',
+  hoursSun: 'Domingos y festivos: no hay servicio',
+  anuncio: 'Pastelería Artesanal 100% Sin Azúcar Refinada y Sin Gluten en Bucaramanga',
+  etiquetaHero: 'Pastelería Saludable en Bucaramanga & Área Metropolitana',
+  heroTitulo: 'El placer de lo dulce, *100% sin azúcar* y libre de gluten.',
+  heroDescripcion: '',
+  etiquetas: '0% Azúcar refinada, 100% Libres de gluten, Aptas para diabéticos, Tortas con 1 día de anticipación',
+  pieDescripcion: 'Pastelería 100% libre de gluten y azúcar refinada en Bucaramanga. Postres, panes y tortas hechos con amor e ingredientes naturales.',
+  zonasCobertura: 'Bucaramanga, Floridablanca, Piedecuesta, Girón',
+  pagoNequi: '',
+  pagoDaviplata: '',
+  pagoBancolombia: '',
+  pagoTitular: '',
+  pagoEfectivo: true,
+  pagoOtros: '',
   recargoTortas: 3000,
   datosPago: '💳 Nequi / Daviplata: 3000559196\n🏦 Bancolombia Ahorros: (pendiente cuenta real)'
 };
@@ -40,6 +53,29 @@ const WhatsAppIcon = ({ size = 16, className = '' }) => (
     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
   </svg>
 );
+
+// Campos de texto de la página que se editan desde el panel
+const CAMPOS_TEXTO = ['anuncio', 'etiquetaHero', 'heroTitulo', 'heroDescripcion', 'etiquetas', 'pieDescripcion', 'zonasCobertura', 'hoursMonFri', 'hoursSat', 'hoursSun', 'pagoNequi', 'pagoDaviplata', 'pagoBancolombia', 'pagoTitular', 'pagoEfectivo', 'pagoOtros'];
+
+const listaComas = (t) => String(t || '').split(',').map(x => x.trim()).filter(Boolean);
+
+// "texto *resaltado* texto" → el resaltado va en verde e itálica
+const TituloResaltado = ({ texto }) => (
+  <>{String(texto || '').split('*').map((parte, i) => i % 2 === 1
+    ? <span key={i} className="text-[#2D5A27] italic">{parte}</span>
+    : <span key={i}>{parte}</span>)}</>
+);
+
+// Texto con los datos de pago que envía el bot
+function componerDatosPago(c) {
+  const l = [];
+  if (c.pagoNequi) l.push('💳 Nequi: ' + c.pagoNequi);
+  if (c.pagoDaviplata) l.push('💳 Daviplata: ' + c.pagoDaviplata);
+  if (c.pagoBancolombia) l.push('🏦 Bancolombia: ' + c.pagoBancolombia);
+  if (c.pagoTitular) l.push('👤 Titular: ' + c.pagoTitular);
+  if (c.pagoOtros) l.push(c.pagoOtros);
+  return l.join('\n');
+}
 
 // Producto con tarjeta personalizada (marcado en el panel o mencionado en la descripción)
 const llevaTarjeta = (p) => (typeof p.tarjeta === 'boolean' ? p.tarjeta : /tarjeta/i.test(p.description || ''));
@@ -198,6 +234,7 @@ export default function Page() {
   const [confirmarBorrarId, setConfirmarBorrarId] = useState(null);
   const [buscarInventario, setBuscarInventario] = useState('');
   const [buscarZona, setBuscarZona] = useState('');
+  const [borradorTextos, setBorradorTextos] = useState(null);
   const [catalogoEnServidor, setCatalogoEnServidor] = useState(false);
   const [verificandoClave, setVerificandoClave] = useState(false);
   const [formAvailable, setFormAvailable] = useState(true);
@@ -487,7 +524,6 @@ export default function Page() {
       hoursSat: cfgSat.trim(),
       hoursSun: cfgSun.trim(),
       calendarEmbedUrl: cfgEmbedUrl.trim(),
-      datosPago: cfgDatosPago.trim(),
       recargoTortas: Number(String(cfgRecargo).replace(/\D/g, '')) || 0
     };
     setConfig(updated);
@@ -561,6 +597,26 @@ export default function Page() {
       .then(d => { setPrivado(prev => ({ ...prev, ...(d.privado || {}) })); setPrivadoCargado(true); })
       .catch(() => {});
   }, [authRole, adminTab, privadoCargado]);
+
+  useEffect(() => {
+    if (adminTab !== 'configuracion') return;
+    const b = {};
+    CAMPOS_TEXTO.forEach(k => { b[k] = config[k] ?? DEFAULT_CONFIG[k]; });
+    // Si aún no hay datos de pago separados, se muestra el texto anterior en "Otros"
+    if (!b.pagoNequi && !b.pagoDaviplata && !b.pagoBancolombia && !b.pagoOtros && config.datosPago) b.pagoOtros = config.datosPago;
+    setBorradorTextos(b);
+  }, [adminTab, config]);
+
+  const guardarTextos = async () => {
+    const updated = { ...config, ...borradorTextos };
+    updated.datosPago = componerDatosPago(updated) || config.datosPago || '';
+    setConfig(updated);
+    setCfgMonFri(updated.hoursMonFri || '');
+    setCfgSat(updated.hoursSat || '');
+    setCfgSun(updated.hoursSun || '');
+    const ok = await guardarAjustesServidor({ config: updated });
+    if (ok) showToast('✓ Textos y pagos guardados');
+  };
 
   const guardarPrivado = async () => {
     try {
@@ -701,11 +757,11 @@ export default function Page() {
         <div className="max-w-7xl mx-auto flex flex-col items-center gap-1 text-center">
           <div className="flex items-center gap-1.5 justify-center">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
-            <p className="font-semibold text-[11px] leading-tight"> Pastelería Artesanal 100% Sin Azúcar Refinada y Sin Gluten en Bucaramanga</p>
+            <p className="font-semibold text-[11px] leading-tight">{config.anuncio ?? DEFAULT_CONFIG.anuncio}</p>
           </div>
           <div className="w-full flex items-center justify-between text-[10px] text-emerald-200/90 pt-0.5 border-t border-emerald-800/60 px-2">
             <span className="truncate">🕒 {config.hoursMonFri}</span>
-            <span className="truncate">📍 Bucaramanga y Área Metropol.</span>
+            <span className="truncate">📍 Bucaramanga y Área Metropolitana</span>
           </div>
         </div>
       </div>
@@ -803,23 +859,23 @@ export default function Page() {
           <section className="bg-gradient-to-b from-[#FAF7F2] to-[#F2EDE4] py-12 px-4 border-b border-[#EAE2D8] text-center space-y-4">
             <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#E5ECE3] text-[#2D5A27] text-xs font-bold border border-emerald-200">
               <Sparkles size={13} />
-              <span>Pastelería Saludable en Bucaramanga & Área Metropolitana</span>
+              <span>{config.etiquetaHero ?? DEFAULT_CONFIG.etiquetaHero}</span>
             </div>
             
-            <h1 className="font-serif text-3xl sm:text-5xl lg:text-6xl font-black text-[#241E19] leading-tight tracking-tight max-w-4xl mx-auto">
-              El placer de lo dulce, <span className="text-[#2D5A27] italic font-serif">100% sin</span> <br />
-              <span className="text-[#2D5A27] italic font-serif">azúcar</span> y libre de gluten.
+            <h1 className="font-serif text-3xl sm:text-5xl lg:text-6xl font-normal text-[#241E19] leading-tight max-w-4xl mx-auto">
+              <TituloResaltado texto={config.heroTitulo ?? DEFAULT_CONFIG.heroTitulo} />
             </h1>
 
-            <p className="text-sm text-stone-600 max-w-3xl mx-auto leading-relaxed pt-2">
-              Nuestra meta es crear recetas deliciosas con ingredientes que sean útiles para nuestro cuerpo. Eliminamos el azúcar refinado, eliminamos el gluten (a muchos les cae mal), e incluimos ingredientes maravillosos como el chocolate amargo, la fibra prebiótica, el colágeno hidrolizado, harinas integrales, muchas frutas y lo mejor, es que todo lo endulzamos con STEVIA.
-            </p>
+            {(config.heroDescripcion ?? DEFAULT_CONFIG.heroDescripcion) && (
+              <p className="font-texto text-sm text-stone-600 max-w-3xl mx-auto leading-relaxed pt-2">
+                {config.heroDescripcion}
+              </p>
+            )}
 
             <div className="flex flex-wrap items-center justify-center gap-2 pt-3">
-              <span className="px-3 py-1 rounded-full bg-white border border-emerald-200 text-emerald-800 text-xs font-bold shadow-2xs">✓ 0% Azúcar refinada</span>
-              <span className="px-3 py-1 rounded-full bg-white border border-emerald-200 text-emerald-800 text-xs font-bold shadow-2xs">✓ 100% Libres de gluten</span>
-              <span className="px-3 py-1 rounded-full bg-white border border-emerald-200 text-emerald-800 text-xs font-bold shadow-2xs">♡ Aptas para diabéticos</span>
-              <span className="px-3 py-1 rounded-full bg-white border border-emerald-200 text-emerald-800 text-xs font-bold shadow-2xs">🕒 Tortas con 1 día de anticipación</span>
+              {listaComas(config.etiquetas ?? DEFAULT_CONFIG.etiquetas).map(e => (
+                <span key={e} className="px-3 py-1 rounded-full bg-white border border-emerald-200 text-emerald-800 text-xs font-bold shadow-2xs">✓ {e}</span>
+              ))}
             </div>
 
             <div className="pt-4 max-w-md mx-auto relative">
@@ -887,14 +943,14 @@ export default function Page() {
                       </div>
 
                       <div className="p-4 space-y-2">
-                        <h3 className="font-serif font-bold text-base text-[#241E19] group-hover:text-[#2D5A27] transition">{prod.name}</h3>
+                        <h3 className="font-subtitulo font-bold text-lg text-[#241E19] group-hover:text-[#2D5A27] transition">{prod.name}</h3>
                         
                         {llevaTarjeta(prod) && (
                           <p className="text-[11px] font-semibold text-[#8C533C] bg-[#F6EEE6] rounded-lg px-2 py-1">💌 Incluye tarjeta: te pedimos el mensaje por WhatsApp</p>
                         )}
 
                         {prod.description && (
-                          <p className="text-stone-500 text-xs leading-relaxed">
+                          <p className="font-texto text-stone-500 text-xs leading-relaxed">
                             {prod.description}
                           </p>
                         )}
@@ -1430,16 +1486,6 @@ export default function Page() {
                     </div>
                   </div>
 
-                  <div className="space-y-2 pt-4 border-t border-stone-100 text-xs">
-                    <label className="font-bold text-stone-700 block">Datos de pago (los envía el bot de WhatsApp al confirmar un pedido)</label>
-                    <textarea
-                      value={cfgDatosPago}
-                      onChange={(e) => setCfgDatosPago(e.target.value)}
-                      rows={3}
-                      className="w-full p-3 rounded-2xl bg-stone-50 border border-stone-200 text-stone-800"
-                    />
-                  </div>
-
                   <div className="space-y-4 pt-4 border-t border-stone-100">
                     <h4 className="font-serif font-bold text-base text-stone-900 flex items-center gap-2">
                       <Calendar size={16} className="text-[#2D5A27]" />
@@ -1461,6 +1507,66 @@ export default function Page() {
                     Guardar Configuración General
                   </button>
                 </form>
+              </div>
+
+              <div className="bg-white rounded-3xl border border-stone-200 p-6 space-y-4 shadow-xs text-xs">
+                <h3 className="font-serif font-bold text-base text-stone-900 flex items-center gap-2">
+                  <Edit2 size={16} className="text-[#2D5A27]" />
+                  <span>Textos de la página y métodos de pago</span>
+                </h3>
+                {borradorTextos && (
+                  <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {[
+                        ['anuncio', 'Franja superior (anuncio)'],
+                        ['etiquetaHero', 'Etiqueta sobre el título'],
+                        ['heroTitulo', 'Título principal (lo que va entre *asteriscos* sale en verde)'],
+                        ['heroDescripcion', 'Texto debajo del título (déjalo vacío para no mostrar nada)'],
+                        ['etiquetas', 'Etiquetas bajo el título (separadas por coma)'],
+                        ['pieDescripcion', 'Descripción en el pie de página'],
+                        ['zonasCobertura', 'Zonas de cobertura en el pie (separadas por coma)'],
+                        ['hoursMonFri', 'Horario lunes a viernes'],
+                        ['hoursSat', 'Horario sábados'],
+                        ['hoursSun', 'Domingos y festivos']
+                      ].map(([k, etiqueta]) => (
+                        <div key={k} className={k === 'heroDescripcion' || k === 'pieDescripcion' ? 'md:col-span-2' : ''}>
+                          <label className="font-bold text-stone-700 block mb-1">{etiqueta}</label>
+                          {k === 'heroDescripcion' || k === 'pieDescripcion'
+                            ? <textarea rows={2} value={borradorTextos[k] || ''} onChange={(e) => setBorradorTextos({ ...borradorTextos, [k]: e.target.value })} className="w-full p-3 rounded-2xl bg-stone-50 border border-stone-200" />
+                            : <input value={borradorTextos[k] || ''} onChange={(e) => setBorradorTextos({ ...borradorTextos, [k]: e.target.value })} className="w-full p-3 rounded-2xl bg-stone-50 border border-stone-200" />}
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="pt-3 border-t border-stone-100">
+                      <p className="font-bold text-stone-800 mb-1">Métodos de pago</p>
+                      <p className="text-[10px] text-stone-400 mb-2">El bot envía estos datos al cliente cuando confirma su pedido. Deja vacío lo que no usen.</p>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {[
+                          ['pagoNequi', 'Nequi (número)'],
+                          ['pagoDaviplata', 'Daviplata (número)'],
+                          ['pagoBancolombia', 'Bancolombia (tipo y número de cuenta)'],
+                          ['pagoTitular', 'Titular de las cuentas']
+                        ].map(([k, etiqueta]) => (
+                          <div key={k}>
+                            <label className="font-bold text-stone-700 block mb-1">{etiqueta}</label>
+                            <input value={borradorTextos[k] || ''} onChange={(e) => setBorradorTextos({ ...borradorTextos, [k]: e.target.value })} className="w-full p-3 rounded-2xl bg-stone-50 border border-stone-200" />
+                          </div>
+                        ))}
+                        <div className="md:col-span-2">
+                          <label className="font-bold text-stone-700 block mb-1">Otros datos de pago (opcional)</label>
+                          <textarea rows={2} value={borradorTextos.pagoOtros || ''} onChange={(e) => setBorradorTextos({ ...borradorTextos, pagoOtros: e.target.value })} className="w-full p-3 rounded-2xl bg-stone-50 border border-stone-200" />
+                        </div>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input type="checkbox" checked={borradorTextos.pagoEfectivo !== false} onChange={(e) => setBorradorTextos({ ...borradorTextos, pagoEfectivo: e.target.checked })} />
+                          <span>Mostrar "Efectivo" en la página</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <button type="button" onClick={guardarTextos} className="px-5 py-2.5 rounded-xl bg-[#2D5A27] text-white font-bold hover:bg-[#23481E]">Guardar textos y pagos</button>
+                  </>
+                )}
               </div>
 
               <div className="bg-white rounded-3xl border border-stone-200 p-6 space-y-4 shadow-xs text-xs">
@@ -1618,7 +1724,7 @@ export default function Page() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 grid grid-cols-1 md:grid-cols-4 gap-8 text-xs">
           <div className="space-y-3">
             <span className="font-serif text-lg font-black text-white block">{config.businessName} S.A.S.</span>
-            <p className="text-stone-400 leading-relaxed">Pastelería 100% libre de gluten y azúcar refinada en Bucaramanga. Postres, panes y tortas hechos con amor e ingredientes naturales.</p>
+            <p className="text-stone-400 leading-relaxed">{config.pieDescripcion ?? DEFAULT_CONFIG.pieDescripcion}</p>
           </div>
           <div className="space-y-2">
             <span className="font-bold text-white uppercase tracking-wider block text-[11px]">Horario de Atención</span>
@@ -1628,7 +1734,7 @@ export default function Page() {
           </div>
           <div className="space-y-2">
             <span className="font-bold text-white uppercase tracking-wider block text-[11px]">Zonas de Cobertura</span>
-            {[...new Set(zones.map(z => z.grupo || z.name))].map(g => (
+            {listaComas(config.zonasCobertura ?? DEFAULT_CONFIG.zonasCobertura).map(g => (
               <p key={g} className="text-stone-400">
                 • {g}
               </p>
@@ -1640,10 +1746,17 @@ export default function Page() {
           <div className="space-y-3">
             <span className="font-bold text-white uppercase tracking-wider block text-[11px]">Métodos de Pago</span>
             <div className="flex flex-wrap gap-1.5">
-              <span className="px-2.5 py-1 rounded bg-purple-900 text-white font-bold text-[10px]">NEQUI</span>
-              <span className="px-2.5 py-1 rounded bg-red-900 text-white font-bold text-[10px]">DAVIPLATA</span>
-              <span className="px-2.5 py-1 rounded bg-yellow-800 text-white font-bold text-[10px]">BANCOLOMBIA</span>
-              <span className="px-2.5 py-1 rounded bg-emerald-900 text-white font-bold text-[10px]">EFECTIVO</span>
+              {(() => {
+                const hay = config.pagoNequi || config.pagoDaviplata || config.pagoBancolombia;
+                return (
+                  <>
+                    {(!hay || config.pagoNequi) && <span className="px-2.5 py-1 rounded bg-purple-900 text-white font-bold text-[10px]">NEQUI</span>}
+                    {(!hay || config.pagoDaviplata) && <span className="px-2.5 py-1 rounded bg-red-900 text-white font-bold text-[10px]">DAVIPLATA</span>}
+                    {(!hay || config.pagoBancolombia) && <span className="px-2.5 py-1 rounded bg-yellow-800 text-white font-bold text-[10px]">BANCOLOMBIA</span>}
+                    {config.pagoEfectivo !== false && <span className="px-2.5 py-1 rounded bg-emerald-900 text-white font-bold text-[10px]">EFECTIVO</span>}
+                  </>
+                );
+              })()}
             </div>
             <div className="pt-2">
               <button onClick={() => navigateTo('admin')} className="text-stone-600 hover:text-stone-400 text-[10px] cursor-pointer">Acceso interno</button>
