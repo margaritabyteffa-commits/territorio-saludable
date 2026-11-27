@@ -943,7 +943,9 @@ async function manejarAdmin(texto, desde) {
   await enviarTexto(pedido.telefono, `${sinPago ? '*Su pedido fue confirmado.*' : '*Pago verificado.*'}\n\nSu pedido *${pedido.codigo}* quedó agendado${lugar} para el *${cuando}*.${saldo}\n\nGracias por elegir Territorio Saludable.`);
   const produccion = await avisarProduccion(pedido);
   const calendario = await agendarEnCalendario(pedido);
-  await responder(`✅ Pedido ${pedido.codigo} aprobado.\n\nCliente: notificado\nProducción: ${produccion}\nCalendario: ${calendario}`);
+  const detalle = `\n\n📅 ${fechaBonita(pedido.fecha)}, ${pedido.hora} · ${etiquetaEntrega(pedido)}\n*Productos:*\n${(pedido.carrito || []).map(i => `• ${nombreItem(i)}`).join('\n')}` +
+    (pedido.mensajeTarjeta ? `\n💌 Tarjeta: ${pedido.mensajeTarjeta}` : '') + (pedido.notas ? `\n📝 Notas: ${pedido.notas}` : '');
+  await responder(`✅ Pedido ${pedido.codigo} aprobado.${detalle}\n\nCliente: notificado${produccion === 'sin número de producción' ? '' : `\nProducción: ${produccion}`}\nCalendario: ${calendario}`);
   const s = await leer(claveSesion(pedido.telefono));
   if (s && s.codigo === pedido.codigo) await borrar(claveSesion(pedido.telefono));
   return true;

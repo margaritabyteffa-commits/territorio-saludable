@@ -1800,9 +1800,9 @@ export default function Page() {
                     <p className="text-[10px] text-stone-400 mt-1">Recibe el comprobante y es el único que puede escribir "Aprobar".</p>
                   </div>
                   <div>
-                    <label className="font-bold text-stone-700 block mb-1">🧁 WhatsApp de producción</label>
+                    <label className="font-bold text-stone-700 block mb-1">🧁 WhatsApp de producción (opcional)</label>
                     <input value={privado.produccion} onChange={(e) => setPrivado({ ...privado, produccion: e.target.value })} placeholder="Ej: 3109876543" className="w-full p-3 rounded-2xl bg-stone-50 border border-stone-200" />
-                    <p className="text-[10px] text-stone-400 mt-1">Recibe el pedido para preparar cuando se aprueba el pago.</p>
+                    <p className="text-[10px] text-stone-400 mt-1">Opcional. Si lo deja vacío, el detalle del pedido para preparar le llega a quien aprueba los pagos.</p>
                   </div>
                   <div className="md:col-span-2">
                     <label className="font-bold text-stone-700 block mb-1">📅 Enlace del calendario (script de Google)</label>
