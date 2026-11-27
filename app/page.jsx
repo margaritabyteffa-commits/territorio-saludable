@@ -34,6 +34,7 @@ const DEFAULT_CONFIG = {
   pagoEfectivo: true,
   pagoOtros: '',
   recargoTortas: 3000,
+  direccionTienda: 'Calle 59 # 30-91, barrio Conucos, Bucaramanga',
   datosPago: '💳 Nequi / Daviplata: 3000559196\n🏦 Bancolombia Ahorros: (pendiente cuenta real)'
 };
 

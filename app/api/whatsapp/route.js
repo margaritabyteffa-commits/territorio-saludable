@@ -77,6 +77,9 @@ function seccionPorNumero(config, t) {
 const PIDE_INMEDIATA = /(para hoy|para ya|entrega inmediata|inmediat|que (tienen|tiene|hay) (hoy|ya|disponible)|disponible(s)? (hoy|ya)|lo de hoy)/;
 
 const DATOS_PAGO_POR_DEFECTO = 'Nequi / Daviplata: 3000559196';
+const DIRECCION_TIENDA = 'Calle 59 # 30-91, barrio Conucos, Bucaramanga';
+const direccionTienda = (config) => (config && config.direccionTienda) || DIRECCION_TIENDA;
+const PAGO_AL_RECIBIR = 'en efectivo o por transferencia';
 
 // ---------------------------------------------------------------------------
 // Utilidades
@@ -309,7 +312,7 @@ async function agendarEnCalendario(pedido) {
   ].filter(x => x !== '').join('\n');
   return crearEventoCalendario({
     titulo, descripcion, fecha: pedido.fecha, hora: pedido.hora,
-    ubicacion: pedido.entrega === 'tienda' ? (config.direccionTienda || 'Recoge en tienda') : `${pedido.direccion}, Bucaramanga`
+    ubicacion: pedido.entrega === 'tienda' ? direccionTienda(config) : `${pedido.direccion}, Bucaramanga`
   }, privado);
 }
 
@@ -773,7 +776,7 @@ function calcularPago(d, carrito) {
   if (d.formaPago === 'transferencia') {
     d.anticipo = 0; d.saldo = 0; d.aPagar = d.total;
   } else if (requiereAnticipo) {
-    d.anticipo = redondear100(d.subtotal * 0.5);
+    d.anticipo = redondear100(d.total * 0.5);
     d.saldo = Math.max(0, d.total - d.anticipo);
     d.aPagar = d.anticipo;
   } else {
@@ -809,7 +812,7 @@ async function mostrarResumen(tel, s) {
   const productos = s.carrito.map(i => `• ${nombreItem(i)} — ${i.precio ? formatCOP(i.precio) : 'precio por confirmar'}`).join('\n');
   const extras = (d.mensajeTarjeta ? `\n*Tarjeta:* ${d.mensajeTarjeta}` : '') + (d.notas ? `\n*Notas:* ${d.notas}` : '');
   const lugar = d.entrega === 'tienda'
-    ? `*Entrega:* Recoge en tienda${config.direccionTienda ? ` (${config.direccionTienda})` : ''}`
+    ? `*Entrega:* Recoge en tienda (${direccionTienda(config)})`
     : `*Entrega:* Domicilio\n*Dirección:* ${d.direccion}${d.sectorNombre ? ` _(zona ${d.sectorNombre})_` : ''}`;
   const recibe = d.recibeNombre && d.recibeNombre !== d.nombre ? `\n*Recibe:* ${d.recibeNombre}` : '';
   const lineaDomicilio = d.entrega === 'tienda' ? '' : `\n*Domicilio:* ${domicilioPorConfirmar ? 'por confirmar' : formatCOP(domicilio) + (recargo ? ` _(incluye ${formatCOP(recargo)} de recargo por torta)_` : '')}`;
@@ -817,8 +820,10 @@ async function mostrarResumen(tel, s) {
   const total = pendiente ? `${formatCOP(d.total)} + valores por confirmar` : formatCOP(d.total);
   let pago;
   if (d.formaPago === 'transferencia') pago = '*Forma de pago:* Transferencia (pago completo antes de la entrega)';
-  else if (d.anticipo) pago = `*Forma de pago:* Contra entrega con anticipo\n*Anticipo (50%):* ${formatCOP(d.anticipo)}\n*Saldo al ${d.entrega === 'tienda' ? 'recoger' : 'recibir'}:* ${pendiente ? 'se confirma con el domicilio' : formatCOP(d.saldo)}`;
-  else pago = `*Forma de pago:* Contra entrega (paga al ${d.entrega === 'tienda' ? 'recoger' : 'recibir'})`;
+  else if (d.anticipo) pago = pendiente
+    ? '*Forma de pago:* Contra entrega con anticipo del 50% (el valor se lo confirmamos junto con el domicilio)'
+    : `*Forma de pago:* Contra entrega con anticipo\n*Anticipo (50%):* ${formatCOP(d.anticipo)}\n*Saldo al ${d.entrega === 'tienda' ? 'recoger' : 'recibir'}:* ${formatCOP(d.saldo)} (${PAGO_AL_RECIBIR})`;
+  else pago = `*Forma de pago:* Contra entrega (paga al ${d.entrega === 'tienda' ? 'recoger' : 'recibir'}, ${PAGO_AL_RECIBIR})`;
 
   await enviarBotones(tel, `*RESUMEN DE SU PEDIDO*
 
@@ -857,7 +862,7 @@ async function siguientePasoPago(tel, pedido, s, resumenAdmin) {
       for (const k of ['domicilio', 'domicilioPorConfirmar', 'total', 'anticipo', 'saldo', 'aPagar']) s.datos[k] = pedido[k];
     }
     const detalle = pedido.anticipo
-      ? ` (anticipo del 50%; el saldo de ${formatCOP(pedido.saldo)} lo paga al ${pedido.entrega === 'tienda' ? 'recoger' : 'recibir'})`
+      ? ` (anticipo del 50%; el saldo de ${formatCOP(pedido.saldo)} lo paga al ${pedido.entrega === 'tienda' ? 'recoger' : 'recibir'}, ${PAGO_AL_RECIBIR})`
       : '';
     await enviarTexto(tel, `*Pedido ${pedido.codigo} registrado.*\n\nPara programarlo, por favor realice el pago de *${formatCOP(pedido.aPagar)}*${detalle} a:\n\n${datosPago}\n\nLuego envíenos por este medio la *foto o captura del comprobante*.`);
     if (resumenAdmin) await avisarAdmin(`🆕 *Nuevo pedido ${pedido.codigo}* (esperando pago)\n${resumenAdmin}\n💰 Total ${formatCOP(pedido.total)} · ${lineaPagoEquipo(pedido)}`);
@@ -868,7 +873,7 @@ async function siguientePasoPago(tel, pedido, s, resumenAdmin) {
   await guardarPedidoBot(pedido);
   await guardar('wa:ultimo_por_verificar', pedido.codigo);
   if (s) { s.paso = 'MENU'; s.carrito = []; s.datos = {}; s.codigo = null; }
-  await enviarTexto(tel, `*Pedido ${pedido.codigo} recibido.*\n\nEn breve le confirmamos su pedido. El pago de *${formatCOP(pedido.total)}* lo realiza al ${pedido.entrega === 'tienda' ? 'recoger' : 'recibir'}.\n\nGracias por elegir Territorio Saludable.`);
+  await enviarTexto(tel, `*Pedido ${pedido.codigo} recibido.*\n\nEn breve le confirmamos su pedido. El pago de *${formatCOP(pedido.total)}* lo realiza al ${pedido.entrega === 'tienda' ? 'recoger' : 'recibir'}, ${PAGO_AL_RECIBIR}.${pedido.entrega === 'tienda' ? `\n\nDirección de la tienda: ${direccionTienda(config)}` : ''}\n\nGracias por elegir Territorio Saludable.`);
   await avisarAdmin(`🆕 *Pedido contra entrega ${pedido.codigo}*\n${resumenAdmin || ''}\n💰 Cobrar al entregar: ${formatCOP(pedido.total)}\n\nPara confirmarlo y pasarlo a producción, responda:\n*Aprobar ${pedido.codigo}*`);
   await dormir(tel, pedido.codigo, 'pedido');
 }
@@ -933,7 +938,8 @@ async function manejarAdmin(texto, desde) {
     ? `\nRecuerde que el saldo de *${formatCOP(pedido.saldo)}* se paga al ${pedido.entrega === 'tienda' ? 'recoger' : 'recibir'}.`
     : '';
   const cuando = `${fechaBonita(pedido.fecha)}, ${pedido.hora}`;
-  const lugar = pedido.entrega === 'tienda' ? ' para recoger en tienda' : '';
+  const { config } = await catalogo();
+  const lugar = pedido.entrega === 'tienda' ? ` para recoger en nuestra tienda (${direccionTienda(config)})` : '';
   await enviarTexto(pedido.telefono, `${sinPago ? '*Su pedido fue confirmado.*' : '*Pago verificado.*'}\n\nSu pedido *${pedido.codigo}* quedó agendado${lugar} para el *${cuando}*.${saldo}\n\nGracias por elegir Territorio Saludable.`);
   const produccion = await avisarProduccion(pedido);
   const calendario = await agendarEnCalendario(pedido);
