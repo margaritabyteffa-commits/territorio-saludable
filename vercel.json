@@ -1,5 +1,6 @@
 {
   "crons": [
-    { "path": "/api/resumen-diario", "schedule": "0 19 * * *" }
+    { "path": "/api/resumen-diario?momento=manana", "schedule": "0 12 * * *" },
+    { "path": "/api/resumen-diario?momento=tarde", "schedule": "0 22 * * *" }
   ]
 }

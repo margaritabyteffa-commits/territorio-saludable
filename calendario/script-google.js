@@ -2,7 +2,7 @@
 // Se pega en script.google.com (con el Gmail dueño del calendario) y se publica como "Aplicación web".
 // - El bot lo llama cuando se aprueba un pago: aquí se crea el evento con sus recordatorios.
 // - También envía por correo el resumen diario de pedidos.
-// - Si se ejecuta una vez "instalarResumenDiario", todos los días a las 2 pm pide el resumen a la página.
+// - Si se ejecuta una vez "instalarResumenDiario", todos los días a las 7 am y 5 pm pide los resúmenes a la página.
 
 // Enlace del resumen diario (se copia desde el panel: Configuración → Avisos de pedidos y calendario)
 var ENLACE_RESUMEN = '';
@@ -42,16 +42,20 @@ function respuesta(objeto) {
   return ContentService.createTextOutput(JSON.stringify(objeto)).setMimeType(ContentService.MimeType.JSON);
 }
 
-// Se ejecuta una sola vez (botón "Ejecutar") para programar el resumen de las 2 pm.
+// Se ejecuta una sola vez (botón "Ejecutar") para programar los resúmenes de las 7 am y las 5 pm.
 function instalarResumenDiario() {
   ScriptApp.getProjectTriggers().forEach(function (t) {
-    if (t.getHandlerFunction() === 'pedirResumenDiario') ScriptApp.deleteTrigger(t);
+    if (['pedirResumenDiario', 'pedirResumenManana', 'pedirResumenTarde'].indexOf(t.getHandlerFunction()) !== -1) ScriptApp.deleteTrigger(t);
   });
-  ScriptApp.newTrigger('pedirResumenDiario').timeBased().atHour(14).nearMinute(0).everyDays(1).inTimezone('America/Bogota').create();
+  ScriptApp.newTrigger('pedirResumenManana').timeBased().atHour(7).nearMinute(0).everyDays(1).inTimezone('America/Bogota').create();
+  ScriptApp.newTrigger('pedirResumenTarde').timeBased().atHour(17).nearMinute(0).everyDays(1).inTimezone('America/Bogota').create();
   MailApp.getRemainingDailyQuota(); // pide el permiso de correo de una vez
 }
 
-function pedirResumenDiario() {
+function pedirResumenManana() { pedir('manana'); }
+function pedirResumenTarde() { pedir('tarde'); }
+
+function pedir(momento) {
   if (!ENLACE_RESUMEN) return;
-  UrlFetchApp.fetch(ENLACE_RESUMEN, { muteHttpExceptions: true });
+  UrlFetchApp.fetch(ENLACE_RESUMEN + '&momento=' + momento, { muteHttpExceptions: true });
 }

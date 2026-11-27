@@ -1823,14 +1823,15 @@ export default function Page() {
                   </div>
                 </div>
                 <div>
-                  <label className="font-bold text-stone-700 block mb-1">📋 Correos que reciben el resumen diario de las 2 pm</label>
+                  <label className="font-bold text-stone-700 block mb-1">📋 Correos que reciben los resúmenes diarios (7 am y 5 pm)</label>
                   <input value={privado.correosResumen || ''} onChange={(e) => setPrivado({ ...privado, correosResumen: e.target.value })} placeholder="camila@gmail.com, marta@gmail.com" className="w-full p-3 rounded-2xl bg-stone-50 border border-stone-200" />
-                  <p className="text-[10px] text-stone-400 mt-1">Todos los días a las 2 pm llega el resumen del siguiente día hábil (productos, pedidos y domicilios) a estos correos y al WhatsApp que aprueba los pagos.</p>
+                  <p className="text-[10px] text-stone-400 mt-1">A las 7:00 a. m. llegan los pedidos de hoy y a las 5:00 p. m. los del siguiente día hábil (productos, pedidos y domicilios), a estos correos y al WhatsApp que aprueba los pagos.</p>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <button type="button" onClick={guardarPrivado} className="px-5 py-2.5 rounded-xl bg-[#2D5A27] text-white font-bold hover:bg-[#23481E]">Guardar avisos y calendario</button>
-                  <button type="button" onClick={() => apiAdmin('/api/resumen-diario?ver=1').then(r => setResumenVista(r.texto)).catch(e => showToast('⚠️ ' + e.message))} className="px-4 py-2.5 rounded-xl bg-stone-100 text-stone-700 font-bold">👀 Ver resumen del próximo día</button>
-                  <button type="button" onClick={() => apiAdmin('/api/resumen-diario?enviar=1').then(r => showToast(`Resumen: WhatsApp ${r.whatsapp} · correo ${r.correo}`)).catch(e => showToast('⚠️ ' + e.message))} className="px-4 py-2.5 rounded-xl bg-stone-100 text-stone-700 font-bold">📤 Enviar resumen ahora</button>
+                  <button type="button" onClick={() => apiAdmin('/api/resumen-diario?ver=1&momento=manana').then(r => setResumenVista(r.texto)).catch(e => showToast('⚠️ ' + e.message))} className="px-4 py-2.5 rounded-xl bg-stone-100 text-stone-700 font-bold">👀 Ver pedidos de hoy</button>
+                  <button type="button" onClick={() => apiAdmin('/api/resumen-diario?ver=1&momento=tarde').then(r => setResumenVista(r.texto)).catch(e => showToast('⚠️ ' + e.message))} className="px-4 py-2.5 rounded-xl bg-stone-100 text-stone-700 font-bold">👀 Ver pedidos del próximo día</button>
+                  <button type="button" onClick={() => apiAdmin('/api/resumen-diario?enviar=1&momento=tarde').then(r => showToast(`Resumen: WhatsApp ${r.whatsapp} · correo ${r.correo}`)).catch(e => showToast('⚠️ ' + e.message))} className="px-4 py-2.5 rounded-xl bg-stone-100 text-stone-700 font-bold">📤 Enviar resumen del próximo día ahora</button>
                 </div>
                 {resumenVista && (
                   <div className="relative">
