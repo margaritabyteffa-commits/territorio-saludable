@@ -57,7 +57,11 @@ const WhatsAppIcon = ({ size = 16, className = '' }) => (
 );
 
 // Campos de texto de la página que se editan desde el panel
-const CAMPOS_TEXTO = ['anuncio', 'etiquetaHero', 'heroTitulo', 'heroDescripcion', 'etiquetas', 'pieDescripcion', 'zonasCobertura', 'hoursMonFri', 'hoursSat', 'hoursSun', 'pagoNequi', 'pagoDaviplata', 'pagoBancolombia', 'pagoTitular', 'pagoEfectivo', 'pagoOtros'];
+const CAMPOS_TEXTO = ['anuncio', 'etiquetaHero', 'heroTitulo', 'heroDescripcion', 'etiquetas', 'pieDescripcion', 'zonasCobertura', 'hoursMonFri', 'hoursSat', 'hoursSun', 'pagoNequi', 'pagoDaviplata', 'pagoBancolombia', 'pagoTitular', 'pagoEfectivo', 'pagoOtros', 'direccionTienda'];
+
+// Sección especial de la página: lo que se entrega hoy mismo (anticipación 0 días)
+const CATEGORIA_INMEDIATA = { nombre: 'Entrega inmediata', id: 'inmediata', emoji: '⚡', especial: true, descripcion: '⚡ Estos productos se los podemos entregar hoy mismo, en aproximadamente 30 minutos. Presione "Pedir" para hacer su pedido por WhatsApp.' };
+const diasAnticipacionProducto = (p) => (Number(p.diasAnticipacion) > 0 ? Number(p.diasAnticipacion) : (p.requiresNotice ? 1 : 0));
 
 const listaComas = (t) => String(t || '').split(',').map(x => x.trim()).filter(Boolean);
 
@@ -211,7 +215,9 @@ export default function Page() {
 
   const [config, setConfig] = useState(DEFAULT_CONFIG);
   const [products, setProducts] = useState(initialProducts);
-  const [orders, setOrders] = useState(initialOrders);
+  // Pedidos: del bot y registrados a mano, guardados en la base de datos
+  const [pedidosBot, setPedidosBot] = useState([]);
+  const [pedidosPanel, setPedidosPanel] = useState({ manuales: [], estados: {} });
   const [zones, setZones] = useState(INITIAL_ZONES);
 
   const [selectedCategory, setSelectedCategory] = useState('Tortas Saludables');
@@ -247,7 +253,8 @@ export default function Page() {
   const [formSabores, setFormSabores] = useState([]);
   const [formTarjeta, setFormTarjeta] = useState(false);
   const [formExtras, setFormExtras] = useState([]);
-  const [formEnCarro, setFormEnCarro] = useState(false);
+  const [formRecargo, setFormRecargo] = useState(false);
+  const [formAnticipo, setFormAnticipo] = useState(false);
   const [filtroCatInventario, setFiltroCatInventario] = useState('Todas');
   const [borradorCategorias, setBorradorCategorias] = useState(null);
   const [nuevaCategoria, setNuevaCategoria] = useState({ nombre: '', emoji: '✨', descripcion: '' });
@@ -276,7 +283,8 @@ export default function Page() {
   const [cfgRecargo, setCfgRecargo] = useState(String(DEFAULT_CONFIG.recargoTortas));
 
   const [newAdminPwd, setNewAdminPwd] = useState('');
-  const [privado, setPrivado] = useState({ aprobadores: '', produccion: '', calendarioUrl: '', calendarioCorreos: '', recordatorios: '1440,120' });
+  const [privado, setPrivado] = useState({ aprobadores: '', produccion: '', calendarioUrl: '', calendarioCorreos: '', recordatorios: '1440,120', correosResumen: '' });
+  const [resumenVista, setResumenVista] = useState(null);
   const [privadoCargado, setPrivadoCargado] = useState(false);
   const [newPanaderoPwd, setNewPanaderoPwd] = useState('');
   const [selectedCalDateStr, setSelectedCalDateStr] = useState('2026-11-09');
@@ -311,11 +319,6 @@ export default function Page() {
       const role = sessionStorage.getItem('ts_auth_role');
       const token = sessionStorage.getItem('ts_token');
       if (role && token) setAuthRole(role);
-      const ord = localStorage.getItem('ts_orders_v3');
-      if (ord) {
-        const parsed = JSON.parse(ord);
-        if (Array.isArray(parsed)) setOrders(parsed);
-      }
     } catch (e) {
       console.error(e);
     }
@@ -349,9 +352,6 @@ export default function Page() {
       .catch(e => console.error('No se pudo cargar el catálogo:', e));
   }, []);
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') localStorage.setItem('ts_orders_v3', JSON.stringify(orders));
-  }, [orders]);
 
   // ---------- Conexión con el servidor (solo administrador) ----------
   const cerrarSesionLocal = () => {
@@ -575,7 +575,9 @@ export default function Page() {
       setFormSabores(Array.isArray(prod.sabores) ? prod.sabores.map(x => ({ ...x })) : []);
       setFormTarjeta(llevaTarjeta(prod));
       setFormExtras(Array.isArray(prod.extraCategorias) ? prod.extraCategorias : []);
-      setFormEnCarro(prod.enCarro === true);
+      const esTortaP = prod.category === 'Tortas Saludables' || /\btortas?\b/i.test(prod.name || '');
+      setFormRecargo(typeof prod.recargoDomicilio === 'boolean' ? prod.recargoDomicilio : (prod.enCarro === true || esTortaP));
+      setFormAnticipo(typeof prod.anticipo === 'boolean' ? prod.anticipo : (esTortaP || /guacal/i.test(prod.name || '')));
     } else {
       setEditingProduct({ id: 'NEW_PRODUCT' });
       setFormName('');
@@ -589,7 +591,8 @@ export default function Page() {
       setFormSizes([]);
       setFormSabores([]);
       setFormTarjeta(false);
-      setFormEnCarro(false);
+      setFormRecargo(false);
+      setFormAnticipo(false);
       // Si estás viendo una categoría de temporada, el producto nuevo queda marcado en ella
       setFormExtras(filtroCatInventario !== 'Todas' && !CATEGORIES.includes(filtroCatInventario) ? [filtroCatInventario] : []);
     }
@@ -601,10 +604,10 @@ export default function Page() {
     const sizes = formSizes.map(s => ({ portions: s.portions, price: Number(s.price), label: s.portions + ' (' + formatCOP(Number(s.price)) + ')' }));
     const sabores = formSabores.filter(x => x.nombre && x.nombre.trim()).map(x => ({ nombre: x.nombre.trim(), disponible: x.disponible !== false }));
     if (editingProduct && editingProduct.id && editingProduct.id !== 'NEW_PRODUCT') {
-      guardarProductosServidor(products.map(p => p.id === editingProduct.id ? { ...p, name: formName.trim(), category: formCategory, price: Number(formPrice), description: formDescription.trim(), imageUrl: ensureSlash(formImageUrl), available: formAvailable, requiresNotice: formDias > 0, diasAnticipacion: formDias, sizes, sabores, tarjeta: formTarjeta, extraCategorias: formExtras.filter(c => c !== formCategory), enCarro: formEnCarro } : p));
+      guardarProductosServidor(products.map(p => p.id === editingProduct.id ? { ...p, name: formName.trim(), category: formCategory, price: Number(formPrice), description: formDescription.trim(), imageUrl: ensureSlash(formImageUrl), available: formAvailable, requiresNotice: formDias > 0, diasAnticipacion: formDias, sizes, sabores, tarjeta: formTarjeta, extraCategorias: formExtras.filter(c => c !== formCategory), recargoDomicilio: formRecargo, anticipo: formAnticipo } : p));
       showToast('✓ Producto actualizado');
     } else {
-      guardarProductosServidor([{ id: 'prod-' + Date.now(), name: formName.trim(), category: formCategory, price: Number(formPrice), description: formDescription.trim(), imageUrl: ensureSlash(formImageUrl), available: formAvailable, requiresNotice: formDias > 0, diasAnticipacion: formDias, features: ['Sin Azúcar', 'Sin Gluten'], sizes, sabores, tarjeta: formTarjeta, extraCategorias: formExtras.filter(c => c !== formCategory), enCarro: formEnCarro }, ...products]);
+      guardarProductosServidor([{ id: 'prod-' + Date.now(), name: formName.trim(), category: formCategory, price: Number(formPrice), description: formDescription.trim(), imageUrl: ensureSlash(formImageUrl), available: formAvailable, requiresNotice: formDias > 0, diasAnticipacion: formDias, features: ['Sin Azúcar', 'Sin Gluten'], sizes, sabores, tarjeta: formTarjeta, extraCategorias: formExtras.filter(c => c !== formCategory), recargoDomicilio: formRecargo, anticipo: formAnticipo }, ...products]);
       showToast('✓ Nuevo producto agregado');
     }
     setEditingProduct(null);
@@ -750,7 +753,7 @@ export default function Page() {
     const itemPrice = portionObj ? portionObj.price : prod.price;
     const newOrd = {
       id: 'ord-' + Date.now(),
-      code: 'TS-' + (orders.length + 1001),
+      code: 'TS-M' + String(Date.now()).slice(-4),
       clientName: newClientName.trim() || 'Cliente Mostrador',
       clientPhone: newClientPhone.trim() || config.whatsappPhone,
       address: newAddress.trim() || 'Recoge en Tienda',
@@ -763,9 +766,11 @@ export default function Page() {
       paymentMethod: newPaymentMethod,
       notes: newOrderNotes.trim()
     };
-    setOrders(prev => [newOrd, ...prev]);
     setNewOrderModalOpen(false);
-    showToast('✓ Pedido registrado con éxito');
+    guardarPedidosPanel({ ...pedidosPanel, manuales: [{ ...newOrd, creado: new Date().toISOString() }, ...pedidosPanel.manuales] }, '✓ Pedido registrado');
+    apiAdmin('/api/admin/pedidos', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ orden: newOrd }) })
+      .then(r => showToast(r.ok ? '✓ Pedido registrado y agregado al calendario' : '⚠️ Pedido registrado, pero no se pudo crear el evento del calendario'))
+      .catch(() => showToast('⚠️ Pedido registrado, pero no se pudo crear el evento del calendario'));
   };
 
   const saboresDisponibles = (product) => (product.sabores || []).filter(x => x.disponible !== false);
@@ -782,7 +787,7 @@ export default function Page() {
   };
 
   const todasCategorias = useMemo(() => categoriasDe(config), [config]);
-  const categoriasPublicas = useMemo(() => todasCategorias.filter(c => c.visible !== false), [todasCategorias]);
+  const categoriasPublicas = useMemo(() => [...todasCategorias.filter(c => c.visible !== false), CATEGORIA_INMEDIATA], [todasCategorias]);
   const categoriaActual = categoriasPublicas.find(c => c.nombre === selectedCategory) || categoriasPublicas[0] || CATEGORIAS_BASE[0];
 
   useEffect(() => {
@@ -805,7 +810,8 @@ export default function Page() {
 
   const filteredProducts = useMemo(() => {
     return products.filter(p => {
-      if (categoriaActual && !estaEnCategoria(p, categoriaActual.nombre)) return false;
+      if (categoriaActual && categoriaActual.especial) { if (p.available === false || diasAnticipacionProducto(p) > 0) return false; }
+      else if (categoriaActual && !estaEnCategoria(p, categoriaActual.nombre)) return false;
       if (selectedTag !== 'Todas') {
         if (selectedTag === 'Entrega Hoy' && p.requiresNotice) return false;
         if (selectedTag === 'Con Anticipación' && !p.requiresNotice) return false;
@@ -820,6 +826,60 @@ export default function Page() {
       return true;
     });
   }, [products, categoriaActual, selectedTag, searchQuery]);
+
+  const ETIQUETA_PAGO_BOT = { ESPERA_DOMICILIO: 'Falta valor domicilio', ESPERA_PAGO: 'Esperando pago', POR_VERIFICAR: 'Comprobante por verificar', POR_CONFIRMAR: 'Contra entrega por confirmar' };
+  const orders = useMemo(() => {
+    const delBot = pedidosBot.map(p => {
+      const cambios = pedidosPanel.estados[p.codigo] || {};
+      const saldo = Number(p.saldo) || 0;
+      const pago = p.estado !== 'APROBADO'
+        ? (ETIQUETA_PAGO_BOT[p.estado] || p.estado)
+        : (p.formaPago === 'contraentrega' && saldo > 0 ? 'Contra entrega: cobrar ' + formatCOP(saldo) : 'Pagado (bot)');
+      return {
+        id: p.codigo, code: p.codigo, origen: 'bot', estadoBot: p.estado,
+        clientName: p.nombre || '', clientPhone: p.recibeTelefono || String(p.telefono || '').replace(/^57/, ''),
+        address: p.entrega === 'tienda' ? 'Recoge en tienda' : (p.direccion || ''), zone: p.sectorNombre || '',
+        deliveryDate: p.fecha || '', deliveryTime: p.hora || '',
+        items: (p.carrito || []).map(i => ({ productName: i.nombre, portion: [i.porcion, i.sabor ? 'sabor ' + i.sabor : null].filter(Boolean).join(', ') || undefined, quantity: 1, price: i.precio })),
+        total: Number(p.total) || 0,
+        status: cambios.status || 'Pendiente',
+        paymentMethod: pago,
+        notes: cambios.notes !== undefined ? cambios.notes : [p.mensajeTarjeta ? 'Tarjeta: ' + p.mensajeTarjeta : '', p.notas || ''].filter(Boolean).join(' · ')
+      };
+    });
+    const manuales = pedidosPanel.manuales.map(o => ({ ...o, origen: 'manual' }));
+    return [...manuales, ...delBot].sort((a, b) => String(b.deliveryDate).localeCompare(String(a.deliveryDate)));
+  }, [pedidosBot, pedidosPanel]);
+
+  const cargarPedidos = async () => {
+    try {
+      const d = await apiAdmin('/api/admin/pedidos');
+      setPedidosBot(d.bot || []);
+      setPedidosPanel(d.panel || { manuales: [], estados: {} });
+    } catch (e) { console.error(e); }
+  };
+
+  const guardarPedidosPanel = async (nuevo, aviso) => {
+    setPedidosPanel(nuevo);
+    try {
+      await apiAdmin('/api/admin/pedidos', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ panel: nuevo }) });
+      if (aviso) showToast(aviso);
+    } catch (e) { showToast('⚠️ ' + e.message); }
+  };
+
+  // Cambia estado o nota de cualquier pedido (del bot o manual) y lo guarda
+  const actualizarPedido = (ord, cambios, aviso) => {
+    if (ord.origen === 'bot') {
+      const actual = pedidosPanel.estados[ord.code] || {};
+      guardarPedidosPanel({ ...pedidosPanel, estados: { ...pedidosPanel.estados, [ord.code]: { ...actual, ...cambios } } }, aviso);
+    } else {
+      guardarPedidosPanel({ ...pedidosPanel, manuales: pedidosPanel.manuales.map(o => o.id === ord.id ? { ...o, ...cambios } : o) }, aviso);
+    }
+  };
+
+  useEffect(() => {
+    if (authRole === 'admin' && currentView === 'admin' && ['pedidos', 'calendario'].includes(adminTab)) cargarPedidos();
+  }, [authRole, currentView, adminTab]);
 
   const filteredOrders = useMemo(() => {
     return orders.filter(o => {
@@ -1322,7 +1382,7 @@ export default function Page() {
                         <td className="p-3">
                           <select 
                             value={ord.status} 
-                            onChange={(e) => setOrders(prev => prev.map(o => o.id === ord.id ? { ...o, status: e.target.value } : o))} 
+                            onChange={(e) => actualizarPedido(ord, { status: e.target.value }, '✓ Estado actualizado')} 
                             className="px-2.5 py-1.5 rounded-xl text-xs font-semibold border border-stone-300 bg-white shadow-xs focus:outline-none"
                           >
                             <option value="Pendiente">⌛ Pendiente</option>
@@ -1668,7 +1728,8 @@ export default function Page() {
                         ['zonasCobertura', 'Zonas de cobertura en el pie (separadas por coma)'],
                         ['hoursMonFri', 'Horario lunes a viernes'],
                         ['hoursSat', 'Horario sábados'],
-                        ['hoursSun', 'Domingos y festivos']
+                        ['hoursSun', 'Domingos y festivos'],
+                        ['direccionTienda', '🏪 Dirección de la tienda (el bot se la da a quien recoge)']
                       ].map(([k, etiqueta]) => (
                         <div key={k} className={k === 'heroDescripcion' || k === 'pieDescripcion' ? 'md:col-span-2' : ''}>
                           <label className="font-bold text-stone-700 block mb-1">{etiqueta}</label>
@@ -1745,7 +1806,22 @@ export default function Page() {
                     </select>
                   </div>
                 </div>
-                <button type="button" onClick={guardarPrivado} className="px-5 py-2.5 rounded-xl bg-[#2D5A27] text-white font-bold hover:bg-[#23481E]">Guardar avisos y calendario</button>
+                <div>
+                  <label className="font-bold text-stone-700 block mb-1">📋 Correos que reciben el resumen diario de las 2 pm</label>
+                  <input value={privado.correosResumen || ''} onChange={(e) => setPrivado({ ...privado, correosResumen: e.target.value })} placeholder="camila@gmail.com, marta@gmail.com" className="w-full p-3 rounded-2xl bg-stone-50 border border-stone-200" />
+                  <p className="text-[10px] text-stone-400 mt-1">Todos los días a las 2 pm llega el resumen del siguiente día hábil (productos, pedidos y domicilios) a estos correos y al WhatsApp que aprueba los pagos.</p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <button type="button" onClick={guardarPrivado} className="px-5 py-2.5 rounded-xl bg-[#2D5A27] text-white font-bold hover:bg-[#23481E]">Guardar avisos y calendario</button>
+                  <button type="button" onClick={() => apiAdmin('/api/resumen-diario?ver=1').then(r => setResumenVista(r.texto)).catch(e => showToast('⚠️ ' + e.message))} className="px-4 py-2.5 rounded-xl bg-stone-100 text-stone-700 font-bold">👀 Ver resumen del próximo día</button>
+                  <button type="button" onClick={() => apiAdmin('/api/resumen-diario?enviar=1').then(r => showToast(`Resumen: WhatsApp ${r.whatsapp} · correo ${r.correo}`)).catch(e => showToast('⚠️ ' + e.message))} className="px-4 py-2.5 rounded-xl bg-stone-100 text-stone-700 font-bold">📤 Enviar resumen ahora</button>
+                </div>
+                {resumenVista && (
+                  <div className="relative">
+                    <button type="button" onClick={() => setResumenVista(null)} className="absolute top-2 right-3 text-stone-400 font-bold">✕</button>
+                    <pre className="whitespace-pre-wrap text-[11px] bg-stone-50 border border-stone-200 rounded-2xl p-4 font-sans">{resumenVista.replace(/\*/g, '')}</pre>
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1799,7 +1875,7 @@ export default function Page() {
                   <p className="text-xs text-stone-500">Barrios y valor del domicilio. El bot busca el barrio en la dirección del cliente. Si el valor es $0 o el barrio no está en la lista, el bot te pide el valor por WhatsApp.</p>
 
                   <div className="flex items-center gap-2 text-xs">
-                    <label className="font-bold text-stone-700">🚗 Recargo si va en carro (tortas de 15 porciones o más y torta vasca):</label>
+                    <label className="font-bold text-stone-700">🛵 Recargo por tortas (se suma al domicilio):</label>
                     <input value={cfgRecargo} onChange={(e) => setCfgRecargo(e.target.value)} className="w-24 p-2 rounded-xl bg-stone-50 border border-stone-200" />
                     <button type="button" onClick={() => { const updated = { ...config, recargoTortas: Number(String(cfgRecargo).replace(/\D/g, '')) || 0 }; setConfig(updated); guardarAjustesServidor({ config: updated }).then(ok => { if (ok) showToast('✓ Recargo guardado'); }); }} className="px-3 py-2 rounded-xl bg-[#E5ECE3] text-[#2D5A27] font-bold">Guardar</button>
                   </div>
@@ -2065,7 +2141,8 @@ export default function Page() {
                   </select>
                 </label>
                 <label className="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" checked={formTarjeta} onChange={(e) => setFormTarjeta(e.target.checked)} /><span>💌 Lleva tarjeta</span></label>
-                <label className="flex items-center gap-1.5 cursor-pointer" title="La torta vasca y las tortas de 15 porciones o más ya van en carro automáticamente"><input type="checkbox" checked={formEnCarro} onChange={(e) => setFormEnCarro(e.target.checked)} /><span>🚗 Siempre va en carro</span></label>
+                <label className="flex items-center gap-1.5 cursor-pointer" title="Las tortas lo traen marcado"><input type="checkbox" checked={formRecargo} onChange={(e) => setFormRecargo(e.target.checked)} /><span>🛵 Suma recargo de domicilio</span></label>
+                <label className="flex items-center gap-1.5 cursor-pointer" title="Tortas y guacales lo traen marcado"><input type="checkbox" checked={formAnticipo} onChange={(e) => setFormAnticipo(e.target.checked)} /><span>💵 Exige anticipo del 50% (contra entrega)</span></label>
               </div>
               <div className="pt-3 flex gap-2">
                 <button type="button" onClick={() => setEditingProduct(null)} className="flex-1 py-2.5 rounded-xl border border-stone-300 font-bold text-stone-600">Cancelar</button>
@@ -2105,7 +2182,7 @@ export default function Page() {
                     <div className="flex gap-2">
                       <button type="button" onClick={() => {
                         const nota = notaEnEdicion.trim();
-                        setOrders(prev => prev.map(o => o.id === selectedOrderDetail.id ? { ...o, notes: nota } : o));
+                        actualizarPedido(selectedOrderDetail, { notes: nota });
                         setSelectedOrderDetail({ ...selectedOrderDetail, notes: nota });
                         setNotaEnEdicion(null);
                         showToast('✓ Nota guardada');

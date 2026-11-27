@@ -50,7 +50,7 @@ export async function GET(request) {
   if (rolDesdeRequest(request) !== 'admin') return noAutorizado();
   try {
     const [pedidos, control] = await Promise.all([leerAjuste('pedidos_whatsapp'), leerAjuste('domicilios')]);
-    const lista = (Array.isArray(pedidos) ? pedidos : []).map(p => ({
+    const lista = (Array.isArray(pedidos) ? pedidos : []).filter(p => p.entrega !== 'tienda').map(p => ({
       codigo: p.codigo,
       estado: p.estado,
       fecha: p.fecha || '',
@@ -64,6 +64,8 @@ export async function GET(request) {
       domicilio: Number(p.domicilio) || 0,
       domicilioPorConfirmar: !!p.domicilioPorConfirmar,
       total: Number(p.total) || 0,
+      formaPago: p.formaPago || 'transferencia',
+      saldo: Number(p.saldo) || 0,
       notas: p.notas || ''
     }));
     return Response.json({ pedidos: lista, control: limpiarControl(control) });

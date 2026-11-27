@@ -62,11 +62,12 @@ export default function PanelDomicilios({ apiAdmin, showToast }) {
   const entregas = useMemo(() => {
     const delBot = pedidos.map(p => {
       const a = control.asignaciones[p.codigo] || {};
-      const pagoBot = p.estado === 'APROBADO' ? 'pagado' : p.estado === 'POR_VERIFICAR' ? 'verificar' : 'sinpagar';
+      const contraEntrega = p.formaPago === 'contraentrega' && p.saldo > 0;
+      const pagoBot = p.estado === 'APROBADO' ? (contraEntrega ? 'contraentrega' : 'pagado') : p.estado === 'POR_VERIFICAR' ? 'verificar' : 'sinpagar';
       const pago = a.pago || pagoBot;
       return {
         ...p, origen: 'bot', pago, pagoBot,
-        valor: a.valor ?? p.domicilio, cobrar: pago === 'contraentrega' ? p.total : 0,
+        valor: a.valor ?? p.domicilio, cobrar: pago === 'contraentrega' ? (contraEntrega ? p.saldo : p.total) : 0,
         domiciliario: a.domiciliario || '', pagadoDomiciliario: !!a.pagadoDomiciliario,
         entregado: !!a.entregado, cancelado: !!a.cancelado
       };

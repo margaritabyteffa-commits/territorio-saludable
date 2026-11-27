@@ -4,7 +4,7 @@ import { leerAjuste, guardarAjuste, rolDesdeRequest, noAutorizado, errorServidor
 
 export const dynamic = 'force-dynamic';
 
-const CAMPOS = ['aprobadores', 'produccion', 'calendarioUrl', 'calendarioCorreos', 'recordatorios'];
+const CAMPOS = ['aprobadores', 'produccion', 'calendarioUrl', 'calendarioCorreos', 'recordatorios', 'correosResumen'];
 
 export async function GET(request) {
   if (rolDesdeRequest(request) !== 'admin') return noAutorizado();
