@@ -561,8 +561,16 @@ function datosSueltos(texto, faltaban) {
   const nombres = [];
   const quienRecibe = [];
   const falta = (k) => faltaban.includes(k) && !datos[k];
+  let anteriorFueDireccion = false;
   for (const lineaOriginal of lineas) {
     let linea = lineaOriginal;
+    // La línea que sigue a la dirección y es solo texto suele ser el barrio ("Real de minas")
+    if (anteriorFueDireccion && /^[a-záéíóúñü0-9 .'-]{3,60}$/i.test(linea) && !interpretarFecha(linea) && !PARECE_HORA.test(normalizar(linea)) && !interpretarPago(linea) && !limpiarCelular(linea)) {
+      datos.direccion = `${datos.direccion}, ${linea}`;
+      anteriorFueDireccion = false;
+      continue;
+    }
+    anteriorFueDireccion = false;
     const t0 = normalizar(linea);
     // Domicilio / tienda y forma de pago (frases cortas)
     if (t0.split(' ').length <= 6) {
@@ -575,6 +583,7 @@ function datosSueltos(texto, faltaban) {
     if (falta('direccion') || (datos.direccion && PARECE_DIRECCION.test(linea))) {
       if (PARECE_DIRECCION.test(linea) && !limpiarCelular(linea)) {
         datos.direccion = datos.direccion ? `${datos.direccion}, ${linea}` : linea;
+        anteriorFueDireccion = true;
         continue;
       }
     }
@@ -605,7 +614,11 @@ function datosSueltos(texto, faltaban) {
       else nombres.push(linea.replace(/^(pide|soy|me llamo|mi nombre es)\s*/i, '').trim());
     }
   }
-  for (const n of nombres) if (falta('nombre')) datos.nombre = n;
+  // El primer nombre es quien pide; un segundo nombre es quien recibe
+  for (const n of nombres) {
+    if (falta('nombre')) datos.nombre = n;
+    else if (!datos.recibeNombre) datos.recibeNombre = n;
+  }
   if (quienRecibe.length) datos.recibeNombre = quienRecibe[0];
   return datos;
 }
@@ -912,10 +925,7 @@ async function manejarAdmin(texto, desde) {
   const dom = t.match(/^domicilio\s*(ts\s*\d{4})\s*\$?\s*([\d ]+)/);
   if (dom) return fijarDomicilio(dom[1].replace(/\s/g, '').toUpperCase().replace('TS', 'TS-'), Number(dom[2].replace(/\D/g, '')), responder);
   const m = t.match(/^(aprobar|aprobado|aprobada)\s*(ts\s*\d{4})?/);
-  if (!m) {
-    await responder('Para aprobar escribe: *Aprobar TS-1234*\nPara el domicilio: *Domicilio TS-1234 12000*');
-    return true;
-  }
+  if (!m) return false;
   let codigo = m[2] ? m[2].replace(/\s/g, '').toUpperCase().replace('TS', 'TS-') : null;
   if (!codigo) codigo = await leer('wa:ultimo_por_verificar');
   const pedido = codigo ? await leer(`wa:pedido:${codigo}`) : null;
@@ -988,7 +998,9 @@ async function manejarMensaje(msg) {
   const texto = (msg.text?.body || msg.interactive?.button_reply?.title || '').trim();
   const t = normalizar(texto);
 
-  if (tipo === 'text' && /^\s*(aprob|domicilio)/i.test(texto) && (await aprobadores()).includes(tel) && await manejarAdmin(texto, tel)) return;
+  // Comandos de Camila: "Aprobar TS-1234" o "Domicilio TS-1234 12000".
+  // (Un cliente que escribe "Domicilio" en sus datos no es un comando, aunque sea un número del equipo.)
+  if (tipo === 'text' && /^\s*(aprob[a-z]*\b|domicilio\s*ts\s*-?\s*\d)/i.test(texto) && (await aprobadores()).includes(tel) && await manejarAdmin(texto, tel)) return;
 
   const s = (await leer(claveSesion(tel))) || sesionNueva();
   const guardarSesion = () => guardar(claveSesion(tel), s);
