@@ -59,7 +59,7 @@ Pastelería 100% sin azúcar refinada y libre de gluten en *Bucaramanga* y su Á
 ${lineas.join('\n')}
 ${numeroEmoji(Number(catalogo))} Ver el catálogo completo
 ${numeroEmoji(Number(asesor))} Hablar con un asesor
-${numeroEmoji(Number(inmediata))} ⚡ Entrega inmediata`;
+${numeroEmoji(Number(inmediata))} ⚡ ¿Qué hay para ya?`;
 }
 
 const COMO_PEDIR = `Cuando sepa cuál desea, *escríbanos el nombre del producto y el tamaño* por este medio, o presione el botón *Pedir* en la página.
@@ -74,7 +74,7 @@ function seccionPorNumero(config, t) {
   return { titulo: `*${c.nombre}*`, ancla: c.id, nota: c.id === 'tortas' ? 'En la página puede elegir el número de porciones.' : '' };
 }
 
-const PIDE_INMEDIATA = /(para hoy|para ya|entrega inmediata|inmediat|que (tienen|tiene|hay) (hoy|ya|disponible)|disponible(s)? (hoy|ya)|lo de hoy)/;
+const PIDE_INMEDIATA = /(que hay para ya|para hoy|para ya|entrega inmediata|inmediat|que (tienen|tiene|hay) (hoy|ya|disponible)|disponible(s)? (hoy|ya)|lo de hoy)/;
 
 const DATOS_PAGO_POR_DEFECTO = 'Nequi / Daviplata: 3000559196';
 const DIRECCION_TIENDA = 'Calle 59 # 30-91, barrio Conucos, Bucaramanga';
@@ -979,7 +979,7 @@ async function responderInmediata(tel, productos) {
   if (esDiaSinEntregas(hoyIso)) aviso = '\n\n_Hoy no hacemos entregas (domingo o festivo). Puede programar su pedido para el siguiente día hábil._';
   else if (despuesDeDescanso(hoyIso) && ahoraColombia().getHours() < HORA_INICIO_TRAS_DESCANSO) aviso = `\n\n_Hoy ${nombreDia(hoyIso)} entregamos a partir de las 2:00 p. m._`;
   const listado = lista.length && lista.length <= 25 ? `\n\n${lista.join('\n')}` : '';
-  return enviarTexto(tel, `⚡ *Entrega inmediata*\n\nEstos productos se los podemos entregar hoy mismo, en aproximadamente 30 minutos:${listado}\n\nVea las fotos y precios aquí:\n${BASE_URL}/#inmediata${aviso}\n\n${COMO_PEDIR}`);
+  return enviarTexto(tel, `⚡ *¿Qué hay para ya?*\n\nEstos productos se los podemos entregar hoy mismo, en aproximadamente 30 minutos:${listado}\n\nVea las fotos y precios aquí:\n${BASE_URL}/#inmediata${aviso}\n\n${COMO_PEDIR}`);
 }
 
 async function manejarMensaje(msg) {

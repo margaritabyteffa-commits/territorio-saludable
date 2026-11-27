@@ -64,7 +64,7 @@ const WhatsAppIcon = ({ size = 16, className = '' }) => (
 const CAMPOS_TEXTO = ['anuncio', 'etiquetaHero', 'heroTitulo', 'heroDescripcion', 'etiquetas', 'pieDescripcion', 'zonasCobertura', 'hoursMonFri', 'hoursSat', 'hoursSun', 'pagoNequi', 'pagoDavivienda', 'pagoDaviviendaTipo', 'pagoBancolombia', 'pagoBancolombiaTipo', 'pagoBreb', 'pagoTitular', 'pagoEfectivo', 'pagoOtros', 'direccionTienda'];
 
 // Sección especial de la página: lo que se entrega hoy mismo (anticipación 0 días)
-const CATEGORIA_INMEDIATA = { nombre: 'Entrega inmediata', id: 'inmediata', emoji: '⚡', especial: true, descripcion: '⚡ Estos productos se los podemos entregar hoy mismo, en aproximadamente 30 minutos. Presione "Pedir" para hacer su pedido por WhatsApp.' };
+const CATEGORIA_INMEDIATA = { nombre: '¿Qué hay para ya?', id: 'inmediata', emoji: '⚡', especial: true, descripcion: '⚡ Estos productos se los podemos entregar hoy mismo, en aproximadamente 30 minutos. Presione "Pedir" para hacer su pedido por WhatsApp.' };
 const diasAnticipacionProducto = (p) => (Number(p.diasAnticipacion) > 0 ? Number(p.diasAnticipacion) : (p.requiresNotice ? 1 : 0));
 
 const listaComas = (t) => String(t || '').split(',').map(x => x.trim()).filter(Boolean);
