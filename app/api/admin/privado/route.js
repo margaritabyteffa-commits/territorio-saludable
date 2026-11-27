@@ -1,6 +1,7 @@
 // Ajustes privados (no se muestran en la página pública):
 // quién aprueba pagos, quién recibe los avisos de producción y el enlace del calendario.
 import { leerAjuste, guardarAjuste, rolDesdeRequest, noAutorizado, errorServidor } from '../../../../lib/servidor';
+import { leer } from '../../../../lib/sesiones';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,7 +10,8 @@ const CAMPOS = ['aprobadores', 'produccion', 'calendarioUrl', 'calendarioCorreos
 export async function GET(request) {
   if (rolDesdeRequest(request) !== 'admin') return noAutorizado();
   try {
-    return Response.json({ privado: (await leerAjuste('privado')) || {} });
+    const [privado, errores, remitentes] = await Promise.all([leerAjuste('privado'), leer('wa:errores_envio'), leer('wa:remitentes')]);
+    return Response.json({ privado: privado || {}, errores: errores || [], remitentes: remitentes || [] });
   } catch (e) {
     return errorServidor(e);
   }

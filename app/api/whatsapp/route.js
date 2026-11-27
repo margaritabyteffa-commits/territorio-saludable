@@ -21,7 +21,7 @@ import {
   esDiaSinEntregas, despuesDeDescanso, HORA_INICIO_TRAS_DESCANSO,
   horaDelDia, horaYMinutos, HORA_INMEDIATA, esInmediato
 } from '../../../lib/fechas';
-import { enviarTexto, enviarBotones, descargarMedia, listaNumeros, numerosAprobadores } from '../../../lib/whatsapp';
+import { enviarTexto, enviarBotones, descargarMedia, listaNumeros, numerosAprobadores, registrarRemitente } from '../../../lib/whatsapp';
 import { crearEventoCalendario } from '../../../lib/calendario';
 import { guardarPedidoBot, formatCOP, nombreItem } from '../../../lib/pedidos';
 
@@ -1251,6 +1251,7 @@ export async function POST(request) {
     const mensajes = body.entry?.[0]?.changes?.[0]?.value?.messages || [];
     for (const msg of mensajes) {
       if (!(await esMensajeNuevo(msg.id))) continue;
+      await registrarRemitente(msg.from);
       try {
         await manejarMensaje(msg);
       } catch (e) {

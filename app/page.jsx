@@ -290,6 +290,7 @@ export default function Page() {
   const [newAdminPwd, setNewAdminPwd] = useState('');
   const [privado, setPrivado] = useState({ aprobadores: '', produccion: '', calendarioUrl: '', calendarioCorreos: '', recordatorios: '1440,120', correosResumen: '' });
   const [resumenVista, setResumenVista] = useState(null);
+  const [diagnostico, setDiagnostico] = useState({ errores: [], remitentes: [] });
   const [privadoCargado, setPrivadoCargado] = useState(false);
   const [newPanaderoPwd, setNewPanaderoPwd] = useState('');
   const [selectedCalDateStr, setSelectedCalDateStr] = useState('2026-11-09');
@@ -621,7 +622,7 @@ export default function Page() {
   useEffect(() => {
     if (authRole !== 'admin' || adminTab !== 'configuracion' || privadoCargado) return;
     apiAdmin('/api/admin/privado')
-      .then(d => { setPrivado(prev => ({ ...prev, ...(d.privado || {}) })); setPrivadoCargado(true); })
+      .then(d => { setPrivado(prev => ({ ...prev, ...(d.privado || {}) })); setDiagnostico({ errores: d.errores || [], remitentes: d.remitentes || [] }); setPrivadoCargado(true); })
       .catch(() => {});
   }, [authRole, adminTab, privadoCargado]);
 
@@ -1833,6 +1834,20 @@ export default function Page() {
                   <button type="button" onClick={() => apiAdmin('/api/resumen-diario?ver=1&momento=tarde').then(r => setResumenVista(r.texto)).catch(e => showToast('⚠️ ' + e.message))} className="px-4 py-2.5 rounded-xl bg-stone-100 text-stone-700 font-bold">👀 Ver pedidos del próximo día</button>
                   <button type="button" onClick={() => apiAdmin('/api/resumen-diario?enviar=1&momento=tarde').then(r => showToast(`Resumen: WhatsApp ${r.whatsapp} · correo ${r.correo}`)).catch(e => showToast('⚠️ ' + e.message))} className="px-4 py-2.5 rounded-xl bg-stone-100 text-stone-700 font-bold">📤 Enviar resumen del próximo día ahora</button>
                 </div>
+                <details className="rounded-2xl border border-stone-200 p-3">
+                  <summary className="font-bold text-stone-700 cursor-pointer">🔎 Revisar avisos de WhatsApp</summary>
+                  <div className="mt-2 space-y-2">
+                    <p className="text-stone-500">Últimos números que le escribieron al bot (el de Camila debe ser igual al de "WhatsApp que aprueba los pagos", sin el 57):</p>
+                    {diagnostico.remitentes.length ? diagnostico.remitentes.map(r => (
+                      <p key={r.numero} className="font-mono">{String(r.numero).replace(/^57/, '')} <span className="text-stone-400 font-sans">· {new Date(r.cuando).toLocaleString('es-CO')}</span></p>
+                    )) : <p className="text-stone-400">Nadie ha escrito todavía.</p>}
+                    <p className="text-stone-500 pt-2">Últimos avisos que WhatsApp no dejó enviar:</p>
+                    {diagnostico.errores.length ? diagnostico.errores.map((e, i) => (
+                      <p key={i} className="text-red-700">{String(e.para).replace(/^57/, '')} · {new Date(e.cuando).toLocaleString('es-CO')} · {/131047|24 hours|re-engagement/i.test(e.detalle) ? 'no le había escrito al bot en las últimas 24 horas' : e.detalle}</p>
+                    )) : <p className="text-emerald-700">Ninguno: todos los avisos salieron bien.</p>}
+                    <button type="button" onClick={() => setPrivadoCargado(false)} className="px-3 py-1.5 rounded-lg bg-stone-100 font-bold">Actualizar</button>
+                  </div>
+                </details>
                 {resumenVista && (
                   <div className="relative">
                     <button type="button" onClick={() => setResumenVista(null)} className="absolute top-2 right-3 text-stone-400 font-bold">✕</button>
