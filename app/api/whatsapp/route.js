@@ -34,7 +34,7 @@ const BASE_URL = 'https://territorio-saludable.vercel.app';
 const HORAS_DORMIDO = 24;
 
 // ---------------------------------------------------------------------------
-// Textos (siempre de "usted")
+// Textos (de "tú": el cliente lo prefiere más cercano)
 // ---------------------------------------------------------------------------
 
 const NUMEROS = ['0️⃣', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
@@ -50,11 +50,11 @@ function opcionesMenu(config) {
 function menuPrincipal(config) {
   const { cats, catalogo, asesor, inmediata } = opcionesMenu(config);
   const lineas = cats.map((c, i) => `${numeroEmoji(i + 1)} ${c.fija ? '' : (c.emoji ? c.emoji + ' ' : '')}${c.nombre}`);
-  return `Bienvenido a *Territorio Saludable* 🌱
+  return `¡Hola! Bienvenid@ a *Territorio Saludable* 🌱
 
 Pastelería 100% sin azúcar refinada y libre de gluten en *Bucaramanga* y su Área Metropolitana.
 
-¿Qué desea ver hoy? Responda con el número:
+¿Qué te gustaría ver hoy? Responde con el número:
 
 ${lineas.join('\n')}
 ${numeroEmoji(Number(catalogo))} Ver el catálogo completo
@@ -62,16 +62,16 @@ ${numeroEmoji(Number(asesor))} Hablar con un asesor
 ${numeroEmoji(Number(inmediata))} ⚡ ¿Qué hay para ya?`;
 }
 
-const COMO_PEDIR = `Cuando sepa cuál desea, *escríbanos el nombre del producto y el tamaño* por este medio, o presione el botón *Pedir* en la página.
+const COMO_PEDIR = `Cuando sepas cuál te gusta, *escríbenos el nombre del producto y el tamaño* por aquí, o presiona el botón *Pedir* en la página.
 
-_Escriba *0* para volver al menú._`;
+_Escribe *0* para volver al menú._`;
 
 function seccionPorNumero(config, t) {
   const { cats } = opcionesMenu(config);
   const n = Number(t);
   if (!/^\d+$/.test(t) || n < 1 || n > cats.length) return null;
   const c = cats[n - 1];
-  return { titulo: `*${c.nombre}*`, ancla: c.id, nota: c.id === 'tortas' ? 'En la página puede elegir el número de porciones.' : '' };
+  return { titulo: `*${c.nombre}*`, ancla: c.id, nota: c.id === 'tortas' ? 'En la página puedes elegir el número de porciones.' : '' };
 }
 
 const PIDE_INMEDIATA = /(que hay para ya|para hoy|para ya|entrega inmediata|inmediat|que (tienen|tiene|hay) (hoy|ya|disponible)|disponible(s)? (hoy|ya)|lo de hoy)/;
@@ -288,7 +288,7 @@ async function avisarProduccion(pedido) {
     (pedido.entrega === 'tienda' ? '' : `\n\n📍 ${pedido.sectorNombre || pedido.direccion}`);
   let ok = true;
   for (const n of lista) ok = (await enviarTexto(n, texto)) && ok;
-  return ok ? 'avisado' : 'no se pudo avisar (revise que haya escrito al bot en las últimas 24 h)';
+  return ok ? 'avisado' : 'no se pudo avisar (revisa que haya escrito al bot en las últimas 24 h)';
 }
 
 async function agendarEnCalendario(pedido) {
@@ -348,7 +348,7 @@ async function agregarAlCarrito(tel, s, item) {
   s.candidatos = [];
   s.productoId = null;
   const precio = item.precio ? ` (${formatCOP(item.precio)})` : '';
-  await enviarBotones(tel, `Agregamos *${nombreItem(item)}*${precio} a su pedido.\n\n¿Desea agregar otro producto?`, [
+  await enviarBotones(tel, `¡Excelente elección! Agregamos *${nombreItem(item)}*${precio} a tu pedido.\n\n¿Deseas agregar otro producto?`, [
     { id: 'si', title: 'Sí, agregar otro' },
     { id: 'no', title: 'No, continuar' }
   ]);
@@ -359,10 +359,10 @@ async function preguntarTamano(tel, s, producto) {
   s.productoId = producto.id;
   if (sonOpciones(producto)) {
     const lista = producto.sizes.map((x, i) => `${i + 1}. ${x.portions}`).join('\n');
-    return enviarTexto(tel, `¿Cuál opción de *${producto.name}* (${formatCOP(producto.sizes[0].price)}) desea? Responda con el número:\n\n${lista}`);
+    return enviarTexto(tel, `¿Cuál prefieres de *${producto.name}* (${formatCOP(producto.sizes[0].price)})? Responde con el número:\n\n${lista}`);
   }
   const lista = producto.sizes.map((x, i) => `${i + 1}. ${x.portions} — ${formatCOP(x.price)}`).join('\n');
-  await enviarTexto(tel, `¿De qué tamaño desea *${producto.name}*? Responda con el número:\n\n${lista}`);
+  await enviarTexto(tel, `¿De qué tamaño quieres *${producto.name}*? Responde con el número:\n\n${lista}`);
 }
 
 async function procesarProducto(tel, s, producto, textoTamano) {
@@ -380,7 +380,7 @@ async function pasoSabor(tel, s, producto, tamano, texto) {
   if (!disponibles.length) {
     s.paso = s.carrito.length ? 'AGREGAR_MAS' : 'MENU';
     s.productoId = null;
-    return enviarTexto(tel, `Lo sentimos, hoy no tenemos sabores disponibles de *${producto.name}*. Escríbanos otro producto o escriba *0* para ver el menú.`);
+    return enviarTexto(tel, `Lo sentimos, hoy no tenemos sabores disponibles de *${producto.name}*. Escríbenos otro producto o escribe *0* para ver el menú.`);
   }
   const sabor = texto ? buscarSabor(texto, producto) : null;
   if (sabor) return agregarAlCarrito(tel, s, itemDesde(producto, tamano, sabor.nombre));
@@ -392,7 +392,7 @@ async function pasoSabor(tel, s, producto, tamano, texto) {
   s.productoId = producto.id;
   s.tamanoPendiente = tamano ? tamano.portions : null;
   const lista = disponibles.map((x, i) => `${i + 1}. ${x.nombre}`).join('\n');
-  return enviarTexto(tel, `${avisoAgotado}¿De qué sabor desea *${producto.name}*? Hoy tenemos:\n\n${lista}\n\nResponda con el número.`);
+  return enviarTexto(tel, `${avisoAgotado}¿De qué sabor quieres *${producto.name}*? Hoy tenemos:\n\n${lista}\n\nResponde con el número.`);
 }
 
 // ---------- Plantilla de datos ----------
@@ -413,12 +413,12 @@ function plantillaDatos(s) {
 }
 
 const PREGUNTAS = {
-  entrega: '¿Desea *domicilio* o *recoger en tienda*?',
+  entrega: '¿Quieres *domicilio* o *recoger en tienda*?',
   nombre: '¿A nombre de quién queda el pedido?',
   direccion: '¿Cuál es la *dirección completa y el barrio* de entrega?',
-  fecha: '¿Para qué *fecha* desea su pedido?',
-  hora: '¿A qué *hora* desea su pedido?',
-  formaPago: '¿Cómo desea pagar: *transferencia* o *contra entrega*?'
+  fecha: '¿Para qué *fecha* quieres tu pedido?',
+  hora: '¿A qué *hora* quieres tu pedido?',
+  formaPago: '¿Cómo quieres pagar: *transferencia* o *contra entrega*?'
 };
 
 async function pedirDatosEntrega(tel, s) {
@@ -427,11 +427,11 @@ async function pedirDatosEntrega(tel, s) {
   const dias = diasNecesarios(s);
   const minimo = fechaMinima(s);
   const avisos = [];
-  if (dias) avisos.push(`⏰ Su pedido se prepara con *${dias} día${dias > 1 ? 's' : ''} de anticipación* (entrega desde el ${fechaBonita(minimo)}).`);
-  else avisos.push('⚡ Si lo desea para ya, en la hora escriba *lo antes posible* (aproximadamente 30 minutos).');
+  if (dias) avisos.push(`⏰ Tu pedido se prepara con *${dias} día${dias > 1 ? 's' : ''} de anticipación* (entrega desde el ${fechaBonita(minimo)}).`);
+  else avisos.push('⚡ Si lo quieres para ya, en la hora escribe *lo antes posible* (aproximadamente 30 minutos).');
   avisos.push('No hacemos entregas los domingos ni festivos. Los lunes (o el día después de un festivo) entregamos desde las 2:00 p. m.');
   if (s.carrito.some(i => i.anticipo)) avisos.push('Para pago contra entrega, las tortas y guacales requieren un *anticipo del 50%*.');
-  await enviarTexto(tel, `Para programar su pedido, por favor *copie este mensaje, complételo y envíelo* en un solo mensaje:\n\n${plantillaDatos(s)}\n\n${avisos.join('\n')}`);
+  await enviarTexto(tel, `¡Perfecto! Para programar tu pedido, *copia este mensaje, complétalo y envíalo* en un solo mensaje:\n\n${plantillaDatos(s)}\n\n${avisos.join('\n')}`);
 }
 
 // ---------- Lectura de los datos ----------
@@ -624,7 +624,7 @@ function datosFaltantes(s) {
 }
 
 function mensajeDiaTrasDescanso(iso) {
-  return `Disculpe, los ${nombreDia(iso)} entregamos a partir de las *2:00 p. m.*, porque el día anterior no trabajamos. ¿A qué hora desde las 2:00 p. m. le queda bien?`;
+  return `Discúlpanos, los ${nombreDia(iso)} entregamos a partir de las *2:00 p. m.*, porque el día anterior no trabajamos. ¿A qué hora desde las 2:00 p. m. te queda bien?`;
 }
 
 // Revisa la hora (y la fecha cuando es "lo antes posible"). Devuelve un aviso o null.
@@ -638,11 +638,11 @@ function validarHora(s) {
   if (!hm && esInmediato(d.hora)) {
     if (diasNecesarios(s) > 0) {
       delete d.hora;
-      return `Este pedido se prepara con anticipación, por eso no puede ser inmediato. Escriba la hora que prefiera para el *${fechaBonita(fechaMinima(s))}* o después.`;
+      return `Este pedido se prepara con anticipación, por eso no puede ser inmediato. Escribe la hora que prefieras para el *${fechaBonita(fechaMinima(s))}* o después.`;
     }
     if (esDiaSinEntregas(hoyIso)) {
       delete d.hora;
-      return `Hoy no hacemos entregas (domingo o festivo). Escriba fecha y hora a partir del *${fechaBonita(fechaMinima(s))}*.`;
+      return `Hoy no hacemos entregas (domingo o festivo). Escribe fecha y hora a partir del *${fechaBonita(fechaMinima(s))}*.`;
     }
     if (despuesDeDescanso(hoyIso) && ahora.getHours() < HORA_INICIO_TRAS_DESCANSO) {
       delete d.hora;
@@ -655,7 +655,7 @@ function validarHora(s) {
   }
   if (!hm && !/(manana|tarde|noche|medio ?dia|temprano)/.test(normalizar(d.hora))) {
     delete d.hora;
-    return 'No entendimos la hora. Escríbala así: *3 pm* o *10:30 am*, o escriba *lo antes posible*.';
+    return 'No entendimos la hora. Escríbela así: *3 pm* o *10:30 am*, o escribe *lo antes posible*.';
   }
   if (!d.fecha) return null;
   if (despuesDeDescanso(d.fecha)) {
@@ -664,7 +664,7 @@ function validarHora(s) {
   }
   if (d.fecha === hoyIso && hm && hm.h * 60 + hm.m < ahora.getHours() * 60 + ahora.getMinutes() - 5) {
     delete d.hora;
-    return 'Esa hora ya pasó. Escriba una hora de aquí en adelante, o *lo antes posible*.';
+    return 'Esa hora ya pasó. Escribe una hora de aquí en adelante, o *lo antes posible*.';
   }
   return null;
 }
@@ -678,7 +678,7 @@ function validarFecha(s, iso) {
     const dias = diasNecesarios(s);
     return dias
       ? `Este pedido se prepara con *${dias} día${dias > 1 ? 's' : ''} de anticipación*. La fecha más cercana es el *${fechaBonita(minimo)}*.`
-      : 'Esa fecha ya pasó. Escriba una fecha de hoy en adelante.';
+      : 'Esa fecha ya pasó. Escribe una fecha de hoy en adelante.';
   }
   return null;
 }
@@ -697,9 +697,9 @@ async function procesarDatos(tel, s, texto) {
   if (Object.keys(nuevos).length === 0 && !usoIA) nuevos = await leerTextoLibre(texto);
   if (Object.keys(nuevos).length === 0) {
     if (faltaban.length < 6) {
-      return enviarTexto(tel, `Disculpe, no logramos entenderlo. Por favor indíquenos:\n\n${faltaban.map(k => '• ' + PREGUNTAS[k]).join('\n')}`);
+      return enviarTexto(tel, `No logramos entenderlo 🙈 Por favor cuéntanos:\n\n${faltaban.map(k => '• ' + PREGUNTAS[k]).join('\n')}`);
     }
-    return enviarTexto(tel, `Disculpe, no logramos leer los datos. Por favor copie este mensaje, complételo y envíelo:\n\n${plantillaDatos(s)}`);
+    return enviarTexto(tel, `No logramos leer los datos 🙈 Copia este mensaje, complétalo y envíalo:\n\n${plantillaDatos(s)}`);
   }
 
   for (const [k, v] of Object.entries(nuevos)) if (v) s.datos[k] = v;
@@ -719,7 +719,7 @@ async function procesarDatos(tel, s, texto) {
   if (d.formaPago && d.formaPago !== 'transferencia' && d.formaPago !== 'contraentrega') {
     const p = interpretarPago(d.formaPago);
     if (p) d.formaPago = p;
-    else { delete d.formaPago; avisos.push('No entendimos la forma de pago. Escriba *transferencia* o *contra entrega*.'); }
+    else { delete d.formaPago; avisos.push('No entendimos la forma de pago. Escribe *transferencia* o *contra entrega*.'); }
   }
 
   // Nombre: sirve el de quien pide o el de quien recibe
@@ -740,7 +740,7 @@ async function procesarDatos(tel, s, texto) {
   if (d.fecha && !/^\d{4}-\d{2}-\d{2}$/.test(d.fecha)) {
     const iso = interpretarFecha(d.fecha) || (await leerTextoLibre(`Fecha de entrega: ${d.fecha}`)).fecha;
     if (iso && /^\d{4}-\d{2}-\d{2}$/.test(iso)) d.fecha = iso;
-    else { avisos.push('No entendimos la fecha. Escríbala así: *28/11* o *28 de noviembre*.'); delete d.fecha; }
+    else { avisos.push('No entendimos la fecha. Escríbela así: *28/11* o *28 de noviembre*.'); delete d.fecha; }
   }
   if (d.fecha && !esInmediato(d.hora || '')) {
     const error = validarFecha(s, d.fecha);
@@ -752,7 +752,7 @@ async function procesarDatos(tel, s, texto) {
   const faltan = datosFaltantes(s);
   if (faltan.length) {
     const preguntas = faltan.filter(k => !(k === 'hora' && avisoHora)).map(k => '• ' + PREGUNTAS[k]);
-    const encabezado = avisos.length ? avisos.join('\n\n') : (faltan.length === 1 ? 'Gracias. Solo nos falta un dato:' : 'Gracias. Solo nos faltan estos datos:');
+    const encabezado = avisos.length ? avisos.join('\n\n') : (faltan.length === 1 ? '¡Gracias! Solo nos falta un dato:' : '¡Gracias! Solo nos faltan estos datos:');
     return enviarTexto(tel, `${encabezado}${preguntas.length ? '\n\n' + preguntas.join('\n') : ''}`);
   }
 
@@ -821,11 +821,11 @@ async function mostrarResumen(tel, s) {
   let pago;
   if (d.formaPago === 'transferencia') pago = '*Forma de pago:* Transferencia (pago completo antes de la entrega)';
   else if (d.anticipo) pago = pendiente
-    ? '*Forma de pago:* Contra entrega con anticipo del 50% (el valor se lo confirmamos junto con el domicilio)'
+    ? '*Forma de pago:* Contra entrega con anticipo del 50% (el valor te lo confirmamos junto con el domicilio)'
     : `*Forma de pago:* Contra entrega con anticipo\n*Anticipo (50%):* ${formatCOP(d.anticipo)}\n*Saldo al ${d.entrega === 'tienda' ? 'recoger' : 'recibir'}:* ${formatCOP(d.saldo)} (${PAGO_AL_RECIBIR})`;
   else pago = `*Forma de pago:* Contra entrega (paga al ${d.entrega === 'tienda' ? 'recoger' : 'recibir'}, ${PAGO_AL_RECIBIR})`;
 
-  await enviarBotones(tel, `*RESUMEN DE SU PEDIDO*
+  await enviarBotones(tel, `*RESUMEN DE TU PEDIDO*
 
 *Productos:*
 ${productos}
@@ -837,9 +837,9 @@ ${lugar}
 
 *Subtotal:* ${formatCOP(subtotal)}${lineaDomicilio}
 *TOTAL:* ${total}
-${pago}${domicilioPorConfirmar ? '\n\n_El valor del domicilio a su sector se lo enviamos apenas confirme._' : ''}
+${pago}${domicilioPorConfirmar ? '\n\n_El valor del domicilio a tu sector te lo enviamos apenas confirmes._' : ''}
 
-¿Está todo correcto?`, [
+¿Todo está correcto?`, [
     { id: 'confirmar', title: 'Sí, confirmar' },
     { id: 'corregir', title: 'Corregir datos' }
   ]);
@@ -862,9 +862,9 @@ async function siguientePasoPago(tel, pedido, s, resumenAdmin) {
       for (const k of ['domicilio', 'domicilioPorConfirmar', 'total', 'anticipo', 'saldo', 'aPagar']) s.datos[k] = pedido[k];
     }
     const detalle = pedido.anticipo
-      ? ` (anticipo del 50%; el saldo de ${formatCOP(pedido.saldo)} lo paga al ${pedido.entrega === 'tienda' ? 'recoger' : 'recibir'}, ${PAGO_AL_RECIBIR})`
+      ? ` (anticipo del 50%; el saldo de ${formatCOP(pedido.saldo)} lo pagas al ${pedido.entrega === 'tienda' ? 'recoger' : 'recibir'}, ${PAGO_AL_RECIBIR})`
       : '';
-    await enviarTexto(tel, `*Pedido ${pedido.codigo} registrado.*\n\nPara programarlo, por favor realice el pago de *${formatCOP(pedido.aPagar)}*${detalle} a:\n\n${datosPago}\n\nLuego envíenos por este medio la *foto o captura del comprobante*.`);
+    await enviarTexto(tel, `*¡Pedido ${pedido.codigo} registrado!* 🎉\n\nPara programarlo, por favor realiza el pago de *${formatCOP(pedido.aPagar)}*${detalle} a:\n\n${datosPago}\n\nLuego envíanos por aquí la *foto o captura del comprobante*. 🧾`);
     if (resumenAdmin) await avisarAdmin(`🆕 *Nuevo pedido ${pedido.codigo}* (esperando pago)\n${resumenAdmin}\n💰 Total ${formatCOP(pedido.total)} · ${lineaPagoEquipo(pedido)}`);
     return;
   }
@@ -873,8 +873,8 @@ async function siguientePasoPago(tel, pedido, s, resumenAdmin) {
   await guardarPedidoBot(pedido);
   await guardar('wa:ultimo_por_verificar', pedido.codigo);
   if (s) { s.paso = 'MENU'; s.carrito = []; s.datos = {}; s.codigo = null; }
-  await enviarTexto(tel, `*Pedido ${pedido.codigo} recibido.*\n\nEn breve le confirmamos su pedido. El pago de *${formatCOP(pedido.total)}* lo realiza al ${pedido.entrega === 'tienda' ? 'recoger' : 'recibir'}, ${PAGO_AL_RECIBIR}.${pedido.entrega === 'tienda' ? `\n\nDirección de la tienda: ${direccionTienda(config)}` : ''}\n\nGracias por elegir Territorio Saludable.`);
-  await avisarAdmin(`🆕 *Pedido contra entrega ${pedido.codigo}*\n${resumenAdmin || ''}\n💰 Cobrar al entregar: ${formatCOP(pedido.total)}\n\nPara confirmarlo y pasarlo a producción, responda:\n*Aprobar ${pedido.codigo}*`);
+  await enviarTexto(tel, `*¡Pedido ${pedido.codigo} recibido!* 🎉\n\nEn breve te confirmamos tu pedido. El pago de *${formatCOP(pedido.total)}* lo realizas al ${pedido.entrega === 'tienda' ? 'recoger' : 'recibir'}, ${PAGO_AL_RECIBIR}.${pedido.entrega === 'tienda' ? `\n\nDirección de la tienda: ${direccionTienda(config)}` : ''}\n\n¡Gracias por elegir Territorio Saludable! 🌱`);
+  await avisarAdmin(`🆕 *Pedido contra entrega ${pedido.codigo}*\n${resumenAdmin || ''}\n💰 Cobrar al entregar: ${formatCOP(pedido.total)}\n\nPara confirmarlo y pasarlo a producción, responde:\n*Aprobar ${pedido.codigo}*`);
   await dormir(tel, pedido.codigo, 'pedido');
 }
 
@@ -913,14 +913,14 @@ async function manejarAdmin(texto, desde) {
   if (dom) return fijarDomicilio(dom[1].replace(/\s/g, '').toUpperCase().replace('TS', 'TS-'), Number(dom[2].replace(/\D/g, '')), responder);
   const m = t.match(/^(aprobar|aprobado|aprobada)\s*(ts\s*\d{4})?/);
   if (!m) {
-    await responder('Para aprobar escriba: *Aprobar TS-1234*\nPara el domicilio: *Domicilio TS-1234 12000*');
+    await responder('Para aprobar escribe: *Aprobar TS-1234*\nPara el domicilio: *Domicilio TS-1234 12000*');
     return true;
   }
   let codigo = m[2] ? m[2].replace(/\s/g, '').toUpperCase().replace('TS', 'TS-') : null;
   if (!codigo) codigo = await leer('wa:ultimo_por_verificar');
   const pedido = codigo ? await leer(`wa:pedido:${codigo}`) : null;
   if (!pedido) {
-    await responder('⚠️ No se encontró ese pedido. Escriba por ejemplo: *Aprobar TS-1234*');
+    await responder('⚠️ No encontré ese pedido. Escribe por ejemplo: *Aprobar TS-1234*');
     return true;
   }
   if (pedido.estado === 'APROBADO') {
@@ -928,19 +928,19 @@ async function manejarAdmin(texto, desde) {
     return true;
   }
   if (pedido.estado === 'ESPERA_DOMICILIO') {
-    await responder(`Primero indique el valor del domicilio de ${pedido.codigo}, por ejemplo:\n*Domicilio ${pedido.codigo} 12000*`);
+    await responder(`Primero indica el valor del domicilio de ${pedido.codigo}, por ejemplo:\n*Domicilio ${pedido.codigo} 12000*`);
     return true;
   }
   const sinPago = pedido.estado === 'POR_CONFIRMAR';
   pedido.estado = 'APROBADO';
   await guardarPedidoBot(pedido);
   const saldo = pedido.formaPago === 'contraentrega' && pedido.saldo > 0
-    ? `\nRecuerde que el saldo de *${formatCOP(pedido.saldo)}* se paga al ${pedido.entrega === 'tienda' ? 'recoger' : 'recibir'}.`
+    ? `\nRecuerda que el saldo de *${formatCOP(pedido.saldo)}* se paga al ${pedido.entrega === 'tienda' ? 'recoger' : 'recibir'}.`
     : '';
   const cuando = `${fechaBonita(pedido.fecha)}, ${pedido.hora}`;
   const { config } = await catalogo();
   const lugar = pedido.entrega === 'tienda' ? ` para recoger en nuestra tienda (${direccionTienda(config)})` : '';
-  await enviarTexto(pedido.telefono, `${sinPago ? '*Su pedido fue confirmado.*' : '*Pago verificado.*'}\n\nSu pedido *${pedido.codigo}* quedó agendado${lugar} para el *${cuando}*.${saldo}\n\nGracias por elegir Territorio Saludable.`);
+  await enviarTexto(pedido.telefono, `${sinPago ? '*¡Tu pedido fue confirmado!* 🎉' : '*¡Pago verificado!* 🎉'}\n\nTu pedido *${pedido.codigo}* quedó agendado${lugar} para el *${cuando}*.${saldo}\n\n¡Gracias por elegir Territorio Saludable! 🌱`);
   const produccion = await avisarProduccion(pedido);
   const calendario = await agendarEnCalendario(pedido);
   const detalle = `\n\n📅 ${fechaBonita(pedido.fecha)}, ${pedido.hora} · ${etiquetaEntrega(pedido)}\n*Productos:*\n${(pedido.carrito || []).map(i => `• ${nombreItem(i)}`).join('\n')}` +
@@ -953,18 +953,18 @@ async function manejarAdmin(texto, desde) {
 
 async function fijarDomicilio(codigo, valor, responder) {
   const pedido = await leer(`wa:pedido:${codigo}`);
-  if (!pedido) { await responder('⚠️ No se encontró ese pedido. Escriba por ejemplo: *Domicilio TS-1234 12000*'); return true; }
-  if (!valor) { await responder('⚠️ Escriba el valor en números, por ejemplo: *Domicilio ' + codigo + ' 12000*'); return true; }
+  if (!pedido) { await responder('⚠️ No encontré ese pedido. Escribe por ejemplo: *Domicilio TS-1234 12000*'); return true; }
+  if (!valor) { await responder('⚠️ Escribe el valor en números, por ejemplo: *Domicilio ' + codigo + ' 12000*'); return true; }
   pedido.domicilio = valor;
   pedido.domicilioPorConfirmar = false;
   pedido.total = (Number(pedido.subtotal) || 0) + valor;
   calcularPago(pedido, pedido.carrito || []);
   const s = await leer(claveSesion(pedido.telefono));
   const sesion = s && s.codigo === codigo ? s : null;
-  await enviarTexto(pedido.telefono, `El domicilio de su pedido *${codigo}* tiene un valor de *${formatCOP(valor)}*. Total del pedido: *${formatCOP(pedido.total)}*.`);
+  await enviarTexto(pedido.telefono, `El domicilio de tu pedido *${codigo}* tiene un valor de *${formatCOP(valor)}*. Total del pedido: *${formatCOP(pedido.total)}*.`);
   await siguientePasoPago(pedido.telefono, pedido, sesion, null);
   if (sesion) await guardar(claveSesion(pedido.telefono), sesion);
-  await responder(`✅ Domicilio de ${codigo}: ${formatCOP(valor)}. Total ${formatCOP(pedido.total)} enviado al cliente.${pedido.estado === 'POR_CONFIRMAR' ? `\n\nEs contra entrega: para confirmarlo responda *Aprobar ${codigo}*` : ''}`);
+  await responder(`✅ Domicilio de ${codigo}: ${formatCOP(valor)}. Total ${formatCOP(pedido.total)} enviado al cliente.${pedido.estado === 'POR_CONFIRMAR' ? `\n\nEs contra entrega: para confirmarlo responde *Aprobar ${codigo}*` : ''}`);
   return true;
 }
 
@@ -976,10 +976,10 @@ async function responderInmediata(tel, productos) {
   const hoyIso = aISO(hoyColombia(0));
   const lista = productos.filter(p => p.available !== false && diasAnticipacion(p) === 0).map(p => `• ${p.name}`);
   let aviso = '';
-  if (esDiaSinEntregas(hoyIso)) aviso = '\n\n_Hoy no hacemos entregas (domingo o festivo). Puede programar su pedido para el siguiente día hábil._';
+  if (esDiaSinEntregas(hoyIso)) aviso = '\n\n_Hoy no hacemos entregas (domingo o festivo). Puedes programar tu pedido para el siguiente día hábil._';
   else if (despuesDeDescanso(hoyIso) && ahoraColombia().getHours() < HORA_INICIO_TRAS_DESCANSO) aviso = `\n\n_Hoy ${nombreDia(hoyIso)} entregamos a partir de las 2:00 p. m._`;
   const listado = lista.length && lista.length <= 25 ? `\n\n${lista.join('\n')}` : '';
-  return enviarTexto(tel, `⚡ *¿Qué hay para ya?*\n\nEstos productos se los podemos entregar hoy mismo, en aproximadamente 30 minutos:${listado}\n\nVea las fotos y precios aquí:\n${BASE_URL}/#inmediata${aviso}\n\n${COMO_PEDIR}`);
+  return enviarTexto(tel, `⚡ *¿Qué hay para ya?*\n\nEstos productos te los podemos entregar hoy mismo, en aproximadamente 30 minutos:${listado}\n\nMira las fotos y precios aquí:\n${BASE_URL}/#inmediata${aviso}\n\n${COMO_PEDIR}`);
 }
 
 async function manejarMensaje(msg) {
@@ -1009,11 +1009,11 @@ async function manejarMensaje(msg) {
     const comprobantePendiente = esImagen && ['ESPERA_PAGO', 'ESPERA_VERIFICACION'].includes(s.paso);
     if (!comprobantePendiente) {
       const contenido = texto || (esImagen ? '[envió una imagen o archivo]' : tipo === 'audio' ? '[envió un audio]' : `[${tipo}]`);
-      await avisarAdmin(`💬 *Mensaje de cliente* +${tel}${dormido.codigo ? ` (pedido ${dormido.codigo})` : ''}:\n\n${contenido}\n\n_Escríbale a ese número para responderle._`);
+      await avisarAdmin(`💬 *Mensaje de cliente* +${tel}${dormido.codigo ? ` (pedido ${dormido.codigo})` : ''}:\n\n${contenido}\n\n_Escríbele a ese número para responderle._`);
       if (!dormido.avisado) {
         dormido.avisado = true;
         await guardar(claveDormido(tel), dormido, HORAS_DORMIDO * 3600);
-        await enviarTexto(tel, 'Recibimos su mensaje. En breve una persona de nuestro equipo le responde por este medio.\n\n_Si desea hacer un nuevo pedido, escriba *nuevo pedido*._');
+        await enviarTexto(tel, 'Recibimos tu mensaje 🙌 En breve una persona de nuestro equipo te responde por aquí.\n\n_Si quieres hacer un nuevo pedido, escribe *nuevo pedido*._');
       }
       return;
     }
@@ -1027,8 +1027,8 @@ async function manejarMensaje(msg) {
     return enviarTexto(tel, menuPrincipal(config));
   }
   if (t === 'asesor' || (t === opcionesMenu(config).asesor && s.paso === 'MENU')) {
-    await enviarTexto(tel, 'Con gusto. Una persona de nuestro equipo le responderá en breve por este medio.');
-    await avisarAdmin(`🚨 *Solicitud de asesor*\nCliente: +${tel}\nEscríbale a ese número para atenderlo.`);
+    await enviarTexto(tel, '¡Listo! Una persona de nuestro equipo te responderá en breve por aquí. 👩‍🍳');
+    await avisarAdmin(`🚨 *Solicitud de asesor*\nCliente: +${tel}\nEscríbele a ese número para atenderlo.`);
     await dormir(tel, s.codigo, 'asesor');
     return;
   }
@@ -1042,7 +1042,7 @@ async function manejarMensaje(msg) {
     if (producto) {
       await procesarProducto(tel, s, producto, web[2] || '');
     } else {
-      await enviarTexto(tel, `No encontramos *${web[1]}* en el catálogo actual. Una persona del equipo le ayudará.`);
+      await enviarTexto(tel, `No encontramos *${web[1]}* en el catálogo actual. Una persona del equipo te ayudará.`);
       await avisarAdmin(`⚠️ Cliente +${tel} quiso pedir "${web[1]}" pero no está en el catálogo.`);
     }
     return guardarSesion();
@@ -1050,14 +1050,14 @@ async function manejarMensaje(msg) {
 
   // --- Comprobante de pago ---
   if (esImagen && s.paso === 'ESPERA_DOMICILIO') {
-    return enviarTexto(tel, `Aún no le hemos enviado el valor del domicilio de su pedido ${s.codigo}. Por favor espere el total antes de pagar; en unos minutos se lo enviamos.`);
+    return enviarTexto(tel, `Aún no te hemos enviado el valor del domicilio de tu pedido ${s.codigo}. Espera el total antes de pagar; en unos minutos te lo enviamos. 🙏`);
   }
   if (esImagen) {
     if (s.paso === 'ESPERA_PAGO' || s.paso === 'ESPERA_VERIFICACION') {
       const lectura = await leerComprobante(msg.image?.id || msg.document?.id);
       const aPagar = Number(s.datos.aPagar) || Number(s.datos.total) || 0;
       if (lectura && lectura.esComprobante === false) {
-        return enviarTexto(tel, `Esa imagen no parece un comprobante de pago. Por favor envíenos la captura de la transferencia por *${formatCOP(aPagar)}*.`);
+        return enviarTexto(tel, `Esa imagen no parece un comprobante de pago 🧾 Envíanos la captura de la transferencia por *${formatCOP(aPagar)}*.`);
       }
       s.paso = 'ESPERA_VERIFICACION';
       await guardarSesion();
@@ -1071,14 +1071,14 @@ async function manejarMensaje(msg) {
         await guardarPedidoBot(pedido);
       }
       await guardar('wa:ultimo_por_verificar', s.codigo);
-      await enviarTexto(tel, 'Recibimos su comprobante. Vamos a verificar el pago y en breve le confirmamos su pedido.');
+      await enviarTexto(tel, '¡Gracias! 🧾 Recibimos tu comprobante. Vamos a verificar el pago y en breve te confirmamos tu pedido.');
       const lineaMonto = monto ? `\n🔍 Monto leído: ${formatCOP(monto)}${monto < aPagar - 100 ? ' ⚠️ *menor al esperado*' : ''}` : '';
       const d = pedido || s.datos;
-      await avisarAdmin(`🧾 *Comprobante recibido — ${s.codigo}*\n👤 ${s.datos.nombre} (+${tel})\n💰 Debe pagar ahora: ${formatCOP(aPagar)} · ${lineaPagoEquipo(d)}${lineaMonto}\n📅 ${fechaBonita(s.datos.fecha)}, ${s.datos.hora} · ${etiquetaEntrega(s.datos)}\n\nCuando vea el dinero en la cuenta, responda:\n*Aprobar ${s.codigo}*`);
+      await avisarAdmin(`🧾 *Comprobante recibido — ${s.codigo}*\n👤 ${s.datos.nombre} (+${tel})\n💰 Debe pagar ahora: ${formatCOP(aPagar)} · ${lineaPagoEquipo(d)}${lineaMonto}\n📅 ${fechaBonita(s.datos.fecha)}, ${s.datos.hora} · ${etiquetaEntrega(s.datos)}\n\nCuando veas el dinero en la cuenta, responde:\n*Aprobar ${s.codigo}*`);
       await dormir(tel, s.codigo, 'pedido');
       return;
     }
-    return enviarTexto(tel, 'Recibimos su imagen. Si desea hacer un pedido, escriba *0* para ver el menú.');
+    return enviarTexto(tel, 'Recibimos tu imagen 📷 Si quieres hacer un pedido, escribe *0* para ver el menú.');
   }
 
   // --- Paso a paso ---
@@ -1088,7 +1088,7 @@ async function manejarMensaje(msg) {
       const seccion = seccionPorNumero(config, t);
       if (seccion) {
         const nota = seccion.nota ? `\n\n${seccion.nota}` : '';
-        return enviarTexto(tel, `${seccion.titulo}\n\nPuede verlos aquí:\n${BASE_URL}/#${seccion.ancla}${nota}\n\n${COMO_PEDIR}`);
+        return enviarTexto(tel, `${seccion.titulo}\n\nMíralos aquí:\n${BASE_URL}/#${seccion.ancla}${nota}\n\n${COMO_PEDIR}`);
       }
       if (t === op.catalogo) return enviarTexto(tel, `*Catálogo completo de Territorio Saludable*\n\n${BASE_URL}\n\n${COMO_PEDIR}`);
       if (t === op.inmediata || PIDE_INMEDIATA.test(t)) return responderInmediata(tel, productos);
@@ -1106,15 +1106,15 @@ async function manejarMensaje(msg) {
         s.textoOriginal = texto;
         await guardarSesion();
         const lista = candidatos.map((p, i) => `${i + 1}. ${p.name}`).join('\n');
-        return enviarTexto(tel, `¿Cuál de estos desea? Responda con el número:\n\n${lista}`);
+        return enviarTexto(tel, `¿Cuál de estos quieres? Responde con el número:\n\n${lista}`);
       }
-      return enviarTexto(tel, `No encontramos ese producto. Escríbalo como aparece en el catálogo, o elija una opción del menú.\n\n${menuPrincipal(config)}`);
+      return enviarTexto(tel, `No encontramos ese producto 🤔 Escríbelo como aparece en el catálogo, o elige una opción del menú.\n\n${menuPrincipal(config)}`);
     }
 
     case 'ELEGIR_PRODUCTO': {
       const idx = parseInt(t, 10) - 1;
       const producto = productos.find(p => p.id === s.candidatos[idx]);
-      if (!producto) return enviarTexto(tel, 'Responda con el número de la lista, o escriba *0* para volver al menú.');
+      if (!producto) return enviarTexto(tel, 'Responde con el número de la lista, o escribe *0* para volver al menú.');
       await procesarProducto(tel, s, producto, s.textoOriginal || '');
       return guardarSesion();
     }
@@ -1137,7 +1137,7 @@ async function manejarMensaje(msg) {
       const sabor = (/^\d+$/.test(t) && disponibles[idx]) || buscarSabor(texto, producto);
       if (!sabor) {
         const lista = disponibles.map((x, i) => `${i + 1}. ${x.nombre}`).join('\n');
-        return enviarTexto(tel, `Por favor elija uno de los sabores disponibles hoy:\n\n${lista}`);
+        return enviarTexto(tel, `Elige uno de los sabores disponibles hoy:\n\n${lista}`);
       }
       const tamano = (producto.sizes || []).find(x => x.portions === s.tamanoPendiente) || null;
       s.tamanoPendiente = null;
@@ -1150,7 +1150,7 @@ async function manejarMensaje(msg) {
       if (r === 'si') {
         s.paso = 'MENU';
         await guardarSesion();
-        return enviarTexto(tel, `Con gusto. Escríbanos el otro producto con su tamaño, o elíjalo en la página:\n${BASE_URL}`);
+        return enviarTexto(tel, `¡Súper! 🙌 Escríbenos el otro producto con su tamaño, o elígelo en la página:\n${BASE_URL}`);
       }
       if (r === 'no') {
         await pedirDatosEntrega(tel, s);
@@ -1162,12 +1162,12 @@ async function manejarMensaje(msg) {
         await procesarProducto(tel, s, candidatos[0], texto);
         return guardarSesion();
       }
-      return enviarBotones(tel, '¿Desea agregar otro producto?', [{ id: 'si', title: 'Sí, agregar otro' }, { id: 'no', title: 'No, continuar' }]);
+      return enviarBotones(tel, '¿Deseas agregar otro producto?', [{ id: 'si', title: 'Sí, agregar otro' }, { id: 'no', title: 'No, continuar' }]);
     }
 
     case 'DATOS':
       if (!t || /^(hola+|holi|buen[oa]s?( dias| tardes| noches)?|buenas|hey|ola)$/.test(t)) {
-        return enviarTexto(tel, `Sigamos con su pedido. Por favor copie este mensaje, complételo y envíelo:\n\n${plantillaDatos(s)}\n\n_Escriba *cancelar* si desea empezar de nuevo._`);
+        return enviarTexto(tel, `¡Hola! 👋 Sigamos con tu pedido. Copia este mensaje, complétalo y envíalo:\n\n${plantillaDatos(s)}\n\n_Escribe *cancelar* si quieres empezar de nuevo._`);
       }
       await procesarDatos(tel, s, texto);
       return guardarSesion();
@@ -1183,29 +1183,29 @@ async function manejarMensaje(msg) {
           pedido.estado = 'ESPERA_DOMICILIO';
           await guardarPedidoBot(pedido);
           await guardarSesion();
-          await enviarTexto(tel, `*Pedido ${s.codigo} recibido.*\n\nEn unos minutos le enviamos el *valor del domicilio* a su sector${s.datos.aPagar || s.datos.formaPago === 'transferencia' ? ' y los datos de pago' : ''}.`);
-          await avisarAdmin(`🛵 *Pedido ${s.codigo}: falta el valor del domicilio*\n${resumenAdmin}\n💰 Productos: ${formatCOP(s.datos.subtotal)} · Pago: ${s.datos.formaPago === 'transferencia' ? 'transferencia' : 'contra entrega'}\n\nResponda con el valor total del domicilio${s.datos.recargoTortas ? ` (sume ${formatCOP(s.datos.recargoTortas)} de recargo por torta)` : ''}, así:\n*Domicilio ${s.codigo} 12000*`);
+          await enviarTexto(tel, `*¡Pedido ${s.codigo} recibido!* 🎉\n\nEn unos minutos te enviamos el *valor del domicilio* a tu sector${s.datos.aPagar || s.datos.formaPago === 'transferencia' ? ' y los datos de pago' : ''}.`);
+          await avisarAdmin(`🛵 *Pedido ${s.codigo}: falta el valor del domicilio*\n${resumenAdmin}\n💰 Productos: ${formatCOP(s.datos.subtotal)} · Pago: ${s.datos.formaPago === 'transferencia' ? 'transferencia' : 'contra entrega'}\n\nResponde con el valor total del domicilio${s.datos.recargoTortas ? ` (sume ${formatCOP(s.datos.recargoTortas)} de recargo por torta)` : ''}, así:\n*Domicilio ${s.codigo} 12000*`);
           return;
         }
         await siguientePasoPago(tel, pedido, s, resumenAdmin);
         return guardarSesion();
       }
       if (r === 'no') {
-        await enviarTexto(tel, 'Con gusto, volvamos a llenar los datos.\n_(Si desea cambiar los productos, escriba *cancelar* y empezamos de nuevo.)_');
+        await enviarTexto(tel, 'Sin problema, volvamos a llenar los datos ✍️\n_(Si quieres cambiar los productos, escribe *cancelar* y empezamos de nuevo.)_');
         await pedirDatosEntrega(tel, s);
         return guardarSesion();
       }
-      return enviarBotones(tel, '¿Confirma su pedido?', [{ id: 'confirmar', title: 'Sí, confirmar' }, { id: 'corregir', title: 'Corregir datos' }]);
+      return enviarBotones(tel, '¿Confirmas tu pedido?', [{ id: 'confirmar', title: 'Sí, confirmar' }, { id: 'corregir', title: 'Corregir datos' }]);
     }
 
     case 'ESPERA_DOMICILIO':
-      return enviarTexto(tel, `Estamos calculando el *valor del domicilio* de su pedido ${s.codigo}. En unos minutos se lo enviamos.\n\n_Escriba *cancelar* si desea empezar otro pedido._`);
+      return enviarTexto(tel, `Estamos calculando el *valor del domicilio* de tu pedido ${s.codigo} 🛵 En unos minutos te lo enviamos.\n\n_Escribe *cancelar* si quieres empezar otro pedido._`);
 
     case 'ESPERA_PAGO':
-      return enviarTexto(tel, `Estamos esperando la *foto del comprobante* de su pedido ${s.codigo} por ${formatCOP(s.datos.aPagar || s.datos.total)}.\n\n• Si tiene una duda, escriba *asesor*.\n• Para cancelarlo y empezar otro pedido, escriba *cancelar*.`);
+      return enviarTexto(tel, `Estamos esperando la *foto del comprobante* de tu pedido ${s.codigo} por ${formatCOP(s.datos.aPagar || s.datos.total)}.\n\n• Si tienes una duda, escribe *asesor*.\n• Para cancelarlo y empezar otro pedido, escribe *cancelar*.`);
 
     case 'ESPERA_VERIFICACION':
-      return enviarTexto(tel, `Ya recibimos su comprobante del pedido ${s.codigo}. Estamos verificando el pago y le confirmamos muy pronto.`);
+      return enviarTexto(tel, `Ya recibimos tu comprobante del pedido ${s.codigo} ✅ Estamos verificando el pago y te confirmamos muy pronto.`);
 
     default:
       Object.assign(s, sesionNueva());
@@ -1238,7 +1238,7 @@ export async function POST(request) {
         await manejarMensaje(msg);
       } catch (e) {
         console.error('Error manejando mensaje:', e);
-        await enviarTexto(msg.from, 'Disculpe, tuvimos un problema técnico. Escriba *asesor* y una persona le ayudará.');
+        await enviarTexto(msg.from, 'Uy, tuvimos un problema técnico 🙏 Escribe *asesor* y una persona te ayuda.');
       }
     }
   } catch (e) {
