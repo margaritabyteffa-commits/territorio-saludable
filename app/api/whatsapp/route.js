@@ -247,7 +247,7 @@ function itemDesde(producto, tamano, sabor = null) {
     tarjeta: llevaTarjeta(producto),
     precio: Number(tamano ? tamano.price : producto.price) || 0,
     anticipacion: diasAnticipacion(producto),
-    esTorta: esTortaProducto(producto)
+    enCarro: vaEnCarro(producto, tamano)
   };
 }
 
@@ -470,6 +470,17 @@ function diasAnticipacion(p) {
 // Las tortas van en carro (el domicilio tiene recargo)
 function esTortaProducto(p) {
   return p.category === 'Tortas Saludables' || /\btortas?\b/i.test(p.name || '');
+}
+
+// Van en carro: la torta vasca (siempre), los productos marcados "Siempre va en carro"
+// en el panel y las tortas de 15 porciones o más. Las de 1 a 14 porciones van en moto.
+const PORCIONES_CARRO = 15;
+function vaEnCarro(producto, tamano) {
+  if (producto.enCarro === true) return true;
+  if (/vasca/i.test(producto.name || '')) return true;
+  if (!esTortaProducto(producto)) return false;
+  const porciones = Number((String(tamano ? tamano.portions : '').match(/\d+/) || [])[0]) || 0;
+  return porciones >= PORCIONES_CARRO;
 }
 const diasNecesarios = (s) => Math.max(0, ...s.carrito.map(i => Number(i.anticipacion) || 0));
 const necesitaAnticipacion = (s) => diasNecesarios(s) > 0;
@@ -761,7 +772,7 @@ async function mostrarResumen(tel, s) {
   const { zonas, config } = await catalogo();
   const zona = zonas.find(z => String(z.id || z.name) === s.datos.sectorId);
   const base = zona ? Number(zona.price) || 0 : 0;
-  const llevaTortas = s.carrito.some(i => i.esTorta);
+  const llevaTortas = s.carrito.some(i => i.enCarro ?? i.esTorta);
   const recargo = llevaTortas ? (config.recargoTortas === undefined || config.recargoTortas === '' ? 3000 : Number(config.recargoTortas) || 0) : 0;
   const domicilioPorConfirmar = !zona || !base;
   const domicilio = domicilioPorConfirmar ? 0 : base + recargo;
@@ -780,7 +791,7 @@ async function mostrarResumen(tel, s) {
   const notas = (s.datos.mensajeTarjeta ? `\n💌 *Tarjeta:* ${s.datos.mensajeTarjeta}` : '') + (s.datos.notas ? `\n📝 *Notas:* ${s.datos.notas}` : '');
   const lineaDomicilio = domicilioPorConfirmar
     ? 'por confirmar'
-    : formatCOP(domicilio) + (recargo ? ` _(incluye ${formatCOP(recargo)} porque las tortas van en carro)_` : '');
+    : formatCOP(domicilio) + (recargo ? ` _(incluye ${formatCOP(recargo)} porque tu pedido va en carro)_` : '');
   const total = (domicilioPorConfirmar || precioPendiente)
     ? `${formatCOP(s.datos.total)} + valores por confirmar`
     : formatCOP(s.datos.total);
@@ -815,7 +826,7 @@ async function guardarPedido(pedido) {
   try {
     const lista = (await leerAjuste('pedidos_whatsapp')) || [];
     const sinEste = lista.filter(p => p.codigo !== pedido.codigo);
-    await guardarAjuste('pedidos_whatsapp', [pedido, ...sinEste].slice(0, 300));
+    await guardarAjuste('pedidos_whatsapp', [pedido, ...sinEste].slice(0, 2000));
   } catch (e) {
     console.error('No se pudo guardar el pedido en Supabase:', e);
   }
@@ -1073,7 +1084,7 @@ async function manejarMensaje(msg) {
       const r = respuestaSiNo(msg, texto);
       if (r === 'si') {
         s.codigo = codigoPedido();
-        const resumenAdmin = `👤 ${s.datos.nombre} (+${tel})\n🛒 ${s.carrito.map(nombreItem).join(', ')}${s.datos.llevaTortas ? '\n🚗 Lleva tortas (va en carro)' : ''}\n📍 ${s.datos.direccion}${s.datos.sectorNombre ? ' (' + s.datos.sectorNombre + ')' : ''}\n📅 ${fechaBonita(s.datos.fecha)}, ${s.datos.hora}${s.datos.mensajeTarjeta ? '\n💌 Tarjeta: ' + s.datos.mensajeTarjeta : ''}${s.datos.notas ? '\n📝 ' + s.datos.notas : ''}`;
+        const resumenAdmin = `👤 ${s.datos.nombre} (+${tel})\n🛒 ${s.carrito.map(nombreItem).join(', ')}${s.datos.llevaTortas ? '\n🚗 Va en carro (torta grande o vasca)' : ''}\n📍 ${s.datos.direccion}${s.datos.sectorNombre ? ' (' + s.datos.sectorNombre + ')' : ''}\n📅 ${fechaBonita(s.datos.fecha)}, ${s.datos.hora}${s.datos.mensajeTarjeta ? '\n💌 Tarjeta: ' + s.datos.mensajeTarjeta : ''}${s.datos.notas ? '\n📝 ' + s.datos.notas : ''}`;
         if (s.datos.domicilioPorConfirmar) {
           s.paso = 'ESPERA_DOMICILIO';
           await guardarPedido({ codigo: s.codigo, telefono: tel, estado: 'ESPERA_DOMICILIO', creado: new Date().toISOString(), carrito: s.carrito, ...s.datos });

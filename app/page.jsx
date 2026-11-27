@@ -6,6 +6,7 @@ import {
   ShieldCheck, X, Clock, Lock, LogOut, MapPin, Calendar, ExternalLink,
   Copy, Instagram, Facebook, Sprout, ChevronLeft, ChevronRight
 } from 'lucide-react';
+import PanelDomicilios from './PanelDomicilios';
 import { CATEGORIAS_BASE, categoriasDe, estaEnCategoria, slugCategoria } from '../lib/categorias';
 
 const FALLBACK_IMG = 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=500&auto=format&fit=crop&q=60';
@@ -246,6 +247,7 @@ export default function Page() {
   const [formSabores, setFormSabores] = useState([]);
   const [formTarjeta, setFormTarjeta] = useState(false);
   const [formExtras, setFormExtras] = useState([]);
+  const [formEnCarro, setFormEnCarro] = useState(false);
   const [filtroCatInventario, setFiltroCatInventario] = useState('Todas');
   const [borradorCategorias, setBorradorCategorias] = useState(null);
   const [nuevaCategoria, setNuevaCategoria] = useState({ nombre: '', emoji: '✨', descripcion: '' });
@@ -573,6 +575,7 @@ export default function Page() {
       setFormSabores(Array.isArray(prod.sabores) ? prod.sabores.map(x => ({ ...x })) : []);
       setFormTarjeta(llevaTarjeta(prod));
       setFormExtras(Array.isArray(prod.extraCategorias) ? prod.extraCategorias : []);
+      setFormEnCarro(prod.enCarro === true);
     } else {
       setEditingProduct({ id: 'NEW_PRODUCT' });
       setFormName('');
@@ -586,6 +589,7 @@ export default function Page() {
       setFormSizes([]);
       setFormSabores([]);
       setFormTarjeta(false);
+      setFormEnCarro(false);
       // Si estás viendo una categoría de temporada, el producto nuevo queda marcado en ella
       setFormExtras(filtroCatInventario !== 'Todas' && !CATEGORIES.includes(filtroCatInventario) ? [filtroCatInventario] : []);
     }
@@ -597,10 +601,10 @@ export default function Page() {
     const sizes = formSizes.map(s => ({ portions: s.portions, price: Number(s.price), label: s.portions + ' (' + formatCOP(Number(s.price)) + ')' }));
     const sabores = formSabores.filter(x => x.nombre && x.nombre.trim()).map(x => ({ nombre: x.nombre.trim(), disponible: x.disponible !== false }));
     if (editingProduct && editingProduct.id && editingProduct.id !== 'NEW_PRODUCT') {
-      guardarProductosServidor(products.map(p => p.id === editingProduct.id ? { ...p, name: formName.trim(), category: formCategory, price: Number(formPrice), description: formDescription.trim(), imageUrl: ensureSlash(formImageUrl), available: formAvailable, requiresNotice: formDias > 0, diasAnticipacion: formDias, sizes, sabores, tarjeta: formTarjeta, extraCategorias: formExtras.filter(c => c !== formCategory) } : p));
+      guardarProductosServidor(products.map(p => p.id === editingProduct.id ? { ...p, name: formName.trim(), category: formCategory, price: Number(formPrice), description: formDescription.trim(), imageUrl: ensureSlash(formImageUrl), available: formAvailable, requiresNotice: formDias > 0, diasAnticipacion: formDias, sizes, sabores, tarjeta: formTarjeta, extraCategorias: formExtras.filter(c => c !== formCategory), enCarro: formEnCarro } : p));
       showToast('✓ Producto actualizado');
     } else {
-      guardarProductosServidor([{ id: 'prod-' + Date.now(), name: formName.trim(), category: formCategory, price: Number(formPrice), description: formDescription.trim(), imageUrl: ensureSlash(formImageUrl), available: formAvailable, requiresNotice: formDias > 0, diasAnticipacion: formDias, features: ['Sin Azúcar', 'Sin Gluten'], sizes, sabores, tarjeta: formTarjeta, extraCategorias: formExtras.filter(c => c !== formCategory) }, ...products]);
+      guardarProductosServidor([{ id: 'prod-' + Date.now(), name: formName.trim(), category: formCategory, price: Number(formPrice), description: formDescription.trim(), imageUrl: ensureSlash(formImageUrl), available: formAvailable, requiresNotice: formDias > 0, diasAnticipacion: formDias, features: ['Sin Azúcar', 'Sin Gluten'], sizes, sabores, tarjeta: formTarjeta, extraCategorias: formExtras.filter(c => c !== formCategory), enCarro: formEnCarro }, ...products]);
       showToast('✓ Nuevo producto agregado');
     }
     setEditingProduct(null);
@@ -1112,6 +1116,7 @@ export default function Page() {
             <div className="flex flex-wrap items-center gap-2">
               <button onClick={() => setAdminTab('inventario')} className={'px-3.5 py-2 rounded-xl text-xs font-bold transition ' + (adminTab === 'inventario' ? 'bg-white text-[#1C3A27]' : 'bg-emerald-900 text-emerald-100')}>Inventario (CRUD)</button>
               <button onClick={() => setAdminTab('pedidos')} className={'px-3.5 py-2 rounded-xl text-xs font-bold transition ' + (adminTab === 'pedidos' ? 'bg-white text-[#1C3A27]' : 'bg-emerald-900 text-emerald-100')}>Pedidos ({orders.length})</button>
+              <button onClick={() => setAdminTab('domicilios')} className={'px-3.5 py-2 rounded-xl text-xs font-bold transition ' + (adminTab === 'domicilios' ? 'bg-white text-[#1C3A27]' : 'bg-emerald-900 text-emerald-100')}>🛵 Domicilios</button>
               <button onClick={() => setAdminTab('calendario')} className={'px-3.5 py-2 rounded-xl text-xs font-bold transition ' + (adminTab === 'calendario' ? 'bg-white text-[#1C3A27]' : 'bg-emerald-900 text-emerald-100')}>Calendario de Entregas</button>
               <button onClick={() => setAdminTab('configuracion')} className={'px-3.5 py-2 rounded-xl text-xs font-bold transition ' + (adminTab === 'configuracion' ? 'bg-white text-[#1C3A27]' : 'bg-emerald-900 text-emerald-100')}>Configuración & Zonas</button>
             </div>
@@ -1364,6 +1369,8 @@ export default function Page() {
               </div>
             </div>
           )}
+
+          {adminTab === 'domicilios' && <PanelDomicilios apiAdmin={apiAdmin} showToast={showToast} />}
 
           {adminTab === 'calendario' && (
             <div className="space-y-6">
@@ -1792,7 +1799,7 @@ export default function Page() {
                   <p className="text-xs text-stone-500">Barrios y valor del domicilio. El bot busca el barrio en la dirección del cliente. Si el valor es $0 o el barrio no está en la lista, el bot te pide el valor por WhatsApp.</p>
 
                   <div className="flex items-center gap-2 text-xs">
-                    <label className="font-bold text-stone-700">🚗 Recargo si lleva tortas (van en carro):</label>
+                    <label className="font-bold text-stone-700">🚗 Recargo si va en carro (tortas de 15 porciones o más y torta vasca):</label>
                     <input value={cfgRecargo} onChange={(e) => setCfgRecargo(e.target.value)} className="w-24 p-2 rounded-xl bg-stone-50 border border-stone-200" />
                     <button type="button" onClick={() => { const updated = { ...config, recargoTortas: Number(String(cfgRecargo).replace(/\D/g, '')) || 0 }; setConfig(updated); guardarAjustesServidor({ config: updated }).then(ok => { if (ok) showToast('✓ Recargo guardado'); }); }} className="px-3 py-2 rounded-xl bg-[#E5ECE3] text-[#2D5A27] font-bold">Guardar</button>
                   </div>
@@ -2058,6 +2065,7 @@ export default function Page() {
                   </select>
                 </label>
                 <label className="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" checked={formTarjeta} onChange={(e) => setFormTarjeta(e.target.checked)} /><span>💌 Lleva tarjeta</span></label>
+                <label className="flex items-center gap-1.5 cursor-pointer" title="La torta vasca y las tortas de 15 porciones o más ya van en carro automáticamente"><input type="checkbox" checked={formEnCarro} onChange={(e) => setFormEnCarro(e.target.checked)} /><span>🚗 Siempre va en carro</span></label>
               </div>
               <div className="pt-3 flex gap-2">
                 <button type="button" onClick={() => setEditingProduct(null)} className="flex-1 py-2.5 rounded-xl border border-stone-300 font-bold text-stone-600">Cancelar</button>
