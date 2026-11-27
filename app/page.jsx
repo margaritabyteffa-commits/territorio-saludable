@@ -28,8 +28,10 @@ const DEFAULT_CONFIG = {
   pieDescripcion: 'Pastelería 100% libre de gluten y azúcar refinada en Bucaramanga. Postres, panes y tortas hechos con amor e ingredientes naturales.',
   zonasCobertura: 'Bucaramanga, Floridablanca, Piedecuesta, Girón',
   pagoNequi: '',
-  pagoDaviplata: '',
+  pagoDavivienda: '',
+  pagoDaviviendaTipo: 'Ahorros',
   pagoBancolombia: '',
+  pagoBancolombiaTipo: 'Ahorros',
   pagoTitular: '',
   pagoEfectivo: true,
   pagoOtros: '',
@@ -58,7 +60,7 @@ const WhatsAppIcon = ({ size = 16, className = '' }) => (
 );
 
 // Campos de texto de la página que se editan desde el panel
-const CAMPOS_TEXTO = ['anuncio', 'etiquetaHero', 'heroTitulo', 'heroDescripcion', 'etiquetas', 'pieDescripcion', 'zonasCobertura', 'hoursMonFri', 'hoursSat', 'hoursSun', 'pagoNequi', 'pagoDaviplata', 'pagoBancolombia', 'pagoTitular', 'pagoEfectivo', 'pagoOtros', 'direccionTienda'];
+const CAMPOS_TEXTO = ['anuncio', 'etiquetaHero', 'heroTitulo', 'heroDescripcion', 'etiquetas', 'pieDescripcion', 'zonasCobertura', 'hoursMonFri', 'hoursSat', 'hoursSun', 'pagoNequi', 'pagoDavivienda', 'pagoDaviviendaTipo', 'pagoBancolombia', 'pagoBancolombiaTipo', 'pagoTitular', 'pagoEfectivo', 'pagoOtros', 'direccionTienda'];
 
 // Sección especial de la página: lo que se entrega hoy mismo (anticipación 0 días)
 const CATEGORIA_INMEDIATA = { nombre: 'Entrega inmediata', id: 'inmediata', emoji: '⚡', especial: true, descripcion: '⚡ Estos productos se los podemos entregar hoy mismo, en aproximadamente 30 minutos. Presione "Pedir" para hacer su pedido por WhatsApp.' };
@@ -77,8 +79,8 @@ const TituloResaltado = ({ texto }) => (
 function componerDatosPago(c) {
   const l = [];
   if (c.pagoNequi) l.push('💳 Nequi: ' + c.pagoNequi);
-  if (c.pagoDaviplata) l.push('💳 Daviplata: ' + c.pagoDaviplata);
-  if (c.pagoBancolombia) l.push('🏦 Bancolombia: ' + c.pagoBancolombia);
+  if (c.pagoBancolombia) l.push(`🏦 Bancolombia ${c.pagoBancolombiaTipo || 'Ahorros'}: ${c.pagoBancolombia}`);
+  if (c.pagoDavivienda) l.push(`🏦 Davivienda ${c.pagoDaviviendaTipo || 'Ahorros'}: ${c.pagoDavivienda}`);
   if (c.pagoTitular) l.push('👤 Titular: ' + c.pagoTitular);
   if (c.pagoOtros) l.push(c.pagoOtros);
   return l.join('\n');
@@ -641,7 +643,7 @@ export default function Page() {
     const b = {};
     CAMPOS_TEXTO.forEach(k => { b[k] = config[k] ?? DEFAULT_CONFIG[k]; });
     // Si aún no hay datos de pago separados, se muestra el texto anterior en "Otros"
-    if (!b.pagoNequi && !b.pagoDaviplata && !b.pagoBancolombia && !b.pagoOtros && config.datosPago) b.pagoOtros = config.datosPago;
+    if (!b.pagoNequi && !b.pagoDavivienda && !b.pagoBancolombia && !b.pagoOtros && config.datosPago) b.pagoOtros = config.datosPago;
     setBorradorTextos(b);
   }, [adminTab, config]);
 
@@ -1747,13 +1749,23 @@ export default function Page() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {[
                           ['pagoNequi', 'Nequi (número)'],
-                          ['pagoDaviplata', 'Daviplata (número)'],
-                          ['pagoBancolombia', 'Bancolombia (tipo y número de cuenta)'],
                           ['pagoTitular', 'Titular de las cuentas']
                         ].map(([k, etiqueta]) => (
                           <div key={k}>
                             <label className="font-bold text-stone-700 block mb-1">{etiqueta}</label>
                             <input value={borradorTextos[k] || ''} onChange={(e) => setBorradorTextos({ ...borradorTextos, [k]: e.target.value })} className="w-full p-3 rounded-2xl bg-stone-50 border border-stone-200" />
+                          </div>
+                        ))}
+                        {[['pagoBancolombia', 'Bancolombia'], ['pagoDavivienda', 'Davivienda']].map(([k, banco]) => (
+                          <div key={k}>
+                            <label className="font-bold text-stone-700 block mb-1">{banco}: tipo y número de cuenta</label>
+                            <div className="flex gap-2">
+                              <select value={borradorTextos[k + 'Tipo'] || 'Ahorros'} onChange={(e) => setBorradorTextos({ ...borradorTextos, [k + 'Tipo']: e.target.value })} className="p-3 rounded-2xl bg-stone-50 border border-stone-200">
+                                <option value="Ahorros">Ahorros</option>
+                                <option value="Corriente">Corriente</option>
+                              </select>
+                              <input value={borradorTextos[k] || ''} onChange={(e) => setBorradorTextos({ ...borradorTextos, [k]: e.target.value })} inputMode="numeric" placeholder="Número de cuenta" className="flex-1 min-w-0 p-3 rounded-2xl bg-stone-50 border border-stone-200" />
+                            </div>
                           </div>
                         ))}
                         <div className="md:col-span-2">
@@ -1965,12 +1977,12 @@ export default function Page() {
             <span className="font-bold text-white uppercase tracking-wider block text-[11px]">Métodos de Pago</span>
             <div className="flex flex-wrap gap-1.5">
               {(() => {
-                const hay = config.pagoNequi || config.pagoDaviplata || config.pagoBancolombia;
+                const hay = config.pagoNequi || config.pagoDavivienda || config.pagoBancolombia;
                 return (
                   <>
                     {(!hay || config.pagoNequi) && <span className="px-2.5 py-1 rounded bg-purple-900 text-white font-bold text-[10px]">NEQUI</span>}
-                    {(!hay || config.pagoDaviplata) && <span className="px-2.5 py-1 rounded bg-red-900 text-white font-bold text-[10px]">DAVIPLATA</span>}
                     {(!hay || config.pagoBancolombia) && <span className="px-2.5 py-1 rounded bg-yellow-800 text-white font-bold text-[10px]">BANCOLOMBIA</span>}
+                    {(!hay || config.pagoDavivienda) && <span className="px-2.5 py-1 rounded bg-red-900 text-white font-bold text-[10px]">DAVIVIENDA</span>}
                     {config.pagoEfectivo !== false && <span className="px-2.5 py-1 rounded bg-emerald-900 text-white font-bold text-[10px]">EFECTIVO</span>}
                   </>
                 );

@@ -887,7 +887,7 @@ async function leerComprobante(mediaId) {
   try {
     const media = await descargarMedia(mediaId);
     if (!media) return null;
-    const prompt = 'Mira esta imagen. ¿Es un comprobante de pago o transferencia (Nequi, Daviplata, Bancolombia, PSE, etc.)? Responde SOLO un JSON sin markdown: {"esComprobante": true/false, "monto": numero_sin_puntos_o_null, "detalle": "texto corto"}';
+    const prompt = 'Mira esta imagen. ¿Es un comprobante de pago o transferencia (Nequi, Davivienda, Bancolombia, PSE, etc.)? Responde SOLO un JSON sin markdown: {"esComprobante": true/false, "monto": numero_sin_puntos_o_null, "detalle": "texto corto"}';
     const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-goog-api-key': GEMINI_API_KEY },
