@@ -343,7 +343,13 @@ function horaYMinutos(texto) {
 async function crearEventoCalendario(pedido) {
   const { privado } = await catalogo();
   if (!privado.calendarioUrl) return 'calendario sin configurar';
-  const hm = horaYMinutos(pedido.hora || '');
+  let hm = horaYMinutos(pedido.hora || '');
+  if (!hm && esInmediato(pedido.hora || '')) {
+    // Entrega inmediata: se agenda 30 minutos después de aprobar el pago
+    const t = ahoraColombia();
+    t.setMinutes(t.getMinutes() + 30);
+    hm = { h: t.getHours(), m: t.getMinutes() };
+  }
   const dos = (n) => String(n).padStart(2, '0');
   const inicio = hm ? `${pedido.fecha}T${dos(hm.h)}:${dos(hm.m)}:00-05:00` : `${pedido.fecha}T00:00:00-05:00`;
   const fin = hm ? `${pedido.fecha}T${dos(Math.min(23, hm.h + 1))}:${dos(hm.m)}:00-05:00` : inicio;
@@ -528,7 +534,7 @@ async function pedirDatosEntrega(tel, s) {
   const minimo = fechaMinima(s);
   const aviso = (dias
     ? `\n⏰ Tu pedido se prepara con *${dias} día${dias > 1 ? 's' : ''} de anticipación* (entrega desde el ${fechaBonita(minimo)}).`
-    : '') + '\n🚫 No hacemos entregas los domingos ni festivos.';
+    : '\n⚡ Si lo quieres para ya, en la hora escribe *lo antes posible* (llega en unos 30 minutos).') + '\n🚫 No hacemos entregas los domingos ni festivos.';
   await enviarTexto(tel, `¡Perfecto! 📝 Para programar la entrega, *copia este mensaje, complétalo y envíalo* en un solo mensaje:${aviso}${pedidoConTarjeta(s) ? '\n💌 Incluye *tarjeta*: escribe el mensaje que quieres que lleve (o "sin mensaje").' : ''}\n\n${plantillaDatos(s)}`);
 }
 
@@ -602,6 +608,15 @@ Extrae los datos y responde SOLO este JSON (usa null si un dato no aparece; no i
 function limpiarCelular(texto) {
   const m = String(texto || '').match(/(\+?57[\s-]*)?(3\d{2})[\s.-]?(\d{3})[\s.-]?(\d{4})/);
   return m ? `${m[2]}${m[3]}${m[4]}` : null;
+}
+
+// "Ya", "inmediato", "lo antes posible"… → entrega inmediata (unos 30 minutos)
+const PIDE_INMEDIATO = /\b(ya|ya mismo|inmediat[oa]?|inmediatamente|lo antes posible|lo mas pronto( posible)?|cuanto antes|apenas (puedan|se pueda)|ahora( mismo)?|de una|urgente|asap)\b/;
+const HORA_INMEDIATA = 'Lo antes posible (≈ 30 min)';
+const esInmediato = (texto) => texto === HORA_INMEDIATA || PIDE_INMEDIATO.test(normalizar(texto));
+
+function ahoraColombia() {
+  return new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Bogota' }));
 }
 
 // Hora escrita libre ("3 pm", "a las 10", "mediodía") → hora del día 0-23, o null.
@@ -733,9 +748,30 @@ async function procesarDatos(tel, s, texto) {
     const error = validarFecha(s, s.datos.fecha);
     if (error) { avisos.push(error); delete s.datos.fecha; }
   }
-  if (s.datos.hora && horaDelDia(s.datos.hora) === null && !/(manana|tarde|noche|medio ?dia|temprano)/.test(normalizar(s.datos.hora))) {
-    avisos.push('⏰ No entendí la hora. Escríbela así: *3 pm* o *10:30 am*.');
+  const hoyIso = aISO(hoyColombia(0));
+  if (s.datos.hora && esInmediato(s.datos.hora) && (s.datos.hora === HORA_INMEDIATA || horaDelDia(s.datos.hora) === null)) {
+    // Entrega inmediata: solo para pedidos sin anticipación (postres, pan…), y es para hoy
+    if (diasNecesarios(s) > 0) {
+      avisos.push(`⏰ Este pedido se prepara con anticipación, así que no puede ser inmediato. Escribe la hora que prefieres para el *${fechaBonita(fechaMinima(s))}* o después.`);
+      delete s.datos.hora;
+    } else if (esDiaSinEntregas(hoyIso)) {
+      avisos.push(`🚫 Hoy no hacemos entregas (domingo o festivo). Escribe una hora para el *${fechaBonita(fechaMinima(s))}*.`);
+      delete s.datos.hora;
+    } else {
+      s.datos.hora = HORA_INMEDIATA;
+      s.datos.fecha = hoyIso;
+    }
+  } else if (s.datos.hora && horaDelDia(s.datos.hora) === null && !/(manana|tarde|noche|medio ?dia|temprano)/.test(normalizar(s.datos.hora))) {
+    avisos.push('⏰ No entendí la hora. Escríbela así: *3 pm* o *10:30 am*, o escribe *lo antes posible*.');
     delete s.datos.hora;
+  } else if (s.datos.hora && s.datos.fecha === hoyIso) {
+    // Para hoy se acepta cualquier hora desde ya (los postres salen en unos 30 minutos); solo se rechaza una hora que ya pasó
+    const hm = horaYMinutos(s.datos.hora);
+    const ahora = ahoraColombia();
+    if (hm && hm.h * 60 + hm.m < ahora.getHours() * 60 + ahora.getMinutes() - 5) {
+      avisos.push('⏰ Esa hora ya pasó. Escribe una hora de aquí en adelante, o *lo antes posible*.');
+      delete s.datos.hora;
+    }
   }
 
   const faltan = Object.keys(CAMPOS).filter(k => !s.datos[k]);
