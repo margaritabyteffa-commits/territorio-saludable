@@ -815,7 +815,7 @@ async function mostrarResumen(tel, s) {
     ? `*Entrega:* Recoge en tienda (${direccionTienda(config)})`
     : `*Entrega:* Domicilio\n*Dirección:* ${d.direccion}${d.sectorNombre ? ` _(zona ${d.sectorNombre})_` : ''}`;
   const recibe = d.recibeNombre && d.recibeNombre !== d.nombre ? `\n*Recibe:* ${d.recibeNombre}` : '';
-  const lineaDomicilio = d.entrega === 'tienda' ? '' : `\n*Domicilio:* ${domicilioPorConfirmar ? 'por confirmar' : formatCOP(domicilio) + (recargo ? ` _(incluye ${formatCOP(recargo)} de recargo por torta)_` : '')}`;
+  const lineaDomicilio = d.entrega === 'tienda' ? '' : `\n*Domicilio:* ${domicilioPorConfirmar ? 'por confirmar' : formatCOP(domicilio)}`;
   const pendiente = domicilioPorConfirmar || precioPendiente;
   const total = pendiente ? `${formatCOP(d.total)} + valores por confirmar` : formatCOP(d.total);
   let pago;
