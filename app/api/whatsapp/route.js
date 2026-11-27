@@ -8,6 +8,7 @@
 // Productos, precios, zonas de domicilio y datos de pago se leen de la base de
 // datos (Supabase), así que se cambian desde el panel de administración.
 
+import { categoriasVisibles } from '../../../lib/categorias';
 import { leerProductos, leerAjuste, guardarAjuste, supabaseConfigurado } from '../../../lib/servidor';
 import { leer, guardar, borrar, esMensajeNuevo } from '../../../lib/sesiones';
 
@@ -26,31 +27,45 @@ const GRAPH = 'https://graph.facebook.com/v21.0';
 // Textos
 // ---------------------------------------------------------------------------
 
-const MENU_PRINCIPAL = `¡Hola! Bienvenid@ a *Territorio Saludable* 🍰🌱
+const NUMEROS = ['0️⃣', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
+const numeroEmoji = (n) => NUMEROS[n] || `*${n}.*`;
+
+// El menú sale de las categorías visibles del panel (incluye las de temporada)
+function opcionesMenu(config) {
+  const cats = categoriasVisibles(config);
+  return { cats, catalogo: String(cats.length + 1), asesor: String(cats.length + 2) };
+}
+
+function menuPrincipal(config) {
+  const { cats, catalogo, asesor } = opcionesMenu(config);
+  const lineas = cats.map((c, i) => `${numeroEmoji(i + 1)} ${c.fija ? '' : (c.emoji ? c.emoji + ' ' : '')}${c.nombre}`);
+  return `¡Hola! Bienvenid@ a *Territorio Saludable* 🍰🌱
 
 Pastelería 100% sin azúcar refinada y libre de gluten en *Bucaramanga* y su Área Metropolitana.
 
 ¿Qué te gustaría ver hoy? Responde con el número:
 
-1️⃣ Tortas Saludables
-2️⃣ Catálogo Detalles
-3️⃣ Pan Saludable
-4️⃣ Postres Saludables
-5️⃣ Mercadito
-6️⃣ 📖 Ver el catálogo completo
-7️⃣ 👩‍🍳 Hablar con un asesor`;
+${lineas.join('\n')}
+${numeroEmoji(Number(catalogo))} 📖 Ver el catálogo completo
+${numeroEmoji(Number(asesor))} 👩‍🍳 Hablar con un asesor`;
+}
 
 const COMO_PEDIR = `Cuando sepas cuál te gusta, *escríbeme su nombre y las porciones* por aquí, o dale al botón *Pedir* en la página. 🍰✨
 
 _Escribe *0* para volver al menú._`;
 
-const SECCIONES = {
-  '1': { emoji: '🍰', titulo: '¡Nuestras tortas son deliciosas y sin culpa!', ancla: 'tortas', nota: '📌 En la página puedes elegir el número de porciones.' },
-  '2': { emoji: '🎁', titulo: '¡Sorprende a alguien especial con nuestros detalles saludables!', ancla: 'detalles' },
-  '3': { emoji: '🍞', titulo: '¡Panes artesanos sin azúcar y sin gluten!', ancla: 'pan' },
-  '4': { emoji: '🍮', titulo: '¡Postres saludables para disfrutar cualquier día!', ancla: 'postres' },
-  '5': { emoji: '🛒', titulo: '¡Bienvenid@ a nuestro Mercadito Saludable!', ancla: 'mercadito' }
-};
+function seccionPorNumero(config, t) {
+  const { cats } = opcionesMenu(config);
+  const n = Number(t);
+  if (!/^\d+$/.test(t) || n < 1 || n > cats.length) return null;
+  const c = cats[n - 1];
+  return {
+    emoji: c.emoji || '✨',
+    titulo: c.tituloBot || `¡Mira nuestra colección *${c.nombre}*!`,
+    ancla: c.id,
+    nota: c.notaBot
+  };
+}
 
 const PLANTILLA_DATOS = `Nombre:
 Dirección y barrio:
@@ -909,9 +924,9 @@ async function manejarMensaje(msg) {
     if (t === 'cancelar' && s.carrito.length) await enviarTexto(tel, 'Pedido cancelado. 🗑️');
     Object.assign(s, sesionNueva());
     await guardarSesion();
-    return enviarTexto(tel, MENU_PRINCIPAL);
+    return enviarTexto(tel, menuPrincipal(config));
   }
-  if (t === 'asesor' || (t === '7' && s.paso === 'MENU')) {
+  if (t === 'asesor' || (t === opcionesMenu(config).asesor && s.paso === 'MENU')) {
     await enviarTexto(tel, '👩‍🍳 ¡Listo! Una persona de nuestro equipo te responderá en breve por aquí.');
     await avisarAdmin(`🚨 *Solicitud de asesor*\nCliente: +${tel}\nAbre WhatsApp y escríbele a ese número.`);
     return;
@@ -923,7 +938,7 @@ async function manejarMensaje(msg) {
     Object.assign(s, sesionNueva());
     await guardarSesion();
     if (!t || ES_SALUDO.test(t)) {
-      return enviarTexto(tel, `Tu pedido *${codigoAnterior}* sigue en verificación ✅ Te avisamos apenas esté confirmado.\n\n${MENU_PRINCIPAL}`);
+      return enviarTexto(tel, `Tu pedido *${codigoAnterior}* sigue en verificación ✅ Te avisamos apenas esté confirmado.\n\n${menuPrincipal(config)}`);
     }
   }
 
@@ -968,16 +983,16 @@ async function manejarMensaje(msg) {
   // --- Paso a paso ---
   switch (s.paso) {
     case 'MENU': {
-      const seccion = SECCIONES[t];
+      const seccion = seccionPorNumero(config, t);
       if (seccion) {
         const nota = seccion.nota ? `\n\n${seccion.nota}` : '';
         return enviarTexto(tel, `${seccion.titulo} ${seccion.emoji}\n\nMíralos aquí:\n${BASE_URL}/#${seccion.ancla}${nota}\n\n${COMO_PEDIR}`);
       }
-      if (t === '6') return enviarTexto(tel, `📖 *Catálogo completo de Territorio Saludable*\n\n${BASE_URL}\n\n${COMO_PEDIR}`);
-      if (!t) return enviarTexto(tel, MENU_PRINCIPAL);
+      if (t === opcionesMenu(config).catalogo) return enviarTexto(tel, `📖 *Catálogo completo de Territorio Saludable*\n\n${BASE_URL}\n\n${COMO_PEDIR}`);
+      if (!t) return enviarTexto(tel, menuPrincipal(config));
 
       const candidatos = candidatosProducto(texto, productos);
-      if (!candidatos.length && ES_SALUDO.test(t)) return enviarTexto(tel, MENU_PRINCIPAL);
+      if (!candidatos.length && ES_SALUDO.test(t)) return enviarTexto(tel, menuPrincipal(config));
       if (candidatos.length === 1) {
         await procesarProducto(tel, s, candidatos[0], texto);
         return guardarSesion();
@@ -990,7 +1005,7 @@ async function manejarMensaje(msg) {
         const lista = candidatos.map((p, i) => `${i + 1}. ${p.name}`).join('\n');
         return enviarTexto(tel, `¿Cuál de estos quieres? Responde con el número:\n\n${lista}`);
       }
-      return enviarTexto(tel, `No encontré ese producto. 🤔 Escríbelo como aparece en el catálogo, o elige una opción del menú.\n\n${MENU_PRINCIPAL}`);
+      return enviarTexto(tel, `No encontré ese producto. 🤔 Escríbelo como aparece en el catálogo, o elige una opción del menú.\n\n${menuPrincipal(config)}`);
     }
 
     case 'ELEGIR_PRODUCTO': {
@@ -1003,7 +1018,7 @@ async function manejarMensaje(msg) {
 
     case 'ELEGIR_TAMANO': {
       const producto = productos.find(p => p.id === s.productoId);
-      if (!producto) { Object.assign(s, sesionNueva()); await guardarSesion(); return enviarTexto(tel, MENU_PRINCIPAL); }
+      if (!producto) { Object.assign(s, sesionNueva()); await guardarSesion(); return enviarTexto(tel, menuPrincipal(config)); }
       const idx = parseInt(t, 10) - 1;
       const tamano = (/^\d+$/.test(t) && producto.sizes[idx]) || buscarTamano(texto, producto);
       if (!tamano) return preguntarTamano(tel, s, producto);
@@ -1013,7 +1028,7 @@ async function manejarMensaje(msg) {
 
     case 'ELEGIR_SABOR': {
       const producto = productos.find(p => p.id === s.productoId);
-      if (!producto) { Object.assign(s, sesionNueva()); await guardarSesion(); return enviarTexto(tel, MENU_PRINCIPAL); }
+      if (!producto) { Object.assign(s, sesionNueva()); await guardarSesion(); return enviarTexto(tel, menuPrincipal(config)); }
       const disponibles = saboresDisponibles(producto);
       const idx = parseInt(t, 10) - 1;
       const sabor = (/^\d+$/.test(t) && disponibles[idx]) || buscarSabor(texto, producto);
@@ -1099,7 +1114,7 @@ async function manejarMensaje(msg) {
     default:
       Object.assign(s, sesionNueva());
       await guardarSesion();
-      return enviarTexto(tel, MENU_PRINCIPAL);
+      return enviarTexto(tel, menuPrincipal(config));
   }
 }
 

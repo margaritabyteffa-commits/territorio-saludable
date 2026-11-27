@@ -6,6 +6,7 @@ import {
   ShieldCheck, X, Clock, Lock, LogOut, MapPin, Calendar, ExternalLink,
   Copy, Instagram, Facebook, Sprout, ChevronLeft, ChevronRight
 } from 'lucide-react';
+import { CATEGORIAS_BASE, categoriasDe, estaEnCategoria, slugCategoria } from '../lib/categorias';
 
 const FALLBACK_IMG = 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=500&auto=format&fit=crop&q=60';
 
@@ -224,6 +225,7 @@ export default function Page() {
   const [editingProduct, setEditingProduct] = useState(null);
   const [newOrderModalOpen, setNewOrderModalOpen] = useState(false);
   const [selectedOrderDetail, setSelectedOrderDetail] = useState(null);
+  const [notaEnEdicion, setNotaEnEdicion] = useState(null);
 
   const [formName, setFormName] = useState('');
   const [formCategory, setFormCategory] = useState(CATEGORIES[0]);
@@ -243,6 +245,10 @@ export default function Page() {
   const [formSizes, setFormSizes] = useState([]);
   const [formSabores, setFormSabores] = useState([]);
   const [formTarjeta, setFormTarjeta] = useState(false);
+  const [formExtras, setFormExtras] = useState([]);
+  const [filtroCatInventario, setFiltroCatInventario] = useState('Todas');
+  const [borradorCategorias, setBorradorCategorias] = useState(null);
+  const [nuevaCategoria, setNuevaCategoria] = useState({ nombre: '', emoji: '✨', descripcion: '' });
   const [selectedSabores, setSelectedSabores] = useState({});
 
   const [newClientName, setNewClientName] = useState('');
@@ -530,17 +536,23 @@ export default function Page() {
     guardarAjustesServidor({ config: updated }).then(ok => { if (ok) showToast('✓ Configuración General Guardada'); });
   };
 
+  // Sube o baja el producto respecto al vecino visible (dentro de la categoría filtrada)
   const handleMoveProduct = (id, dir) => {
-    const idx = products.findIndex(p => p.id === id);
-    if (idx === -1) return;
-    const target = dir === 'up' ? idx - 1 : idx + 1;
-    if (target < 0 || target >= products.length) return;
+    const visibles = products.filter(p => filtroCatInventario === 'Todas' || estaEnCategoria(p, filtroCatInventario));
+    const pos = visibles.findIndex(p => p.id === id);
+    const vecino = visibles[dir === 'up' ? pos - 1 : pos + 1];
+    if (pos === -1 || !vecino) return;
     const updated = [...products];
-    const [moved] = updated.splice(idx, 1);
-    updated.splice(target, 0, moved);
+    const a = updated.findIndex(p => p.id === id);
+    const b = updated.findIndex(p => p.id === vecino.id);
+    [updated[a], updated[b]] = [updated[b], updated[a]];
     guardarProductosServidor(updated);
     showToast('Producto movido ' + (dir === 'up' ? 'arriba ⬆️' : 'abajo ⬇️'));
   };
+
+  const listaInventario = products.filter(p => filtroCatInventario === 'Todas' || estaEnCategoria(p, filtroCatInventario));
+  const esPrimeroVisible = (id) => listaInventario[0]?.id === id;
+  const esUltimoVisible = (id) => listaInventario[listaInventario.length - 1]?.id === id;
 
   const handleToggleProduct = (id) => {
     guardarProductosServidor(products.map(p => p.id === id ? { ...p, available: !p.available } : p));
@@ -560,10 +572,11 @@ export default function Page() {
       setFormSizes(prod.sizes ? prod.sizes.map(s => ({ portions: s.portions, price: s.price })) : []);
       setFormSabores(Array.isArray(prod.sabores) ? prod.sabores.map(x => ({ ...x })) : []);
       setFormTarjeta(llevaTarjeta(prod));
+      setFormExtras(Array.isArray(prod.extraCategorias) ? prod.extraCategorias : []);
     } else {
       setEditingProduct({ id: 'NEW_PRODUCT' });
       setFormName('');
-      setFormCategory(CATEGORIES[0]);
+      setFormCategory(CATEGORIES.includes(filtroCatInventario) ? filtroCatInventario : CATEGORIES[0]);
       setFormPrice(20000);
       setFormDescription('');
       setFormImageUrl('/torta-moka.png');
@@ -573,6 +586,8 @@ export default function Page() {
       setFormSizes([]);
       setFormSabores([]);
       setFormTarjeta(false);
+      // Si estás viendo una categoría de temporada, el producto nuevo queda marcado en ella
+      setFormExtras(filtroCatInventario !== 'Todas' && !CATEGORIES.includes(filtroCatInventario) ? [filtroCatInventario] : []);
     }
   };
 
@@ -582,10 +597,10 @@ export default function Page() {
     const sizes = formSizes.map(s => ({ portions: s.portions, price: Number(s.price), label: s.portions + ' (' + formatCOP(Number(s.price)) + ')' }));
     const sabores = formSabores.filter(x => x.nombre && x.nombre.trim()).map(x => ({ nombre: x.nombre.trim(), disponible: x.disponible !== false }));
     if (editingProduct && editingProduct.id && editingProduct.id !== 'NEW_PRODUCT') {
-      guardarProductosServidor(products.map(p => p.id === editingProduct.id ? { ...p, name: formName.trim(), category: formCategory, price: Number(formPrice), description: formDescription.trim(), imageUrl: ensureSlash(formImageUrl), available: formAvailable, requiresNotice: formDias > 0, diasAnticipacion: formDias, sizes, sabores, tarjeta: formTarjeta } : p));
+      guardarProductosServidor(products.map(p => p.id === editingProduct.id ? { ...p, name: formName.trim(), category: formCategory, price: Number(formPrice), description: formDescription.trim(), imageUrl: ensureSlash(formImageUrl), available: formAvailable, requiresNotice: formDias > 0, diasAnticipacion: formDias, sizes, sabores, tarjeta: formTarjeta, extraCategorias: formExtras.filter(c => c !== formCategory) } : p));
       showToast('✓ Producto actualizado');
     } else {
-      guardarProductosServidor([{ id: 'prod-' + Date.now(), name: formName.trim(), category: formCategory, price: Number(formPrice), description: formDescription.trim(), imageUrl: ensureSlash(formImageUrl), available: formAvailable, requiresNotice: formDias > 0, diasAnticipacion: formDias, features: ['Sin Azúcar', 'Sin Gluten'], sizes, sabores, tarjeta: formTarjeta }, ...products]);
+      guardarProductosServidor([{ id: 'prod-' + Date.now(), name: formName.trim(), category: formCategory, price: Number(formPrice), description: formDescription.trim(), imageUrl: ensureSlash(formImageUrl), available: formAvailable, requiresNotice: formDias > 0, diasAnticipacion: formDias, features: ['Sin Azúcar', 'Sin Gluten'], sizes, sabores, tarjeta: formTarjeta, extraCategorias: formExtras.filter(c => c !== formCategory) }, ...products]);
       showToast('✓ Nuevo producto agregado');
     }
     setEditingProduct(null);
@@ -621,6 +636,47 @@ export default function Page() {
     if (!b.pagoNequi && !b.pagoDaviplata && !b.pagoBancolombia && !b.pagoOtros && config.datosPago) b.pagoOtros = config.datosPago;
     setBorradorTextos(b);
   }, [adminTab, config]);
+
+  useEffect(() => {
+    if (adminTab !== 'configuracion') return;
+    setBorradorCategorias(categoriasDe(config).map(c => ({ ...c })));
+  }, [adminTab, config]);
+
+  const cambiarCategoria = (i, campo, valor) => setBorradorCategorias(prev => prev.map((c, x) => x === i ? { ...c, [campo]: valor } : c));
+  const moverCategoria = (i, dir) => setBorradorCategorias(prev => {
+    const j = i + dir;
+    if (j < 0 || j >= prev.length) return prev;
+    const l = [...prev];
+    [l[i], l[j]] = [l[j], l[i]];
+    return l;
+  });
+  const quitarCategoria = (i) => {
+    const c = borradorCategorias[i];
+    const principales = products.filter(p => p.category === c.nombre).length;
+    if (principales) { showToast(`⚠️ ${principales} producto(s) tienen "${c.nombre}" como categoría principal. Cámbialos primero o mejor ocúltala.`); return; }
+    setBorradorCategorias(prev => prev.filter((_, x) => x !== i));
+  };
+  const agregarCategoria = () => {
+    const nombre = nuevaCategoria.nombre.trim();
+    if (!nombre) return;
+    if (borradorCategorias.some(c => c.nombre.toLowerCase() === nombre.toLowerCase())) { showToast('⚠️ Ya existe una categoría con ese nombre'); return; }
+    let id = slugCategoria(nombre);
+    while (borradorCategorias.some(c => c.id === id)) id += '-2';
+    setBorradorCategorias(prev => [{ nombre, id, emoji: nuevaCategoria.emoji.trim(), descripcion: nuevaCategoria.descripcion.trim(), visible: true, fija: false }, ...prev]);
+    setNuevaCategoria({ nombre: '', emoji: '✨', descripcion: '' });
+  };
+  const guardarCategorias = async () => {
+    const categorias = borradorCategorias.map(c => ({ nombre: c.nombre.trim(), id: c.id, emoji: (c.emoji || '').trim(), descripcion: (c.descripcion || '').trim(), visible: c.visible !== false }));
+    const updated = { ...config, categorias };
+    setConfig(updated);
+    const ok = await guardarAjustesServidor({ config: updated });
+    // Quita de los productos las categorías adicionales que ya no existen
+    const nombres = categorias.map(c => c.nombre);
+    if (products.some(p => (p.extraCategorias || []).some(x => !nombres.includes(x)))) {
+      guardarProductosServidor(products.map(p => p.extraCategorias ? { ...p, extraCategorias: p.extraCategorias.filter(x => nombres.includes(x)) } : p));
+    }
+    if (ok) showToast('✓ Categorías guardadas');
+  };
 
   const guardarTextos = async () => {
     const updated = { ...config, ...borradorTextos };
@@ -721,9 +777,31 @@ export default function Page() {
     window.open('https://wa.me/' + config.whatsappPhone + '?text=' + encodeURIComponent(txt), '_blank');
   };
 
+  const todasCategorias = useMemo(() => categoriasDe(config), [config]);
+  const categoriasPublicas = useMemo(() => todasCategorias.filter(c => c.visible !== false), [todasCategorias]);
+  const categoriaActual = categoriasPublicas.find(c => c.nombre === selectedCategory) || categoriasPublicas[0] || CATEGORIAS_BASE[0];
+
+  useEffect(() => {
+    if (!categoriasPublicas.length) return;
+    if (!categoriasPublicas.some(c => c.nombre === selectedCategory)) setSelectedCategory(categoriasPublicas[0].nombre);
+  }, [categoriasPublicas, selectedCategory]);
+
+  // Los enlaces del bot (…/#detalles, …/#amor-y-amistad) abren directo esa categoría
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const desdeHash = () => {
+      const h = decodeURIComponent(window.location.hash.replace('#', ''));
+      const c = categoriasPublicas.find(x => x.id === h);
+      if (c) setSelectedCategory(c.nombre);
+    };
+    desdeHash();
+    window.addEventListener('hashchange', desdeHash);
+    return () => window.removeEventListener('hashchange', desdeHash);
+  }, [categoriasPublicas]);
+
   const filteredProducts = useMemo(() => {
     return products.filter(p => {
-      if (selectedCategory && p.category !== selectedCategory) return false;
+      if (categoriaActual && !estaEnCategoria(p, categoriaActual.nombre)) return false;
       if (selectedTag !== 'Todas') {
         if (selectedTag === 'Entrega Hoy' && p.requiresNotice) return false;
         if (selectedTag === 'Con Anticipación' && !p.requiresNotice) return false;
@@ -737,7 +815,7 @@ export default function Page() {
       }
       return true;
     });
-  }, [products, selectedCategory, selectedTag, searchQuery]);
+  }, [products, categoriaActual, selectedTag, searchQuery]);
 
   const filteredOrders = useMemo(() => {
     return orders.filter(o => {
@@ -853,14 +931,14 @@ export default function Page() {
       <div className="sticky top-20 z-30 bg-[#FAF7F2] backdrop-blur-md border-b border-[#EAE2D8] py-3 px-4 shadow-2xs">
         <div className="max-w-7xl mx-auto space-y-2.5">
           <div className="flex flex-wrap justify-center sm:justify-start gap-1.5 w-full">
-            {CATEGORIES.map(cat => (
+            {categoriasPublicas.map(cat => (
               <a 
-                key={cat} 
-                href={`#${CATEGORY_IDS[cat]}`}
-                onClick={() => setSelectedCategory(cat)} 
-                className={'px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer text-center flex-1 sm:flex-none whitespace-nowrap ' + (selectedCategory === cat ? 'bg-[#2D5A27] text-white shadow-xs' : 'bg-white border border-[#D8CFC4] text-stone-700 hover:bg-stone-50')}
+                key={cat.nombre} 
+                href={`#${cat.id}`}
+                onClick={() => setSelectedCategory(cat.nombre)} 
+                className={'px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer text-center flex-1 sm:flex-none whitespace-nowrap ' + (categoriaActual.nombre === cat.nombre ? 'bg-[#2D5A27] text-white shadow-xs' : 'bg-white border border-[#D8CFC4] text-stone-700 hover:bg-stone-50')}
               >
-                {cat}
+                {cat.fija ? '' : (cat.emoji ? cat.emoji + ' ' : '')}{cat.nombre}
               </a>
             ))}
           </div>
@@ -907,26 +985,17 @@ export default function Page() {
 
           {/* LISTADO DE PRODUCTOS */}
           <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-            <div id={CATEGORY_IDS[selectedCategory]} className="pb-4 scroll-mt-36">
+            <div id={categoriaActual.id} className="pb-4 scroll-mt-36">
               <div className="flex items-center justify-between">
-                <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#241E19]">{selectedCategory}</h2>
+                <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#241E19]">{categoriaActual.fija ? '' : (categoriaActual.emoji ? categoriaActual.emoji + ' ' : '')}{categoriaActual.nombre}</h2>
                 <span className="text-xs text-stone-500 font-semibold">{filteredProducts.length} productos</span>
               </div>
 
-              <div className="mt-2 text-xs text-stone-600 bg-amber-50/70 p-3.5 rounded-2xl border border-amber-200/70 leading-relaxed">
-                {selectedCategory === 'Tortas Saludables' && (
-                  <p>🎂 <strong>Tortas Saludables:</strong> Todas nuestras tortas son hechas a base de harina de almendras, arroz y almidón de yuca, endulzadas 100% Libres de azúcar y Sin gluten. Pedidos con un día de anticipación.</p>
-                )}
-                {selectedCategory === 'Catalogo Detalles' && (
-                  <p>🎁 <strong>Detalles con amor:</strong> Sorprende a tu persona favorita con una experiencia deliciosa y libre de culpas.</p>
-                )}
-                {selectedCategory === 'Pan Saludable' && (
-                  <p>🍞 <strong>Pan Digestivo (Sin azúcar y Sin gluten):</strong> Disfruta de un pan saludable, delicioso con un sabor auténtico y una textura única. Está hecho con harina de arroz, fécula de maíz y harina de almendras. Contiene psyllium, una fuente natural de fibra que favorece la digestión y brinda saciedad. Es 100% libre de gluten y no contiene azúcar refinada.</p>
-                )}
-                {(selectedCategory === 'Postres Saludables' || selectedCategory === 'Mercadito') && (
-                  <p>✨ Selecciona el producto que prefieras y presiona el botón <strong>Pedir</strong> para coordinar la entrega directamente a través de nuestro WhatsApp oficial.</p>
-                )}
-              </div>
+              {categoriaActual.descripcion && (
+                <div className="mt-2 text-xs text-stone-600 bg-amber-50/70 p-3.5 rounded-2xl border border-amber-200/70 leading-relaxed whitespace-pre-line">
+                  <p>{categoriaActual.descripcion}</p>
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-4">
@@ -1069,11 +1138,22 @@ export default function Page() {
                 className="w-full px-4 py-2.5 rounded-xl border border-stone-300 text-sm focus:outline-none focus:border-[#2D5A27]"
               />
 
+              <div className="flex flex-wrap gap-1.5">
+                {['Todas', ...todasCategorias.map(c => c.nombre)].map(nombre => {
+                  const n = nombre === 'Todas' ? products.length : products.filter(p => estaEnCategoria(p, nombre)).length;
+                  return (
+                    <button key={nombre} onClick={() => setFiltroCatInventario(nombre)} className={'px-3 py-1.5 rounded-full text-xs font-bold transition ' + (filtroCatInventario === nombre ? 'bg-[#2D5A27] text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200')}>
+                      {nombre} ({n})
+                    </button>
+                  );
+                })}
+              </div>
+
               {/* Celular: tarjetas con los botones siempre visibles */}
               <div className="md:hidden space-y-2">
                 {products
                   .map((prod, idx) => ({ prod, idx }))
-                  .filter(({ prod }) => !buscarInventario.trim() || prod.name.toLowerCase().includes(buscarInventario.trim().toLowerCase()))
+                  .filter(({ prod }) => (filtroCatInventario === 'Todas' || estaEnCategoria(prod, filtroCatInventario)) && (!buscarInventario.trim() || prod.name.toLowerCase().includes(buscarInventario.trim().toLowerCase())))
                   .map(({ prod, idx }) => (
                   <div key={prod.id} className="flex items-center gap-3 p-3 rounded-2xl border border-stone-200">
                     <img src={prod.imageUrl} alt={prod.name} onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = FALLBACK_IMG; }} className="w-14 h-14 rounded-xl object-cover shrink-0" />
@@ -1092,8 +1172,8 @@ export default function Page() {
                       </div>
                       {!buscarInventario.trim() && (
                         <div className="flex gap-1.5 justify-end">
-                          <button onClick={() => handleMoveProduct(prod.id, 'up')} disabled={idx === 0} className="p-1.5 rounded-lg bg-stone-100 disabled:opacity-30" title="Subir"><ArrowUp size={14} /></button>
-                          <button onClick={() => handleMoveProduct(prod.id, 'down')} disabled={idx === products.length - 1} className="p-1.5 rounded-lg bg-stone-100 disabled:opacity-30" title="Bajar"><ArrowDown size={14} /></button>
+                          <button onClick={() => handleMoveProduct(prod.id, 'up')} disabled={esPrimeroVisible(prod.id)} className="p-1.5 rounded-lg bg-stone-100 disabled:opacity-30" title="Subir"><ArrowUp size={14} /></button>
+                          <button onClick={() => handleMoveProduct(prod.id, 'down')} disabled={esUltimoVisible(prod.id)} className="p-1.5 rounded-lg bg-stone-100 disabled:opacity-30" title="Bajar"><ArrowDown size={14} /></button>
                         </div>
                       )}
                     </div>
@@ -1118,13 +1198,13 @@ export default function Page() {
                   <tbody className="divide-y divide-stone-100">
                     {products
                       .map((prod, idx) => ({ prod, idx }))
-                      .filter(({ prod }) => !buscarInventario.trim() || prod.name.toLowerCase().includes(buscarInventario.trim().toLowerCase()))
+                      .filter(({ prod }) => (filtroCatInventario === 'Todas' || estaEnCategoria(prod, filtroCatInventario)) && (!buscarInventario.trim() || prod.name.toLowerCase().includes(buscarInventario.trim().toLowerCase())))
                       .map(({ prod, idx }) => (
                       <tr key={prod.id} className="hover:bg-stone-50/50">
                         <td className="p-3">
                           <div className="flex items-center gap-1">
-                            <button onClick={() => handleMoveProduct(prod.id, 'up')} disabled={idx === 0} className="p-1 rounded bg-stone-100 hover:bg-stone-200 disabled:opacity-30"><ArrowUp size={12} /></button>
-                            <button onClick={() => handleMoveProduct(prod.id, 'down')} disabled={idx === products.length - 1} className="p-1 rounded bg-stone-100 hover:bg-stone-200 disabled:opacity-30"><ArrowDown size={12} /></button>
+                            <button onClick={() => handleMoveProduct(prod.id, 'up')} disabled={esPrimeroVisible(prod.id)} className="p-1 rounded bg-stone-100 hover:bg-stone-200 disabled:opacity-30"><ArrowUp size={12} /></button>
+                            <button onClick={() => handleMoveProduct(prod.id, 'down')} disabled={esUltimoVisible(prod.id)} className="p-1 rounded bg-stone-100 hover:bg-stone-200 disabled:opacity-30"><ArrowDown size={12} /></button>
                           </div>
                         </td>
                         <td className="p-3">
@@ -1526,6 +1606,45 @@ export default function Page() {
 
               <div className="bg-white rounded-3xl border border-stone-200 p-6 space-y-4 shadow-xs text-xs">
                 <h3 className="font-serif font-bold text-base text-stone-900 flex items-center gap-2">
+                  <Sparkles size={16} className="text-[#2D5A27]" />
+                  <span>Categorías del catálogo</span>
+                </h3>
+                <p className="text-stone-500">Crea categorías de temporada (Amor y Amistad, Halloween, Navidad…), ordénalas y ocúltalas cuando pase la temporada. Para poner productos en una categoría, edita el producto y márcala en <strong>"También mostrarlo en"</strong>. El menú del bot de WhatsApp usa este mismo orden.</p>
+
+                <div className="p-3 rounded-2xl bg-emerald-50/60 border border-emerald-100 space-y-2">
+                  <p className="font-bold text-stone-800">➕ Nueva categoría</p>
+                  <div className="grid grid-cols-[70px_1fr] gap-2">
+                    <input value={nuevaCategoria.emoji} onChange={(e) => setNuevaCategoria({ ...nuevaCategoria, emoji: e.target.value })} placeholder="Emoji" className="p-2.5 rounded-xl border border-stone-300 text-center" />
+                    <input value={nuevaCategoria.nombre} onChange={(e) => setNuevaCategoria({ ...nuevaCategoria, nombre: e.target.value })} placeholder="Ej: Amor y Amistad" className="p-2.5 rounded-xl border border-stone-300" />
+                  </div>
+                  <textarea value={nuevaCategoria.descripcion} onChange={(e) => setNuevaCategoria({ ...nuevaCategoria, descripcion: e.target.value })} rows={2} placeholder="Texto que sale arriba de los productos (opcional)" className="w-full p-2.5 rounded-xl border border-stone-300" />
+                  <button type="button" onClick={agregarCategoria} className="px-4 py-2 rounded-xl bg-[#2D5A27] text-white font-bold">Agregar categoría</button>
+                </div>
+
+                {borradorCategorias && borradorCategorias.map((c, i) => (
+                  <div key={c.id + i} className={'p-3 rounded-2xl border space-y-2 ' + (c.visible === false ? 'border-stone-200 bg-stone-50 opacity-70' : 'border-stone-200')}>
+                    <div className="flex items-center gap-2">
+                      <div className="flex flex-col gap-1">
+                        <button type="button" onClick={() => moverCategoria(i, -1)} disabled={i === 0} className="p-1 rounded bg-stone-100 disabled:opacity-30" title="Subir"><ArrowUp size={12} /></button>
+                        <button type="button" onClick={() => moverCategoria(i, 1)} disabled={i === borradorCategorias.length - 1} className="p-1 rounded bg-stone-100 disabled:opacity-30" title="Bajar"><ArrowDown size={12} /></button>
+                      </div>
+                      {!c.fija && <input value={c.emoji || ''} onChange={(e) => cambiarCategoria(i, 'emoji', e.target.value)} className="w-12 p-2 rounded-xl border border-stone-300 text-center" />}
+                      {c.fija
+                        ? <span className="flex-1 font-bold text-sm text-stone-900">{c.nombre}</span>
+                        : <input value={c.nombre} onChange={(e) => cambiarCategoria(i, 'nombre', e.target.value)} className="flex-1 p-2 rounded-xl border border-stone-300 font-bold" />}
+                      <span className="text-[10px] text-stone-500 whitespace-nowrap">{products.filter(p => estaEnCategoria(p, c.nombre)).length} prod.</span>
+                      <button type="button" onClick={() => cambiarCategoria(i, 'visible', c.visible === false)} className={'px-2.5 py-1 rounded-full text-[10px] font-bold whitespace-nowrap ' + (c.visible === false ? 'bg-stone-200 text-stone-600' : 'bg-emerald-100 text-emerald-800')}>{c.visible === false ? 'Oculta' : 'Visible'}</button>
+                      {!c.fija && <button type="button" onClick={() => quitarCategoria(i)} className="p-1.5 rounded-lg bg-red-50 text-red-600" title="Eliminar categoría"><Trash2 size={13} /></button>}
+                    </div>
+                    <textarea value={c.descripcion || ''} onChange={(e) => cambiarCategoria(i, 'descripcion', e.target.value)} rows={2} placeholder="Texto que sale arriba de los productos (opcional)" className="w-full p-2 rounded-xl border border-stone-200 text-[11px]" />
+                  </div>
+                ))}
+
+                <button type="button" onClick={guardarCategorias} className="w-full py-2.5 rounded-xl bg-[#2D5A27] text-white font-bold">Guardar categorías</button>
+              </div>
+
+              <div className="bg-white rounded-3xl border border-stone-200 p-6 space-y-4 shadow-xs text-xs">
+                <h3 className="font-serif font-bold text-base text-stone-900 flex items-center gap-2">
                   <Edit2 size={16} className="text-[#2D5A27]" />
                   <span>Textos de la página y métodos de pago</span>
                 </h3>
@@ -1842,7 +1961,7 @@ export default function Page() {
                 <div>
                   <label className="font-bold block mb-1">Categoría:</label>
                   <select value={formCategory} onChange={(e) => setFormCategory(e.target.value)} className="w-full p-2.5 rounded-xl border border-stone-300">
-                    {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                    {todasCategorias.map(c => <option key={c.nombre} value={c.nombre}>{c.nombre}{c.visible === false ? ' (oculta)' : ''}</option>)}
                   </select>
                 </div>
                 <div>
@@ -1851,6 +1970,23 @@ export default function Page() {
                 </div>
               </div>
               
+              {todasCategorias.length > 1 && (
+                <div>
+                  <label className="font-bold block mb-1">También mostrarlo en:</label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {todasCategorias.filter(c => c.nombre !== formCategory).map(c => {
+                      const activo = formExtras.includes(c.nombre);
+                      return (
+                        <button type="button" key={c.nombre} onClick={() => setFormExtras(activo ? formExtras.filter(x => x !== c.nombre) : [...formExtras, c.nombre])} className={'px-2.5 py-1 rounded-full text-[11px] font-bold border ' + (activo ? 'bg-[#2D5A27] text-white border-[#2D5A27]' : 'bg-white text-stone-600 border-stone-300')}>
+                          {activo ? '✓ ' : ''}{c.nombre}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p className="text-[10px] text-stone-500 mt-1">Útil para temporadas: el producto sigue en su categoría y además sale en la de temporada.</p>
+                </div>
+              )}
+
               <div>
                 <label className="font-bold block mb-1">Foto del producto:</label>
                 <div className="flex items-center gap-3">
@@ -1940,7 +2076,7 @@ export default function Page() {
               <h3 className="font-serif font-bold text-stone-900 text-base">
                 📄 Detalle del Pedido #{selectedOrderDetail.code}
               </h3>
-              <button onClick={() => setSelectedOrderDetail(null)} className="text-stone-400 hover:text-stone-600 font-bold">✕</button>
+              <button onClick={() => { setSelectedOrderDetail(null); setNotaEnEdicion(null); }} className="text-stone-400 hover:text-stone-600 font-bold">✕</button>
             </div>
 
             <div className="space-y-3 text-xs">
@@ -1949,7 +2085,27 @@ export default function Page() {
                 <p><strong>Teléfono:</strong> {selectedOrderDetail.clientPhone}</p>
                 <p><strong>Fecha Entrega:</strong> {selectedOrderDetail.deliveryDate} ({selectedOrderDetail.deliveryTime})</p>
                 <p><strong>Dirección:</strong> {selectedOrderDetail.address} - {selectedOrderDetail.zone}</p>
-                {selectedOrderDetail.notes && <p className="text-amber-900 italic pt-1"><strong>Nota:</strong> {selectedOrderDetail.notes}</p>}
+                {notaEnEdicion === null ? (
+                  <div className="flex items-start justify-between gap-2 pt-1">
+                    <p className="text-amber-900 italic"><strong>Nota:</strong> {selectedOrderDetail.notes || <span className="text-stone-400 not-italic">Sin notas</span>}</p>
+                    <button type="button" onClick={() => setNotaEnEdicion(selectedOrderDetail.notes || '')} className="shrink-0 px-2.5 py-1 rounded-lg bg-white border border-amber-300 text-amber-900 font-bold flex items-center gap-1"><Edit2 size={12} /> Editar nota</button>
+                  </div>
+                ) : (
+                  <div className="pt-1 space-y-2">
+                    <label className="font-bold block">Nota del pedido:</label>
+                    <textarea value={notaEnEdicion} onChange={(e) => setNotaEnEdicion(e.target.value)} rows={3} autoFocus placeholder="Ej: Alérgica al maní. Entregar en portería." className="w-full p-2.5 rounded-xl border border-amber-300 bg-white" />
+                    <div className="flex gap-2">
+                      <button type="button" onClick={() => {
+                        const nota = notaEnEdicion.trim();
+                        setOrders(prev => prev.map(o => o.id === selectedOrderDetail.id ? { ...o, notes: nota } : o));
+                        setSelectedOrderDetail({ ...selectedOrderDetail, notes: nota });
+                        setNotaEnEdicion(null);
+                        showToast('✓ Nota guardada');
+                      }} className="px-3 py-1.5 rounded-lg bg-[#2D5A27] text-white font-bold">Guardar nota</button>
+                      <button type="button" onClick={() => setNotaEnEdicion(null)} className="px-3 py-1.5 rounded-lg bg-stone-100 text-stone-600 font-bold">Cancelar</button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div>
@@ -1974,7 +2130,7 @@ export default function Page() {
             </div>
 
             <button 
-              onClick={() => setSelectedOrderDetail(null)} 
+              onClick={() => { setSelectedOrderDetail(null); setNotaEnEdicion(null); }} 
               className="w-full mt-4 bg-[#2D5A27] text-white text-xs font-bold py-2.5 rounded-xl hover:bg-[#23481E] transition"
             >
               Cerrar
