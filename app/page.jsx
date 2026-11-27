@@ -32,6 +32,7 @@ const DEFAULT_CONFIG = {
   pagoDaviviendaTipo: 'Ahorros',
   pagoBancolombia: '',
   pagoBancolombiaTipo: 'Ahorros',
+  pagoBreb: '',
   pagoTitular: '',
   pagoEfectivo: true,
   pagoOtros: '',
@@ -60,7 +61,7 @@ const WhatsAppIcon = ({ size = 16, className = '' }) => (
 );
 
 // Campos de texto de la página que se editan desde el panel
-const CAMPOS_TEXTO = ['anuncio', 'etiquetaHero', 'heroTitulo', 'heroDescripcion', 'etiquetas', 'pieDescripcion', 'zonasCobertura', 'hoursMonFri', 'hoursSat', 'hoursSun', 'pagoNequi', 'pagoDavivienda', 'pagoDaviviendaTipo', 'pagoBancolombia', 'pagoBancolombiaTipo', 'pagoTitular', 'pagoEfectivo', 'pagoOtros', 'direccionTienda'];
+const CAMPOS_TEXTO = ['anuncio', 'etiquetaHero', 'heroTitulo', 'heroDescripcion', 'etiquetas', 'pieDescripcion', 'zonasCobertura', 'hoursMonFri', 'hoursSat', 'hoursSun', 'pagoNequi', 'pagoDavivienda', 'pagoDaviviendaTipo', 'pagoBancolombia', 'pagoBancolombiaTipo', 'pagoBreb', 'pagoTitular', 'pagoEfectivo', 'pagoOtros', 'direccionTienda'];
 
 // Sección especial de la página: lo que se entrega hoy mismo (anticipación 0 días)
 const CATEGORIA_INMEDIATA = { nombre: 'Entrega inmediata', id: 'inmediata', emoji: '⚡', especial: true, descripcion: '⚡ Estos productos se los podemos entregar hoy mismo, en aproximadamente 30 minutos. Presione "Pedir" para hacer su pedido por WhatsApp.' };
@@ -81,6 +82,7 @@ function componerDatosPago(c) {
   if (c.pagoNequi) l.push('💳 Nequi: ' + c.pagoNequi);
   if (c.pagoBancolombia) l.push(`🏦 Bancolombia ${c.pagoBancolombiaTipo || 'Ahorros'}: ${c.pagoBancolombia}`);
   if (c.pagoDavivienda) l.push(`🏦 Davivienda ${c.pagoDaviviendaTipo || 'Ahorros'}: ${c.pagoDavivienda}`);
+  if (c.pagoBreb) l.push('🔑 Llave Bre-B: ' + c.pagoBreb);
   if (c.pagoTitular) l.push('👤 Titular: ' + c.pagoTitular);
   if (c.pagoOtros) l.push(c.pagoOtros);
   return l.join('\n');
@@ -1749,6 +1751,7 @@ export default function Page() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {[
                           ['pagoNequi', 'Nequi (número)'],
+                          ['pagoBreb', 'Llave Bre-B'],
                           ['pagoTitular', 'Titular de las cuentas']
                         ].map(([k, etiqueta]) => (
                           <div key={k}>
@@ -1977,12 +1980,13 @@ export default function Page() {
             <span className="font-bold text-white uppercase tracking-wider block text-[11px]">Métodos de Pago</span>
             <div className="flex flex-wrap gap-1.5">
               {(() => {
-                const hay = config.pagoNequi || config.pagoDavivienda || config.pagoBancolombia;
+                const hay = config.pagoNequi || config.pagoDavivienda || config.pagoBancolombia || config.pagoBreb;
                 return (
                   <>
                     {(!hay || config.pagoNequi) && <span className="px-2.5 py-1 rounded bg-purple-900 text-white font-bold text-[10px]">NEQUI</span>}
                     {(!hay || config.pagoBancolombia) && <span className="px-2.5 py-1 rounded bg-yellow-800 text-white font-bold text-[10px]">BANCOLOMBIA</span>}
                     {(!hay || config.pagoDavivienda) && <span className="px-2.5 py-1 rounded bg-red-900 text-white font-bold text-[10px]">DAVIVIENDA</span>}
+                    {config.pagoBreb && <span className="px-2.5 py-1 rounded bg-sky-900 text-white font-bold text-[10px]">BRE-B</span>}
                     {config.pagoEfectivo !== false && <span className="px-2.5 py-1 rounded bg-emerald-900 text-white font-bold text-[10px]">EFECTIVO</span>}
                   </>
                 );
