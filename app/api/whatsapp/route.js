@@ -715,6 +715,11 @@ async function procesarDatos(tel, s, texto) {
     return enviarTexto(tel, `No logramos leer los datos 🙈 Copia este mensaje, complétalo y envíalo:\n\n${plantillaDatos(s)}`);
   }
 
+  // Si la IA recortó la hora ("3" en vez de "3:00 pm"), se toma tal como la escribió el cliente
+  if (usoIA && nuevos.hora && !/(am|pm|a\.\s?m|p\.\s?m|manana|tarde|noche|medio)/i.test(normalizar(nuevos.hora))) {
+    const m = texto.match(/\d{1,2}([:.]\d{2})?\s*(a\.?\s?m\.?|p\.?\s?m\.?|de la (mañana|manana|tarde|noche))/i);
+    if (m) nuevos.hora = m[0].trim();
+  }
   for (const [k, v] of Object.entries(nuevos)) if (v) s.datos[k] = v;
   const d = s.datos;
   const avisos = [];
