@@ -894,17 +894,20 @@ export default function Page() {
     });
   }, [orders, statusFilter]);
 
+  // El calendario solo muestra lo confirmado: pedidos del bot aprobados por Camila y órdenes manuales (sin cancelados)
+  const ordenesAgendadas = useMemo(() => orders.filter(o => o.status !== 'Cancelado' && (o.origen !== 'bot' || o.estadoBot === 'APROBADO')), [orders]);
+
   const calendarOrdersForDate = useMemo(() => {
-    return orders.filter(o => o.deliveryDate === selectedCalDateStr);
-  }, [orders, selectedCalDateStr]);
+    return ordenesAgendadas.filter(o => o.deliveryDate === selectedCalDateStr);
+  }, [ordenesAgendadas, selectedCalDateStr]);
 
   const daysWithOrders = useMemo(() => {
     const set = new Set();
-    orders.forEach(o => {
+    ordenesAgendadas.forEach(o => {
       if (o.deliveryDate) set.add(o.deliveryDate);
     });
     return set;
-  }, [orders]);
+  }, [ordenesAgendadas]);
 
   return (
     <div className="min-h-screen overflow-x-clip bg-[#FAF7F2] text-[#241E19] flex flex-col font-sans selection:bg-[#2D5A27] selection:text-white">
@@ -1465,7 +1468,7 @@ export default function Page() {
                 <div className="lg:col-span-7 bg-white rounded-3xl border border-stone-200 p-6 space-y-4 shadow-xs">
                   <div className="flex items-center justify-between">
                     <h4 className="font-serif text-xl font-bold text-stone-900">
-                      Noviembre 2026 <span className="text-xs text-stone-400 font-sans font-normal">({orders.length} pedidos totales)</span>
+                      Noviembre 2026 <span className="text-xs text-stone-400 font-sans font-normal">({ordenesAgendadas.length} pedidos confirmados)</span>
                     </h4>
                     <div className="flex items-center gap-1">
                       <button className="p-2 rounded-xl border border-stone-200 text-stone-500 hover:bg-stone-50"><ChevronLeft size={16} /></button>
